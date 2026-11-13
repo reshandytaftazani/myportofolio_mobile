@@ -4,7 +4,12 @@ import 'package:myportofolio_mobile/widgets/info_card.dart';
 import 'package:myportofolio_mobile/widgets/item_card.dart';
 import 'package:myportofolio_mobile/widgets/profile_header.dart';
 
+/// Halaman menu utama aplikasi MyPortfolio Mobile.
+///
+/// Menyajikan ringkasan identitas pemilik portofolio ([ProfileHeader] dan [InfoCard])
+/// serta menu tombol aksi interaktif berkode warna ([ItemCard]).
 class MyHomePage extends StatelessWidget {
+  /// Membuat instansi [MyHomePage].
   MyHomePage({super.key});
 
   final String npm = "2506547651";
