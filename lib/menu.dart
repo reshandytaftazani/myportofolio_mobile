@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
 import 'package:myportofolio_mobile/widgets/item_card.dart';
+import 'package:myportofolio_mobile/widgets/profile_header.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -28,12 +29,15 @@ class MyHomePage extends StatelessWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      // Body halaman utama dengan padding di sekelilingnya.
-      body: Padding(
+      // Body halaman utama dengan dukungan scrolling responsif.
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Header profil visual pemilik portofolio.
+            ProfileHeader(name: nama),
+
             // Baris horizontal untuk menampilkan 3 InfoCard secara sejajar.
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
