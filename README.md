@@ -29,7 +29,8 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 
 - Header profil dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa.
 - Kartu informasi untuk NPM, nama, dan kelas.
-- Menu aksi Lihat Proyek, Tambah Proyek, dan Logout dengan ikon serta warna berbeda.
+- Enam menu aksi dengan ikon dan warna berbeda: Lihat Proyek, Lihat Education, Lihat Skills, Lihat Experience, Tambah Proyek, dan Logout. Menu bagian portofolio mengacu pada Project, Education, Skill, dan Experience pada [proyek web](https://github.com/reshandytaftazani/myportofolio).
+- Grid menu dua kolom pada lebar area kurang dari 600 piksel logis dan tiga kolom pada area yang lebih lebar, dengan tinggi kartu mengikuti skala teks perangkat.
 - SnackBar kontekstual saat item menu ditekan, dengan tombol untuk menutup notifikasi.
 - Tema Material 3 dan tata letak yang dapat digulir.
 
@@ -116,7 +117,7 @@ Untuk pemeriksaan manual setelah `flutter run`, gunakan skenario berikut. Tabel 
 
 | Skenario | Hasil yang diharapkan |
 | --- | --- |
-| Membuka halaman utama | Profil, NPM `2506547651`, nama, kelas `PBP D`, dan tiga menu terlihat. |
+| Membuka halaman utama | Profil, NPM `2506547651`, nama, kelas `PBP D`, dan enam menu tersedia; gulir halaman jika diperlukan. |
 | Menekan masing-masing menu | Pesan `Kamu telah menekan tombol <nama menu>!` muncul dengan warna sesuai kartu. |
 | Menekan `TUTUP` | SnackBar ditutup. |
 | Menekan menu lain saat SnackBar masih muncul | SnackBar sebelumnya disembunyikan dan pesan item terbaru muncul. |
@@ -143,7 +144,7 @@ Pelajaran teknis dari implementasi: model `ItemHomepage.color` membuat warna kar
 - Aksi menu hanya menampilkan SnackBar; belum terhubung ke fitur portofolio yang sebenarnya.
 - Belum ada integrasi API, autentikasi, penyimpanan lokal, atau sinkronisasi dengan proyek web Django.
 - Belum tersedia tangkapan layar atau demo publik khusus aplikasi mobile.
-- Grid menu masih tetap tiga kolom; belum ada penyesuaian jumlah kolom berdasarkan lebar layar. Tampilan pada layar sempit dan skala teks besar perlu diperiksa.
+- Grid menu sudah menyesuaikan jumlah kolom dan tinggi kartu, tetapi keterbacaan seluruh halaman, termasuk baris identitas, masih perlu diperiksa pada layar sangat sempit dan skala teks besar.
 
 ## Kontribusi dan Pelaporan Masalah
 
@@ -172,7 +173,7 @@ Saat layout, parent memberikan batas ukuran kepada child, child menentukan ukura
 | `Padding`, `SizedBox`, `Container` | Mengatur jarak, ukuran, dan dekorasi. |
 | `Text`, `Icon`, `CircleAvatar` | Menampilkan teks, simbol, dan avatar inisial. |
 | `ProfileHeader`, `InfoCard`, `Card` | Menampilkan profil dan kartu identitas. |
-| `GridView.count`, `ItemCard` | Menyusun dan menampilkan tiga menu aksi. |
+| `LayoutBuilder`, `GridView.count`, `ItemCard` | Menyesuaikan jumlah kolom terhadap ruang tersedia dan menampilkan enam menu aksi. |
 | `Material`, `InkWell` | Menyediakan permukaan Material dan respons sentuhan kartu. |
 | `SnackBar`, `SnackBarAction` | Memberi umpan balik interaksi dan aksi penutup. |
 
@@ -241,7 +242,7 @@ Koreksi manual dalam catatan ini merujuk pada peninjauan, keputusan, dan arahan 
    - **Koreksi dokumentasi:** Kondisi tes dicatat secara eksplisit dan skenario pemeriksaan manual diberi label sebagai hasil yang diharapkan. Belum ada klaim seluruh tes lulus atau pengujian visual selesai dalam sesi dokumentasi ini. Memperbarui tes dan menjalankan pemeriksaan aplikasi tetap merupakan pekerjaan yang perlu dilakukan.
 
 5. **Analisis kode tidak cukup untuk menjamin responsivitas antarmuka.**
-   - **Keterbatasan AI:** `SingleChildScrollView` dan lebar kartu berbasis `MediaQuery` dapat membantu layout, tetapi tidak menjamin bebas overflow. Grid menu masih tiga kolom, dan lebar kartu juga harus memperhitungkan padding, margin, serta ukuran teks.
+   - **Keterbatasan AI:** `SingleChildScrollView` dan lebar kartu berbasis `MediaQuery` dapat membantu layout, tetapi tidak menjamin bebas overflow. Grid awal memakai tiga kolom tetap; penambahan menu kemudian memakai dua atau tiga kolom sesuai ruang tersedia. Lebar kartu tetap perlu memperhitungkan padding, margin, serta ukuran teks.
    - **Koreksi dokumentasi:** Klaim jaminan bebas overflow diganti dengan penjelasan keterbatasan dan skenario pemeriksaan pada layar sempit serta skala teks besar. Tidak dicantumkan klaim penambahan widget secara manual atau hasil visual tertentu tanpa bukti pelaksanaan.
 
 Catatan interaksi yang dapat ditelusuri mencakup permintaan revisi README, koreksi klaim MIT, pemeriksaan rencana tugas, dan permintaan commit terpisah. Perubahan Task 3.1–3.2 tersedia pada commit `40472fe` dan `3875f98`; commit menunjukkan perubahan berkas, bukan transkrip percakapan. Ekspor chat lengkap belum disertakan. Pengembang tetap bertanggung jawab memeriksa ketepatan isi, memahami jawaban reflektif, dan memvalidasi perilaku aplikasi sebelum pengumpulan.
