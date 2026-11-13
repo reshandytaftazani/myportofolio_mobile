@@ -20,6 +20,7 @@ class ItemCard extends StatelessWidget {
       color: item.color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         // Aksi ketika kartu ditekan oleh pengguna.
         onTap: () {
           // Menampilkan SnackBar interaktif dengan warna harmonis dan aksi tutup instan.

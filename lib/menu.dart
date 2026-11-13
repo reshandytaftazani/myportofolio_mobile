@@ -18,6 +18,9 @@ class MyHomePage extends StatelessWidget {
 
   final List<ItemHomepage> items = [
     ItemHomepage("Lihat Proyek", Icons.folder, Colors.indigo),
+    ItemHomepage("Lihat Education", Icons.school, const Color(0xFF00695C)),
+    ItemHomepage("Lihat Skills", Icons.code, const Color(0xFF6A1B9A)),
+    ItemHomepage("Lihat Experience", Icons.work, const Color(0xFF01579B)),
     ItemHomepage("Tambah Proyek", Icons.add_circle, const Color(0xFF2E7D32)),
     ItemHomepage("Logout", Icons.logout, const Color(0xFFC62828)),
   ];
@@ -70,18 +73,23 @@ class MyHomePage extends StatelessWidget {
                     ),
                   ),
 
-                  // GridView menampilkan kartu tombol dalam tata letak kisi 3 kolom.
-                  GridView.count(
-                    primary: true,
-                    padding: const EdgeInsets.all(20),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 3,
-                    // shrinkWrap agar ukuran kisi menyesuaikan tinggi konten anak.
-                    shrinkWrap: true,
-                    children: items.map((ItemHomepage item) {
-                      return ItemCard(item);
-                    }).toList(),
+                  // Dua kolom pada ruang sempit, tiga kolom pada ruang lebar.
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GridView.count(
+                        primary: false,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        crossAxisCount: constraints.maxWidth >= 600 ? 3 : 2,
+                        // Tinggi kartu mengikuti skala teks perangkat.
+                        mainAxisExtent:
+                            144 * MediaQuery.textScalerOf(context).scale(1),
+                        shrinkWrap: true,
+                        children: items.map((item) => ItemCard(item)).toList(),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -92,4 +100,3 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
-
