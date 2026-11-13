@@ -2,8 +2,8 @@
 
 Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (CSGE602022)**, Fakultas Ilmu Komputer, Universitas Indonesia. Proyek mobile ini melengkapi [portofolio web Django](https://github.com/reshandytaftazani/myportofolio) dengan tampilan ringkas untuk perangkat mobile.
 
-![Flutter](https://img.shields.io/badge/Flutter-3.47.9-02569B?logo=flutter)
-![Dart](https://img.shields.io/badge/Dart-3.13.7-0175C2?logo=dart)
+**Status:** Implementasi menu dasar selesai. Dokumentasi dan kelengkapan Tugas 7 masih dalam pengerjaan.
+
 ## Daftar Isi
 
 - [Tentang Proyek](#tentang-proyek)
@@ -14,6 +14,7 @@ Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bag
 - [Pengujian dan Analisis](#pengujian-dan-analisis)
 - [Progres Mingguan](#progres-mingguan)
 - [Keterbatasan Saat Ini](#keterbatasan-saat-ini)
+- [Kontribusi dan Pelaporan Masalah](#kontribusi-dan-pelaporan-masalah)
 - [Informasi Pengembang](#informasi-pengembang)
 
 ## Tentang Proyek
@@ -34,7 +35,7 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 
 ## Teknologi
 
-- Flutter SDK dan Dart SDK (versi minimum mengikuti batas SDK pada `pubspec.yaml`).
+- Flutter SDK dengan Dart `>=3.13.7 <4.0.0`, mengikuti `environment.sdk: ^3.13.7` pada [pubspec.yaml](pubspec.yaml).
 - Material 3 untuk komponen dan tema antarmuka.
 - `flutter_lints` untuk aturan analisis statis.
 - `flutter_test` untuk dukungan pengujian widget.
@@ -59,11 +60,13 @@ lib/
 
 ### Prasyarat
 
-- Flutter SDK yang kompatibel dengan batas SDK pada `pubspec.yaml`.
+- Flutter SDK yang menyertakan Dart `>=3.13.7 <4.0.0`. Periksa dengan `flutter --version`; versi Flutter minimum tidak ditetapkan secara terpisah di `pubspec.yaml`.
 - Editor seperti Visual Studio Code dengan ekstensi Flutter atau Android Studio.
 - Target untuk menjalankan aplikasi: Chrome, Android Emulator, atau perangkat Android. Target iOS memerlukan macOS dan Xcode.
 
 ### Langkah-langkah
+
+Perintah berikut dijalankan dari terminal. Aplikasi saat ini tidak membutuhkan server Django, akun, atau konfigurasi `.env`.
 
 1. Clone repositori dan masuk ke direktori proyek:
 
@@ -86,6 +89,14 @@ lib/
 
    Untuk memilih target web secara eksplisit, gunakan `flutter run -d chrome`. Daftar target yang terdeteksi dapat dilihat dengan `flutter devices`.
 
+### Pemecahan Masalah
+
+| Gejala | Langkah penanganan |
+| --- | --- |
+| Perintah `flutter` tidak dikenali | Pastikan direktori `bin` Flutter SDK tercantum dalam PATH, lalu buka ulang terminal. |
+| `flutter pub get` menolak versi Dart | Periksa `flutter --version` dan gunakan Flutter SDK dengan versi Dart yang memenuhi batas di atas. |
+| Perangkat tidak muncul | Jalankan `flutter doctor` dan `flutter devices`; nyalakan emulator atau aktifkan USB debugging pada perangkat Android. |
+
 ## Pengujian dan Analisis
 
 Jalankan analisis statis dan pengujian Flutter dari direktori proyek:
@@ -97,6 +108,19 @@ flutter test
 
 `flutter analyze` memeriksa masalah statis sesuai konfigurasi analyzer. `flutter test` menjalankan pengujian yang tersedia di direktori `test/`.
 
+**Kondisi pengujian:** [test/widget_test.dart](test/widget_test.dart) masih berisi tes counter bawaan Flutter yang mengharapkan teks `0`, `1`, dan ikon tambah. Ekspektasi tersebut tidak sesuai dengan halaman portofolio saat ini, sehingga tes itu perlu diperbarui sebelum dapat menjadi bukti kebenaran fitur. Perintah di atas merupakan panduan; bagian ini tidak menyatakan pengujian telah lulus.
+
+Untuk pemeriksaan manual setelah `flutter run`, gunakan skenario berikut. Tabel ini berisi hasil yang diharapkan berdasarkan kode, bukan laporan hasil pengujian yang sudah dilakukan.
+
+| Skenario | Hasil yang diharapkan |
+| --- | --- |
+| Membuka halaman utama | Profil, NPM `2506547651`, nama, kelas `PBP D`, dan tiga menu terlihat. |
+| Menekan masing-masing menu | Pesan `Kamu telah menekan tombol <nama menu>!` muncul dengan warna sesuai kartu. |
+| Menekan `TUTUP` | SnackBar ditutup. |
+| Menekan menu lain saat SnackBar masih muncul | SnackBar sebelumnya disembunyikan dan pesan item terbaru muncul. |
+| Membiarkan SnackBar terbuka | Notifikasi menggunakan durasi konfigurasi dua detik. |
+| Mengecilkan ukuran jendela | Periksa keterbacaan profil, kartu identitas, dan label menu; catat ukuran layar jika terjadi overflow. |
+
 ## Progres Mingguan
 
 Ringkasan berikut mencatat perubahan yang terlihat dalam riwayat Git proyek. Minggu mengacu pada tanggal commit; catatan ini bukan bukti waktu pengumpulan tugas.
@@ -104,9 +128,12 @@ Ringkasan berikut mencatat perubahan yang terlihat dalam riwayat Git proyek. Min
 | Periode / kegiatan | Ringkasan pekerjaan | Bukti di riwayat Git | Status |
 | --- | --- | --- | --- |
 | 9–15 November 2026 — Tutorial 08 | Menyiapkan aplikasi Flutter dasar, memisahkan halaman utama, serta membuat model dan kartu informasi/menu awal. | `9616c0e` dan commit terkait | Selesai |
-| 9–15 November 2026 — Tugas 07 | Menambahkan warna semantik pada menu, merapikan struktur ke `models/` dan `widgets/`, membuat header profil, serta memperbarui SnackBar agar mengikuti warna item dan dapat ditutup. | `8049b21`, `d526f51`, `78c1f1e`, `2aee293`, `200e048`, `89f7e47`, `02d4ab5` | Selesai pada branch dokumentasi saat ini |
+| 9–15 November 2026 — Tugas 07: implementasi | Menambahkan warna semantik pada menu, merapikan struktur ke `models/` dan `widgets/`, membuat header profil, serta memperbarui SnackBar agar mengikuti warna item dan dapat ditutup. | `8049b21`, `d526f51`, `78c1f1e`, `2aee293`, `200e048`, `89f7e47`, `02d4ab5` | Implementasi selesai |
+| 9–15 November 2026 — Tugas 07: dokumentasi | Menyusun ringkasan, setup, progres mingguan, panduan pemeriksaan, dan refleksi. | Draf awal: `83ffefa`; penyempurnaan tercantum pada README ini. | Dalam pengerjaan; disclosure ditunda hingga tahap akhir |
 
 Semua commit yang tercantum bertanggal 9–15 November 2026 berdasarkan riwayat lokal. Rincian commit dapat ditinjau dengan `git show <hash>`.
+
+Pelajaran teknis dari implementasi: model `ItemHomepage.color` membuat warna kartu dan notifikasi memakai sumber data yang sama; pemisahan widget menjaga `menu.dart` berfokus pada komposisi halaman; pemanggilan `hideCurrentSnackBar()` sebelum pesan baru menghindari antrean pesan lama saat menu ditekan berulang. Ini merupakan penjelasan keputusan yang terlihat di kode, bukan klaim hasil pengujian visual.
 
 ## Keterbatasan Saat Ini
 
@@ -114,6 +141,13 @@ Semua commit yang tercantum bertanggal 9–15 November 2026 berdasarkan riwayat 
 - Aksi menu hanya menampilkan SnackBar; belum terhubung ke fitur portofolio yang sebenarnya.
 - Belum ada integrasi API, autentikasi, penyimpanan lokal, atau sinkronisasi dengan proyek web Django.
 - Belum tersedia tangkapan layar atau demo publik khusus aplikasi mobile.
+- Grid menu masih tetap tiga kolom; belum ada penyesuaian jumlah kolom berdasarkan lebar layar. Tampilan pada layar sempit dan skala teks besar perlu diperiksa.
+
+## Kontribusi dan Pelaporan Masalah
+
+Laporkan masalah melalui [GitHub Issues](https://github.com/reshandytaftazani/myportofolio_mobile/issues) dengan langkah reproduksi, hasil yang diharapkan, hasil aktual, versi Flutter/Dart, serta perangkat atau ukuran layar. Sertakan tangkapan layar bila masalah berkaitan dengan tampilan.
+
+Untuk mengusulkan perubahan, buat branch dengan lingkup yang jelas, pertahankan pemisahan model dan widget, lalu ajukan pull request berisi alasan perubahan dan pemeriksaan yang dilakukan. Gunakan pesan commit deskriptif seperti `fix(ui): ...` atau `docs(readme): ...`. Jelaskan kegagalan tes yang masih ada; jangan menyatakan seluruh pemeriksaan lulus tanpa hasil eksekusi.
 
 ## Informasi Pengembang
 
