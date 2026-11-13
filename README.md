@@ -2,7 +2,7 @@
 
 Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (CSGE602022)**, Fakultas Ilmu Komputer, Universitas Indonesia. Proyek mobile ini melengkapi [portofolio web Django](https://github.com/reshandytaftazani/myportofolio) dengan tampilan ringkas untuk perangkat mobile.
 
-**Status:** Implementasi menu dasar selesai. Dokumentasi dan kelengkapan Tugas 7 masih dalam pengerjaan.
+**Status:** Implementasi menu dasar, dokumentasi, refleksi, dan AI disclosure Tugas 7 tersedia. Kondisi pengujian dijelaskan pada bagian Pengujian dan Analisis.
 
 ## Daftar Isi
 
@@ -16,6 +16,7 @@ Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bag
 - [Keterbatasan Saat Ini](#keterbatasan-saat-ini)
 - [Kontribusi dan Pelaporan Masalah](#kontribusi-dan-pelaporan-masalah)
 - [Refleksi](#refleksi)
+- [AI Disclosure](#ai-disclosure)
 - [Informasi Pengembang](#informasi-pengembang)
 
 ## Tentang Proyek
@@ -130,7 +131,7 @@ Ringkasan berikut mencatat perubahan yang terlihat dalam riwayat Git proyek. Min
 | --- | --- | --- | --- |
 | 9–15 November 2026 — Tutorial 08 | Menyiapkan aplikasi Flutter dasar, memisahkan halaman utama, serta membuat model dan kartu informasi/menu awal. | `9616c0e` dan commit terkait | Selesai |
 | 9–15 November 2026 — Tugas 07: implementasi | Menambahkan warna semantik pada menu, merapikan struktur ke `models/` dan `widgets/`, membuat header profil, serta memperbarui SnackBar agar mengikuti warna item dan dapat ditutup. | `8049b21`, `d526f51`, `78c1f1e`, `2aee293`, `200e048`, `89f7e47`, `02d4ab5` | Implementasi selesai |
-| 9–15 November 2026 — Tugas 07: dokumentasi | Menyusun ringkasan, setup, progres mingguan, panduan pemeriksaan, dan refleksi. | Draf awal: `83ffefa`; penyempurnaan tercantum pada README ini. | Dalam pengerjaan; disclosure ditunda hingga tahap akhir |
+| 9–15 November 2026 — Tugas 07: dokumentasi | Menyusun ringkasan, setup, progres mingguan, panduan pemeriksaan, refleksi, dan AI disclosure. | `83ffefa`, `40472fe`, `3875f98`; disclosure tersedia pada bagian AI Disclosure. | Task 3.1–3.3 selesai; disclosure disetujui pengembang untuk di-commit |
 
 Semua commit yang tercantum bertanggal 9–15 November 2026 berdasarkan riwayat lokal. Rincian commit dapat ditinjau dengan `git show <hash>`.
 
@@ -198,6 +199,52 @@ Lokasi context menentukan ancestor yang dapat ditemukan. Context milik parent ti
 Hot reload menerapkan perubahan kode dan membangun ulang UI sambil mempertahankan state yang ada. Ini berguna untuk iterasi teks, warna, atau layout. Hot restart memulai ulang aplikasi Flutter dan menginisialisasi ulang state, sehingga sesuai ketika perubahan perlu menjalankan kembali alur awal aplikasi.
 
 Hot reload tidak menjalankan ulang `main()` atau `initState()`. Perubahan pada inisialisasi data yang sudah tersimpan mungkin memerlukan hot restart. Perubahan kode native memerlukan penghentian dan pembangunan ulang aplikasi. Karena mekanismenya berbeda, tampilan yang belum berubah setelah hot reload perlu ditinjau berdasarkan lokasi inisialisasi datanya. Lihat [panduan hot reload Flutter](https://docs.flutter.dev/tools/hot-reload).
+
+## AI Disclosure
+
+Dalam pengerjaan MyPortfolio Mobile untuk Tugas 7, saya menggunakan bantuan AI untuk memahami masalah teknis, mengevaluasi alternatif pengembangan Flutter, serta membantu penyusunan dan revisi dokumentasi berdasarkan arahan saya. Saran AI diperlakukan sebagai draf yang perlu diperiksa terhadap kode, kebutuhan tugas, dan hasil pengujian. Disclosure ini berfokus pada aplikasi mobile dalam repositori ini.
+
+### Alat yang Digunakan
+
+Antigravity (powered by Google Gemini), Claude.ai, gemini.google, dan OpenAI Codex digunakan dalam eksplorasi ekosistem proyek, sesuai catatan penggunaan pengembang. Untuk sesi dokumentasi mobile yang tercatat di sini, bantuan diberikan melalui OpenAI Codex. Daftar ini tidak menyatakan bahwa setiap alat digunakan pada setiap bagian tugas. Persentase kontribusi tidak dicantumkan karena tidak ada pengukuran yang mendukungnya.
+
+### Strategi Prompting
+
+- **Memberikan konteks masalah:** Menyertakan pesan error, potongan kode, perilaku aktual, dan hasil yang diharapkan.
+- **Membatasi ruang lingkup:** Memberikan rubrik Tugas 7, repositori referensi, dan batasan Flutter dasar agar saran tetap sesuai tahap pembelajaran. Pada dokumentasi mobile, penulisan diarahkan untuk mengikuti isi `lib/`, konfigurasi dependensi, dan riwayat commit.
+- **Memeriksa keluaran secara bertahap:** Meminta pencocokan dokumentasi dengan rencana tugas, mempertanyakan klaim yang tidak didukung berkas, dan meminta revisi sebelum perubahan dianggap siap.
+- **Memisahkan penulisan dan persetujuan:** Disclosure dikerjakan setelah dokumentasi dasar dan refleksi, kemudian ditinjau manual sebelum di-commit.
+
+### Bagian Spesifik yang Dibantu oleh AI
+
+- **Panduan pengembangan selanjutnya:** AI membantu memberikan arahan mengenai langkah pengembangan, urutan pengerjaan, dan bagian yang masih perlu diperbaiki berdasarkan kondisi proyek serta batasan materi Flutter dasar.
+- **Saran peningkatan untuk target nilai 4:** AI membantu mencocokkan kondisi proyek dengan rubrik dan mengidentifikasi peningkatan yang relevan, seperti modularisasi widget, penguatan identitas profil, interaktivitas SnackBar, serta kelengkapan dokumentasi dan progres mingguan. Saran tersebut menjadi bahan pertimbangan pengembang; pencapaian nilai tetap bergantung pada hasil implementasi, verifikasi, dan penilaian pengajar.
+
+### Keterbatasan AI dan Koreksi yang Dilakukan
+
+Koreksi manual dalam catatan ini merujuk pada peninjauan, keputusan, dan arahan pengembang. Penerapan revisi dokumentasi juga menggunakan bantuan AI; hal ini dibedakan dari klaim bahwa seluruh penyuntingan dilakukan sendiri oleh pengembang.
+
+1. **Klaim faktual dapat terlihat meyakinkan meskipun tidak didukung bukti.**
+   - **Keterbatasan AI:** Draf sempat mempertahankan badge MIT dan menambahkan tautan `LICENSE`, meskipun berkas lisensi tidak ditemukan. Pola README yang umum digunakan keliru diperlakukan sebagai fakta proyek.
+   - **Koreksi pengembang:** Saya mempertanyakan keberadaan lisensi dan meminta agar isi dokumentasi mengikuti berkas yang benar-benar ada. Klaim MIT kemudian dihapus. Pelajarannya, kelengkapan dokumentasi harus dibangun dari bukti, bukan asumsi atau kebiasaan templat.
+
+2. **Informasi versi SDK perlu diperiksa terhadap konfigurasi proyek.**
+   - **Keterbatasan AI:** Draf sempat menampilkan badge versi Flutter dan Dart tanpa membuktikan versi lingkungan yang digunakan. Batas versi Dart dalam konfigurasi juga tidak otomatis menetapkan satu versi minimum Flutter tertentu.
+   - **Koreksi dokumentasi:** Badge versi spesifik dihapus dan prasyarat diselaraskan dengan `environment.sdk: ^3.13.7` pada `pubspec.yaml`. Pembaca diarahkan memeriksa `flutter --version` agar kompatibilitas ditentukan dari lingkungan yang benar-benar digunakan.
+
+3. **Selesainya kode dapat keliru dianggap sebagai selesainya seluruh tugas.**
+   - **Keterbatasan AI:** Draf progres menyatakan Tugas 07 selesai saat refleksi dan disclosure belum lengkap. Label status yang terlalu luas mengaburkan pekerjaan yang masih tersisa.
+   - **Koreksi pengembang:** Saya meminta pemeriksaan ulang terhadap rencana tugas. Status implementasi dan dokumentasi kemudian diperjelas, dan commit Task 3.1–3.2 dipisahkan. Status akhir tetap perlu mengikuti pemeriksaan kelengkapan, bukan hanya keberadaan kode.
+
+4. **Saran perintah pengujian tidak sama dengan bukti pengujian berhasil.**
+   - **Keterbatasan AI:** Draf awal mencantumkan `flutter test` tanpa menjelaskan bahwa `test/widget_test.dart` masih menguji counter bawaan. Tes tersebut belum mewakili fitur portofolio. Demikian pula, hasil analyzer yang bersih tidak membuktikan warna, layout, atau interaksi sudah benar secara visual.
+   - **Koreksi dokumentasi:** Kondisi tes dicatat secara eksplisit dan skenario pemeriksaan manual diberi label sebagai hasil yang diharapkan. Belum ada klaim seluruh tes lulus atau pengujian visual selesai dalam sesi dokumentasi ini. Memperbarui tes dan menjalankan pemeriksaan aplikasi tetap merupakan pekerjaan yang perlu dilakukan.
+
+5. **Analisis kode tidak cukup untuk menjamin responsivitas antarmuka.**
+   - **Keterbatasan AI:** `SingleChildScrollView` dan lebar kartu berbasis `MediaQuery` dapat membantu layout, tetapi tidak menjamin bebas overflow. Grid menu masih tiga kolom, dan lebar kartu juga harus memperhitungkan padding, margin, serta ukuran teks.
+   - **Koreksi dokumentasi:** Klaim jaminan bebas overflow diganti dengan penjelasan keterbatasan dan skenario pemeriksaan pada layar sempit serta skala teks besar. Tidak dicantumkan klaim penambahan widget secara manual atau hasil visual tertentu tanpa bukti pelaksanaan.
+
+Catatan interaksi yang dapat ditelusuri mencakup permintaan revisi README, koreksi klaim MIT, pemeriksaan rencana tugas, dan permintaan commit terpisah. Perubahan Task 3.1–3.2 tersedia pada commit `40472fe` dan `3875f98`; commit menunjukkan perubahan berkas, bukan transkrip percakapan. Ekspor chat lengkap belum disertakan. Pengembang tetap bertanggung jawab memeriksa ketepatan isi, memahami jawaban reflektif, dan memvalidasi perilaku aplikasi sebelum pengumpulan.
 
 ## Informasi Pengembang
 
