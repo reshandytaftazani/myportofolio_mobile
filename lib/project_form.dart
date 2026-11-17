@@ -170,7 +170,42 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Dialog data akan disempurnakan pada Stage 3
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Proyek berhasil ditambahkan!'),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Nama Proyek: $_projectName'),
+                                    Text('Deskripsi: $_description'),
+                                    Text('Kategori: $_category'),
+                                    Text('Teknologi: $_technologies'),
+                                    Text('Tautan: $_projectLink'),
+                                  ],
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _formKey.currentState!.reset();
+                                    setState(() {
+                                      _projectName = "";
+                                      _description = "";
+                                      _category = "Web Development";
+                                      _technologies = "";
+                                      _projectLink = "";
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }
                     },
                     child: const Text(
