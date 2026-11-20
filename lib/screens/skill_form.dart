@@ -1,0 +1,206 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/models/skill.dart';
+import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+
+/// Halaman formulir untuk menambahkan entri Keahlian baru.
+class SkillFormPage extends StatefulWidget {
+  const SkillFormPage({super.key});
+
+  @override
+  State<SkillFormPage> createState() => _SkillFormPageState();
+}
+
+class _SkillFormPageState extends State<SkillFormPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _titleController = TextEditingController();
+  final _levelController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _codeSnippetController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _levelController.dispose();
+    _descriptionController.dispose();
+    _codeSnippetController.dispose();
+    super.dispose();
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _titleController.clear();
+    _levelController.clear();
+    _descriptionController.clear();
+    _codeSnippetController.clear();
+  }
+
+  String? _validateRequiredText(
+    String? value, {
+    required String fieldName,
+    int? maxLength,
+  }) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return '$fieldName tidak boleh kosong.';
+    }
+    if (maxLength != null && trimmed.length > maxLength) {
+      return '$fieldName maksimal $maxLength karakter.';
+    }
+    return null;
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final rawCode = _codeSnippetController.text;
+    final skill = Skill(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      level: _levelController.text.trim(),
+      codeSnippet: rawCode.trim().isEmpty ? null : rawCode,
+    );
+
+    final shouldReset = await showFormSummaryDialog(
+      context: context,
+      title: 'Ringkasan Keahlian',
+      entries: [
+        FormSummaryEntry(
+          label: 'Nama Keahlian',
+          value: skill.title,
+        ),
+        FormSummaryEntry(
+          label: 'Level',
+          value: skill.level,
+        ),
+        FormSummaryEntry(
+          label: 'Deskripsi',
+          value: skill.description,
+          isMultiline: true,
+        ),
+        FormSummaryEntry(
+          label: 'Cuplikan Kode',
+          value: skill.codeSnippet,
+          isCode: true,
+        ),
+      ],
+    );
+
+    if (shouldReset == true && mounted) {
+      _resetForm();
+    }
+  }
+
+  InputDecoration _fieldDecoration({
+    required String labelText,
+    String? hintText,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Tambah Keahlian',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: colorScheme.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: const LeftDrawer(),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: _fieldDecoration(
+                  labelText: 'Nama Keahlian',
+                  hintText: 'Contoh: Flutter & Dart',
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Nama keahlian',
+                  maxLength: 255,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _levelController,
+                decoration: _fieldDecoration(
+                  labelText: 'Level',
+                  hintText: 'Contoh: Intermediate',
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Level',
+                  maxLength: 50,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 4,
+                minLines: 3,
+                decoration: _fieldDecoration(
+                  labelText: 'Deskripsi Keahlian',
+                  hintText: 'Jelaskan pengalaman dan penerapan keahlian ini',
+                ),
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Deskripsi keahlian',
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _codeSnippetController,
+                maxLines: 6,
+                minLines: 4,
+                keyboardType: TextInputType.multiline,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13.0),
+                decoration: _fieldDecoration(
+                  labelText: 'Cuplikan Kode (Opsional)',
+                  hintText: 'void main() {\n  print("Hello");\n}',
+                ),
+              ),
+              const SizedBox(height: 24.0),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                onPressed: _submitForm,
+                child: const Text(
+                  'Simpan',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

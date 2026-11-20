@@ -1,0 +1,220 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/models/education.dart';
+import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+
+/// Halaman formulir untuk menambahkan entri Pendidikan baru.
+class EducationFormPage extends StatefulWidget {
+  const EducationFormPage({super.key});
+
+  @override
+  State<EducationFormPage> createState() => _EducationFormPageState();
+}
+
+class _EducationFormPageState extends State<EducationFormPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _schoolNameController = TextEditingController();
+  final _periodController = TextEditingController();
+  final _detailController = TextEditingController();
+  final _startYearController = TextEditingController();
+
+  @override
+  void dispose() {
+    _schoolNameController.dispose();
+    _periodController.dispose();
+    _detailController.dispose();
+    _startYearController.dispose();
+    super.dispose();
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _schoolNameController.clear();
+    _periodController.clear();
+    _detailController.clear();
+    _startYearController.clear();
+  }
+
+  String? _validateRequiredText(
+    String? value, {
+    required String fieldName,
+    required int maxLength,
+  }) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return '$fieldName tidak boleh kosong.';
+    }
+    if (trimmed.length > maxLength) {
+      return '$fieldName maksimal $maxLength karakter.';
+    }
+    return null;
+  }
+
+  String? _validateStartYear(String? value) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return 'Tahun mulai tidak boleh kosong.';
+    }
+    if (!RegExp(r'^\d{4}$').hasMatch(trimmed)) {
+      return 'Tahun mulai harus berupa bilangan bulat positif 4 digit.';
+    }
+    final parsed = int.tryParse(trimmed);
+    if (parsed == null || parsed < 1000) {
+      return 'Tahun mulai harus berupa bilangan bulat positif 4 digit.';
+    }
+    return null;
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final education = Education(
+      schoolName: _schoolNameController.text.trim(),
+      period: _periodController.text.trim(),
+      detail: _detailController.text.trim(),
+      startYear: int.parse(_startYearController.text.trim()),
+    );
+
+    final shouldReset = await showFormSummaryDialog(
+      context: context,
+      title: 'Ringkasan Pendidikan',
+      entries: [
+        FormSummaryEntry(
+          label: 'Nama Sekolah / Institusi',
+          value: education.schoolName,
+        ),
+        FormSummaryEntry(
+          label: 'Periode',
+          value: education.period,
+        ),
+        FormSummaryEntry(
+          label: 'Detail',
+          value: education.detail,
+          isMultiline: true,
+        ),
+        FormSummaryEntry(
+          label: 'Tahun Mulai',
+          value: education.startYear.toString(),
+        ),
+      ],
+    );
+
+    if (shouldReset == true && mounted) {
+      _resetForm();
+    }
+  }
+
+  InputDecoration _fieldDecoration({
+    required String labelText,
+    String? hintText,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Tambah Pendidikan',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: colorScheme.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: const LeftDrawer(),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _schoolNameController,
+                decoration: _fieldDecoration(
+                  labelText: 'Nama Sekolah / Institusi',
+                  hintText: 'Contoh: Universitas Indonesia',
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Nama sekolah/institusi',
+                  maxLength: 255,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _periodController,
+                decoration: _fieldDecoration(
+                  labelText: 'Periode',
+                  hintText: 'Contoh: 2024 - Sekarang',
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Periode',
+                  maxLength: 50,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _detailController,
+                maxLines: 3,
+                minLines: 2,
+                decoration: _fieldDecoration(
+                  labelText: 'Detail Pendidikan',
+                  hintText: 'Contoh: S1 Ilmu Komputer',
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => _validateRequiredText(
+                  value,
+                  fieldName: 'Detail pendidikan',
+                  maxLength: 255,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _startYearController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                decoration: _fieldDecoration(
+                  labelText: 'Tahun Mulai',
+                  hintText: 'Contoh: 2024',
+                ),
+                validator: _validateStartYear,
+              ),
+              const SizedBox(height: 24.0),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                onPressed: _submitForm,
+                child: const Text(
+                  'Simpan',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
