@@ -4,6 +4,7 @@ import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
+import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 
 /// Widget kartu tombol aksi pada menu beranda portofolio.
 ///
@@ -16,6 +17,7 @@ class ItemCard extends StatelessWidget {
     'Tambah Pengalaman': (_) => const ExperienceFormPage(),
     'Tambah Pendidikan': (_) => const EducationFormPage(),
     'Tambah Keahlian': (_) => const SkillFormPage(),
+    'Tambah Tech Stack': (_) => const TechStackFormPage(),
   };
 
   /// Data konfigurasi item yang dirender oleh kartu ini.

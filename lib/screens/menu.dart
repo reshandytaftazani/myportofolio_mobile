@@ -38,6 +38,11 @@ class MyHomePage extends StatelessWidget {
       Icons.terminal,
       const Color(0xFF7B1FA2),
     ),
+    ItemHomepage(
+      "Tambah Tech Stack",
+      Icons.layers_outlined,
+      const Color(0xFF4527A0),
+    ),
     ItemHomepage("Logout", Icons.logout, const Color(0xFFC62828)),
   ];
 
