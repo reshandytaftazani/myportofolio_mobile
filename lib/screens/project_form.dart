@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 /// Halaman formulir untuk menambahkan entri Proyek baru.
@@ -43,7 +44,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     });
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
     final projectUrl = _projectUrlController.text.trim();
@@ -57,37 +58,41 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       isFeatured: _isFeatured,
     );
 
-    showDialog(
+    final shouldReset = await showFormSummaryDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Proyek berhasil ditambahkan!'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Nama Proyek: ${project.title}'),
-                Text('Deskripsi: ${project.description}'),
-                Text('Kategori: ${project.category}'),
-                Text('Tautan: ${project.projectUrl ?? '-'}'),
-                Text('URL Gambar: ${project.projectImageUrl ?? '-'}'),
-                Text('Unggulan: ${project.isFeatured ? 'Ya' : 'Tidak'}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _resetForm();
-              },
-            ),
-          ],
-        );
-      },
+      title: 'Ringkasan Proyek',
+      entries: [
+        FormSummaryEntry(
+          label: 'Nama Proyek',
+          value: project.title,
+        ),
+        FormSummaryEntry(
+          label: 'Deskripsi',
+          value: project.description,
+          isMultiline: true,
+        ),
+        FormSummaryEntry(
+          label: 'Kategori',
+          value: project.category,
+        ),
+        FormSummaryEntry(
+          label: 'Tautan Proyek',
+          value: project.projectUrl,
+        ),
+        FormSummaryEntry(
+          label: 'URL Gambar Proyek',
+          value: project.projectImageUrl,
+        ),
+        FormSummaryEntry(
+          label: 'Proyek Unggulan',
+          value: project.isFeatured ? 'Ya' : 'Tidak',
+        ),
+      ],
     );
+
+    if (shouldReset == true && mounted) {
+      _resetForm();
+    }
   }
 
   InputDecoration _fieldDecoration({
