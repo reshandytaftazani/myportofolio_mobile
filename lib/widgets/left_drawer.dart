@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/skill_form.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -91,6 +93,24 @@ class LeftDrawer extends StatelessWidget {
             onTap: () => _navigateToForm<ExperienceFormPage>(
               context,
               (context) => const ExperienceFormPage(),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.school_outlined),
+            title: const Text('Tambah Pendidikan'),
+            // Navigasi ke halaman tambah pendidikan
+            onTap: () => _navigateToForm<EducationFormPage>(
+              context,
+              (context) => const EducationFormPage(),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.terminal),
+            title: const Text('Tambah Keahlian'),
+            // Navigasi ke halaman tambah keahlian
+            onTap: () => _navigateToForm<SkillFormPage>(
+              context,
+              (context) => const SkillFormPage(),
             ),
           ),
         ],

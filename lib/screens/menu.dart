@@ -28,6 +28,16 @@ class MyHomePage extends StatelessWidget {
       Icons.work_outline,
       const Color(0xFF00838F),
     ),
+    ItemHomepage(
+      "Tambah Pendidikan",
+      Icons.school_outlined,
+      const Color(0xFF00796B),
+    ),
+    ItemHomepage(
+      "Tambah Keahlian",
+      Icons.terminal,
+      const Color(0xFF7B1FA2),
+    ),
     ItemHomepage("Logout", Icons.logout, const Color(0xFFC62828)),
   ];
 

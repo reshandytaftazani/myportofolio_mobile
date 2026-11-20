@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/skill_form.dart';
 
 /// Widget kartu tombol aksi pada menu beranda portofolio.
 ///
@@ -9,6 +11,13 @@ import 'package:myportofolio_mobile/screens/project_form.dart';
 /// berwarna dinamis sesuai konfigurasi [ItemHomepage.color]. Ketika ditekan,
 /// kartu akan memunculkan [SnackBar] dengan pesan konfirmasi interaktif.
 class ItemCard extends StatelessWidget {
+  static final Map<String, WidgetBuilder> _formRoutes = {
+    'Tambah Proyek': (_) => const ProjectFormPage(),
+    'Tambah Pengalaman': (_) => const ExperienceFormPage(),
+    'Tambah Pendidikan': (_) => const EducationFormPage(),
+    'Tambah Keahlian': (_) => const SkillFormPage(),
+  };
+
   /// Data konfigurasi item yang dirender oleh kartu ini.
   final ItemHomepage item;
 
@@ -51,19 +60,11 @@ class ItemCard extends StatelessWidget {
             );
 
           // Navigate ke halaman yang sesuai
-          if (item.name == "Tambah Proyek") {
+          final routeBuilder = _formRoutes[item.name];
+          if (routeBuilder != null) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const ProjectFormPage(),
-              ),
-            );
-          } else if (item.name == "Tambah Pengalaman") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ExperienceFormPage(),
-              ),
+              MaterialPageRoute(builder: routeBuilder),
             );
           }
         },
