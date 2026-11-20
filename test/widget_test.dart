@@ -7,6 +7,7 @@ import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
+import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 
 Future<void> openDrawer(WidgetTester tester) async {
   await tester.tap(find.byTooltip('Open navigation menu'));
@@ -656,6 +657,177 @@ void main() {
       )) {
         expect(editable.controller.text, isEmpty);
       }
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'tech stack card and drawer open form, Back and Home return cleanly',
+    (tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      await tester.ensureVisible(find.text('Tambah Tech Stack'));
+      await tester.tap(find.text('Tambah Tech Stack'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TechStackFormPage), findsOneWidget);
+
+      await tester.tap(find.text('TUTUP'));
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(MyHomePage), findsOneWidget);
+      expect(find.byType(TechStackFormPage), findsNothing);
+
+      await openDrawer(tester);
+      await tester.ensureVisible(find.text('Tambah Tech Stack').last);
+      await tester.tap(find.text('Tambah Tech Stack').last);
+      await tester.pumpAndSettle();
+      expect(find.byType(TechStackFormPage), findsOneWidget);
+
+      await openDrawer(tester);
+      await tester.ensureVisible(find.text('Tambah Tech Stack').last);
+      await tester.tap(find.text('Tambah Tech Stack').last);
+      await tester.pumpAndSettle();
+      expect(find.byType(TechStackFormPage), findsOneWidget);
+
+      await openDrawer(tester);
+      await tester.tap(find.text('Home'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MyHomePage), findsOneWidget);
+      expect(find.byType(TechStackFormPage), findsNothing);
+
+      final homeContext = tester.element(find.byType(MyHomePage));
+      expect(Navigator.of(homeContext).canPop(), isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'tech stack form validates invalid URL, decimal order, empty snippet, and preserves multiline summary',
+    (tester) async {
+      await tester.pumpWidget(const MaterialApp(home: TechStackFormPage()));
+
+      expect(
+        tester.widget<TextFormField>(field('Urutan Tampil')).controller?.text,
+        '0',
+      );
+
+      await tester.enterText(field('Nama Tech Stack'), '   ');
+      await tester.enterText(field('URL Ikon'), 'ftp://invalid.example');
+      await tester.enterText(field('Nama File'), '   ');
+      await tester.enterText(field('Cuplikan Kode'), '   ');
+      await tester.enterText(field('Urutan Tampil'), '1.5');
+      await submitExperienceForm(tester);
+
+      expect(find.text('Nama tech stack tidak boleh kosong.'), findsOneWidget);
+      expect(
+        find.text('Gunakan URL HTTP/HTTPS yang valid dengan hostname.'),
+        findsOneWidget,
+      );
+      expect(find.text('Nama file tidak boleh kosong.'), findsOneWidget);
+      expect(find.text('Cuplikan kode tidak boleh kosong.'), findsOneWidget);
+      expect(
+        find.text('Urutan tampil harus berupa bilangan bulat.'),
+        findsOneWidget,
+      );
+      expect(find.byType(AlertDialog), findsNothing);
+
+      const snippet = 'class DartStack {\n  final int version = 3;\n}';
+      await tester.enterText(field('Nama Tech Stack'), 'Dart');
+      await tester.enterText(
+        field('URL Ikon'),
+        'https://cdn.example.com/dart.svg',
+      );
+      await tester.enterText(field('Nama File'), 'dart_stack.dart');
+      await tester.enterText(field('Cuplikan Kode'), snippet);
+      await tester.enterText(field('Urutan Tampil'), '2');
+      await submitExperienceForm(tester);
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.text('Ringkasan Tech Stack'), findsOneWidget);
+      expect(find.textContaining('Nama Tech Stack: Dart'), findsOneWidget);
+      expect(
+        find.textContaining('URL Ikon: https://cdn.example.com/dart.svg'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Nama File: dart_stack.dart'),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text(snippet),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Urutan Tampil: 2'), findsOneWidget);
+
+      await tester.tap(find.text('Edit Isian'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        tester.widget<TextFormField>(field('Cuplikan Kode')).controller?.text,
+        snippet,
+      );
+
+      await submitExperienceForm(tester);
+      await tester.tap(find.text('Selesai'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        tester.widget<TextFormField>(field('Nama Tech Stack')).controller?.text,
+        isEmpty,
+      );
+      expect(
+        tester.widget<TextFormField>(field('Urutan Tampil')).controller?.text,
+        '0',
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'tech stack summary dialog scrolls long code snippet on narrow phone and keeps actions reachable',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.pumpWidget(const MaterialApp(home: TechStackFormPage()));
+
+      final longSnippet = List.generate(
+        40,
+        (i) => '  final line$i = "value_$i";',
+      ).join('\n');
+
+      await tester.enterText(field('Nama Tech Stack'), 'Flutter');
+      await tester.enterText(
+        field('URL Ikon'),
+        'https://cdn.example.com/flutter.svg',
+      );
+      await tester.enterText(field('Nama File'), 'main.dart');
+      await tester.enterText(field('Cuplikan Kode'), longSnippet);
+      await tester.enterText(field('Urutan Tampil'), '1');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      await tester.pumpAndSettle();
+
+      await submitExperienceForm(tester);
+      expect(find.byType(AlertDialog), findsOneWidget);
+
+      final dialogScroll = find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(SingleChildScrollView),
+      );
+      await tester.drag(dialogScroll, const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Selesai'));
+      await tester.tap(find.text('Selesai'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
