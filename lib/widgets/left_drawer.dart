@@ -4,6 +4,7 @@ import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
+import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -111,6 +112,15 @@ class LeftDrawer extends StatelessWidget {
             onTap: () => _navigateToForm<SkillFormPage>(
               context,
               (context) => const SkillFormPage(),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.layers_outlined),
+            title: const Text('Tambah Tech Stack'),
+            // Navigasi ke halaman tambah tech stack
+            onTap: () => _navigateToForm<TechStackFormPage>(
+              context,
+              (context) => const TechStackFormPage(),
             ),
           ),
         ],

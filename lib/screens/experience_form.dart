@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
@@ -155,26 +156,6 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
     }
   }
 
-  String? _validateThumbnailUrl(String? value) {
-    final trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) return null;
-
-    if (trimmed.length > 200) {
-      return 'URL thumbnail maksimal 200 karakter.';
-    }
-    if (trimmed.contains(RegExp(r'\s'))) {
-      return 'URL thumbnail tidak boleh mengandung spasi.';
-    }
-
-    final uri = Uri.tryParse(trimmed);
-    if (uri == null ||
-        (uri.scheme != 'http' && uri.scheme != 'https') ||
-        uri.host.isEmpty) {
-      return 'Gunakan URL HTTP/HTTPS yang valid dengan hostname.';
-    }
-    return null;
-  }
-
   InputDecoration _fieldDecoration({
     required String labelText,
     String? hintText,
@@ -318,7 +299,8 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                   labelText: 'URL Thumbnail (Opsional)',
                   hintText: 'https://example.com/image.png',
                 ),
-                validator: _validateThumbnailUrl,
+                validator: (value) =>
+                    validateHttpUrl(value, fieldLabel: 'URL thumbnail'),
               ),
               const SizedBox(height: 16.0),
               _buildDateField(
