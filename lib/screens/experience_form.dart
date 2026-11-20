@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 /// Halaman formulir untuk menambahkan entri Pengalaman baru.
@@ -77,6 +78,81 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
         _endedAtController.clear();
       }
     });
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _titleController.clear();
+    _companyController.clear();
+    _descriptionController.clear();
+    _thumbnailController.clear();
+    _startedAtController.clear();
+    _endedAtController.clear();
+    setState(() {
+      _category = Experience.defaultCategory;
+      _startedAt = null;
+      _endedAt = null;
+    });
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final company = _companyController.text.trim();
+    final thumbnail = _thumbnailController.text.trim();
+    final experience = Experience(
+      title: _titleController.text.trim(),
+      company: company.isEmpty ? null : company,
+      description: _descriptionController.text.trim(),
+      category: _category,
+      thumbnail: thumbnail.isEmpty ? null : thumbnail,
+      startedAt: _startedAt,
+      endedAt: _endedAt,
+    );
+
+    final shouldReset = await showFormSummaryDialog(
+      context: context,
+      title: 'Ringkasan Pengalaman',
+      entries: [
+        FormSummaryEntry(
+          label: 'Nama Pengalaman',
+          value: experience.title,
+        ),
+        FormSummaryEntry(
+          label: 'Perusahaan / Organisasi',
+          value: experience.company,
+        ),
+        FormSummaryEntry(
+          label: 'Kategori',
+          value: experience.categoryLabel,
+        ),
+        FormSummaryEntry(
+          label: 'Deskripsi',
+          value: experience.description,
+          isMultiline: true,
+        ),
+        FormSummaryEntry(
+          label: 'URL Thumbnail',
+          value: experience.thumbnail,
+        ),
+        FormSummaryEntry(
+          label: 'Tanggal Mulai',
+          value: experience.startedAt != null
+              ? _formatDate(experience.startedAt!)
+              : null,
+        ),
+        FormSummaryEntry(
+          label: 'Tanggal Selesai',
+          value: experience.endedAt != null
+              ? _formatDate(experience.endedAt!)
+              : null,
+        ),
+      ],
+    );
+
+    if (shouldReset == true && mounted) {
+      _resetForm();
+    }
   }
 
   String? _validateThumbnailUrl(String? value) {
@@ -276,15 +352,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Isian pengalaman valid.'),
-                      ),
-                    );
-                  }
-                },
+                onPressed: _submitForm,
                 child: const Text(
                   'Simpan',
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
