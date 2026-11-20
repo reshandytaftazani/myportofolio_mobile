@@ -19,12 +19,18 @@ class Experience {
   final String? company;
   final String description;
   final String category;
+  final String? thumbnail;
+  final DateTime? startedAt;
+  final DateTime? endedAt;
 
   const Experience({
     required this.title,
     this.company,
     required this.description,
     this.category = defaultCategory,
+    this.thumbnail,
+    this.startedAt,
+    this.endedAt,
   });
 
   /// Label tampilan yang ramah pengguna untuk [category].
