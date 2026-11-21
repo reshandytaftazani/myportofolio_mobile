@@ -29,11 +29,9 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 ## Fitur
 
 - Header profil (`ProfileHeader`) dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa, serta tiga kartu identitas (`InfoCard`) untuk NPM, nama, dan kelas.
-- Sepuluh menu aksi di beranda (`MyHomePage`):
-  - Lima tombol pembuka form: **Tambah Proyek**, **Tambah Pengalaman**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
-  - Lima tombol demonstrasi SnackBar: **Lihat Proyek**, **Lihat Education**, **Lihat Skills**, **Lihat Experience**, dan **Logout**.
-- Grid menu responsif: 2 kolom pada lebar `< 600` piksel logis dan 3 kolom pada lebar `>= 600` piksel logis, dengan tinggi kartu mengikuti skala teks perangkat.
-- Drawer navigasi bersama (`LeftDrawer`) pada beranda dan seluruh halaman form dengan opsi **Home**, **Add Project**, **Tambah Pengalaman**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
+- Empat kartu kategori utama di beranda (`MyHomePage`) dalam kisi 2 kolom: **Projects**, **Experiences**, **Education**, dan **Skills**, dengan tinggi kartu mengikuti skala teks perangkat, serta tombol aksi **Logout** pada `AppBar`.
+- Halaman bagian portofolio (`PortfolioSectionPage`) yang menyatukan tampilan *empty state* dengan tombol **Tambah** (`FloatingActionButton.extended` dan tombol aksi di tengah layar). Pada bagian **Projects**, tersedia aksi **Tambah Proyek** dan **Tambah Tech Stack**.
+- Drawer navigasi bersama (`LeftDrawer`) pada beranda, halaman bagian, dan seluruh halaman form yang disamakan dengan menu beranda (**Home**, **Projects**, **Experiences**, **Education**, dan **Skills**).
 - Lima formulir tervalidasi (`StatefulWidget` + `Form` + `GlobalKey<FormState>`) yang diselaraskan dengan model Django:
   - **Tambah Pengalaman** (`ExperienceFormPage`): `title` (wajib, maks 255), `description` (wajib), `company` (opsional, maks 255), `category` (dropdown dengan pilihan Django, default `full-time`), `thumbnail` (opsional, URL HTTP(S) dengan hostname, maks 200), serta `started_at` dan `ended_at` via `showDatePicker()` dengan validasi tanggal akhir tidak mendahului tanggal mulai.
   - **Tambah Pendidikan** (`EducationFormPage`): `school_name` (wajib, maks 255), `period` (wajib, maks 50), `detail` (wajib, maks 255), dan `start_year` (wajib, bilangan bulat positif 4 digit).
@@ -63,7 +61,7 @@ lib/
 ├── models/
 │   ├── education.dart                # Model data Pendidikan
 │   ├── experience.dart               # Model data Pengalaman
-│   ├── item_homepage.dart            # Model item menu beranda
+│   ├── item_homepage.dart            # Model item kategori menu beranda & drawer
 │   ├── project.dart                  # Model data Proyek
 │   ├── skill.dart                    # Model data Keahlian
 │   └── tech_stack.dart               # Model data Tech Stack
@@ -71,6 +69,7 @@ lib/
 │   ├── education_form.dart           # Halaman form Tambah Pendidikan
 │   ├── experience_form.dart          # Halaman form Tambah Pengalaman
 │   ├── menu.dart                     # Halaman utama (MyHomePage)
+│   ├── portfolio_section_page.dart   # Halaman bagian portofolio & konfigurasi menu
 │   ├── project_form.dart             # Halaman form Tambah Proyek
 │   ├── skill_form.dart               # Halaman form Tambah Keahlian
 │   └── tech_stack_form.dart          # Halaman form Tambah Tech Stack
@@ -135,13 +134,13 @@ Perintah berikut dijalankan dari direktori akar proyek. Aplikasi belum membutuhk
 
 Alur berikut dapat digunakan untuk mendemokan fitur utama dari beranda/drawer hingga dialog ringkasan:
 
-1. **Buka form dari kartu atau drawer**: Pada beranda, ketuk kartu **Tambah Pengalaman** (atau buka ikon menu kiri atas untuk membuka `LeftDrawer` lalu pilih **Tambah Pengalaman**).
+1. **Buka form dari kartu atau drawer**: Pada beranda, ketuk kartu **Experiences** (atau buka ikon menu kiri atas untuk membuka `LeftDrawer` lalu pilih **Experiences**), kemudian tekan tombol **Tambah Pengalaman**.
 2. **Uji validasi gagal**: Langsung tekan **Simpan** tanpa mengisi field wajib, lalu coba masukkan URL thumbnail tidak valid (mis. `not-a-url`) atau pilih `ended_at` lebih awal dari `started_at`. Pesan error muncul di kolom terkait dan dialog tidak terbuka.
 3. **Isi data valid dan simpan**: Lengkapi `title`, `description`, `company` (opsional), pilih `category`, masukkan URL thumbnail valid (`https://...`), dan pilih rentang tanggal yang benar. Gulir ke bawah lalu tekan **Simpan**.
 4. **Periksa dialog ringkasan dan Edit Isian**: Dialog menampilkan semua field. Tekan **Edit Isian** untuk menutup dialog tanpa menghapus nilai di form, lalu ubah salah satu field dan tekan **Simpan** lagi.
 5. **Selesai dan kembali ke beranda**: Tekan **Selesai** pada dialog untuk mereset seluruh field form. Gunakan tombol **Back** (jika masuk lewat kartu) atau buka drawer lalu pilih **Home** untuk kembali ke beranda tanpa menumpuk rute.
 
-Pola yang sama berlaku untuk **Tambah Proyek**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
+Pola yang sama berlaku untuk **Projects** (**Tambah Proyek** & **Tambah Tech Stack**), **Education** (**Tambah Pendidikan**), dan **Skills** (**Tambah Keahlian**).
 
 ## Pengujian dan Analisis
 
@@ -156,7 +155,7 @@ flutter test
 
 - **`flutter analyze`**: `No issues found!` (bersih tanpa error, warning, maupun lint issue).
 - **`flutter test`**: **14/14 tes di [test/widget_test.dart](test/widget_test.dart) lulus**, mencakup:
-  - Navigasi drawer dan kartu aksi untuk seluruh 5 form (`Proyek`, `Pengalaman`, `Pendidikan`, `Keahlian`, `Tech Stack`), termasuk perilaku `Back` dan `Home`.
+  - Navigasi kartu beranda, halaman bagian (`Projects`, `Experiences`, `Education`, `Skills`), dan drawer menuju seluruh 5 form (`Proyek`, `Pengalaman`, `Pendidikan`, `Keahlian`, `Tech Stack`), termasuk perilaku `Back` dan `Home`.
   - Validasi input wajib kosong/spasi, batas panjang karakter, URL HTTP(S), rentang tanggal Pengalaman, tahun 4 digit Pendidikan, dan urutan bilangan bulat Tech Stack.
   - Dialog ringkasan: tampil hanya saat valid, `Edit Isian` mempertahankan seluruh nilai (termasuk indentasi `code_snippet`), dan `Selesai` mereset form.
   - Keterjangkauan scroll pada lebar ponsel dengan keyboard terbuka serta dialog cuplikan kode panjang pada layar sempit.
@@ -182,11 +181,12 @@ Ringkasan berikut mencatat progres implementasi pada riwayat Git proyek:
 | 21 November 2026 — Tugas 08 Stage 2 (Pendidikan & Keahlian) | Membuat model & form `Education` (validasi tahun 4 digit) dan `Skill` (cuplikan kode multiline), integrasi kartu/drawer, dan widget test. | `b1bebb4`, `49c97d8`, `947507f`, `a41dc2d`, `ecd9026` | Selesai |
 | 21 November 2026 — Tugas 08 Stage 3 (Tech Stack & Validator) | Membuat model & form `TechStack`, mengekstrak `form_validators.dart` bersama, integrasi kartu/drawer, dan uji ringkasan multiline. | `16a2790`, `af4b215`, `4a0ca52`, `056cd2a` | Selesai |
 | 21 November 2026 — Tugas 08 Stage 4 (Penyelarasan Proyek) | Menyelaraskan `Project` dan `ProjectFormPage` dengan model Django (`project_url`, `project_image_url`, `is_featured`), memakai `FormSummaryDialog` bersama, dan memperbarui tes regresi. | `395afcd`, `2522436`, `680e632`, `8bb6ea8` | Selesai |
-| 21 November 2026 — Tugas 08 Stage 5 (Verifikasi & Dokumentasi) | Verifikasi akhir (`flutter analyze` bersih, 14/14 `flutter test` lulus, pemeriksaan Chrome/perangkat) serta pembaruan panduan, struktur berkas, hasil uji, dan progres di `README.md`. | Branch `docs/tugas-8-final-verification-and-documentation` | Verifikasi dan panduan selesai |
+| 21 November 2026 — Tugas 08 Stage 5 (Verifikasi & Dokumentasi) | Verifikasi akhir (`flutter analyze` bersih, 14/14 `flutter test` lulus, pemeriksaan Chrome/perangkat) serta pembaruan panduan, struktur berkas, hasil uji, dan progres di `README.md`. | Branch `docs/tugas-8-final-verification-and-documentation`, `6199929` | Selesai |
+| 21 November 2026 — Penyederhanaan Menu & Drawer | Menyederhanakan 10 kartu menu beranda menjadi 4 kategori (`Projects`, `Experiences`, `Education`, `Skills`), memindahkan `Logout` ke `AppBar`, menambahkan `PortfolioSectionPage`, dan menyamakan `LeftDrawer`. | `11224a0` | Selesai |
 
 ## Keterbatasan Saat Ini
 
-- Empat menu **Lihat ...** (**Lihat Proyek**, **Lihat Education**, **Lihat Skills**, **Lihat Experience**) dan **Logout** masih bersifat demonstrasi SnackBar.
+- Halaman bagian (`PortfolioSectionPage`) masih menampilkan *empty state* tanpa daftar data tersimpan, dan tombol **Logout** pada `AppBar` masih bersifat demonstrasi SnackBar.
 - Data formulir baru divalidasi dan diringkas secara lokal di dialog; belum ada integrasi HTTP, autentikasi sesi, maupun sinkronisasi database ke backend Django.
 - Konten profil dan daftar menu beranda masih didefinisikan secara statis di `lib/screens/menu.dart`.
 
