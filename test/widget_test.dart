@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/main.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
@@ -15,9 +16,12 @@ Future<void> openDrawer(WidgetTester tester) async {
 }
 
 Future<void> saveForm(WidgetTester tester) async {
-  await tester.ensureVisible(find.text('Save'));
+  final button = find.widgetWithText(ElevatedButton, 'Save');
+  await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Save'));
+  await tester.ensureVisible(button);
+  await tester.pumpAndSettle();
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
@@ -92,12 +96,59 @@ void main() {
       expect(find.text('Nama proyek tidak boleh kosong!'), findsOneWidget);
       expect(find.text('Deskripsi proyek tidak boleh kosong!'), findsOneWidget);
       expect(find.byType(AlertDialog), findsNothing);
+
       await tester.enterText(field('Nama Proyek'), '   ');
       await tester.enterText(field('Deskripsi Proyek'), '   ');
       await saveForm(tester);
       expect(find.text('Nama proyek tidak boleh kosong!'), findsOneWidget);
       expect(find.text('Deskripsi proyek tidak boleh kosong!'), findsOneWidget);
       expect(find.byType(AlertDialog), findsNothing);
+
+      await tester.enterText(
+        field('Nama Proyek'),
+        List.filled(256, 'a').join(),
+      );
+      await tester.enterText(field('Deskripsi Proyek'), 'Deskripsi valid');
+      await tester.enterText(
+        field('Tautan Proyek (Opsional)'),
+        'https://example.com/${List.filled(185, 'p').join()}',
+      );
+      await tester.enterText(
+        field('URL Gambar Proyek (Opsional)'),
+        'https://example.com/${List.filled(485, 'i').join()}',
+      );
+      await saveForm(tester);
+      expect(
+        find.text('Nama proyek maksimal 255 karakter.'),
+        findsOneWidget,
+      );
+      expect(find.text('URL proyek maksimal 200 karakter.'), findsOneWidget);
+      expect(
+        find.text('URL gambar proyek maksimal 500 karakter.'),
+        findsOneWidget,
+      );
+      expect(find.byType(AlertDialog), findsNothing);
+
+      await tester.enterText(field('Nama Proyek'), 'Proyek A');
+      await tester.enterText(
+        field('Tautan Proyek (Opsional)'),
+        'ftp://bad.example',
+      );
+      await tester.enterText(
+        field('URL Gambar Proyek (Opsional)'),
+        'not a url',
+      );
+      await saveForm(tester);
+      expect(
+        find.text('Gunakan URL HTTP/HTTPS yang valid dengan hostname.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('URL gambar proyek tidak boleh mengandung spasi.'),
+        findsOneWidget,
+      );
+      expect(find.byType(AlertDialog), findsNothing);
+
       await tester.enterText(field('Nama Proyek'), 'Proyek A');
       await tester.enterText(field('Deskripsi Proyek'), 'Deskripsi A');
       await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
@@ -106,19 +157,56 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Mobile Development').last);
       await tester.pumpAndSettle();
-      await tester.enterText(field('Teknologi yang Digunakan'), 'Flutter');
-      await tester.enterText(field('Tautan Proyek'), 'https://example.com');
+      await tester.enterText(
+        field('Tautan Proyek (Opsional)'),
+        'https://example.com/project',
+      );
+      await tester.enterText(
+        field('URL Gambar Proyek (Opsional)'),
+        'https://example.com/cover.png',
+      );
+      await tester.ensureVisible(find.byType(SwitchListTile));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(SwitchListTile));
+      await tester.pumpAndSettle();
+
       await saveForm(tester);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.text('Ringkasan Proyek'), findsOneWidget);
       for (final text in [
         'Nama Proyek: Proyek A',
-        'Deskripsi: Deskripsi A',
         'Kategori: Mobile Development',
-        'Teknologi: Flutter',
-        'Tautan: https://example.com',
+        'Tautan Proyek: https://example.com/project',
+        'URL Gambar Proyek: https://example.com/cover.png',
+        'Proyek Unggulan: Ya',
       ]) {
-        expect(find.text(text), findsOneWidget);
+        expect(find.textContaining(text), findsOneWidget);
       }
-      await tester.tap(find.text('OK'));
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Deskripsi A'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Edit Isian'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        tester.widget<TextFormField>(field('Nama Proyek')).controller?.text,
+        'Proyek A',
+      );
+      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isTrue);
+
+      await tester.enterText(field('Nama Proyek'), 'Proyek A Edit');
+      await saveForm(tester);
+      expect(
+        find.textContaining('Nama Proyek: Proyek A Edit'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Selesai'));
       await tester.pumpAndSettle();
       for (final editable in tester.widgetList<EditableText>(
         find.byType(EditableText),
@@ -131,21 +219,26 @@ void main() {
               find.byType(DropdownButtonFormField<String>),
             )
             .value,
-        'Web Development',
+        Project.defaultCategory,
       );
+      expect(
+        tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+        isFalse,
+      );
+
       await tester.enterText(field('Nama Proyek'), 'Proyek B');
       await tester.enterText(field('Deskripsi Proyek'), 'Deskripsi B');
       await saveForm(tester);
       for (final text in [
         'Nama Proyek: Proyek B',
-        'Deskripsi: Deskripsi B',
-        'Kategori: Web Development',
-        'Teknologi: ',
-        'Tautan: ',
+        'Kategori: Other',
+        'Tautan Proyek: -',
+        'URL Gambar Proyek: -',
+        'Proyek Unggulan: Tidak',
       ]) {
-        expect(find.text(text), findsOneWidget);
+        expect(find.textContaining(text), findsOneWidget);
       }
-      await tester.tap(find.text('OK'));
+      await tester.tap(find.text('Selesai'));
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsNothing);
       expect(tester.takeException(), isNull);
@@ -181,8 +274,8 @@ void main() {
       await tester.pumpAndSettle();
       await saveForm(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      await tester.ensureVisible(find.text('OK'));
-      await tester.tap(find.text('OK'));
+      await tester.ensureVisible(find.text('Selesai'));
+      await tester.tap(find.text('Selesai'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     },
