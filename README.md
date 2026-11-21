@@ -2,7 +2,7 @@
 
 Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (CSGE602022)**, Fakultas Ilmu Komputer, Universitas Indonesia. Proyek mobile ini melengkapi [portofolio web Django](https://github.com/reshandytaftazani/myportofolio) dengan tampilan ringkas untuk perangkat mobile.
 
-**Status:** Implementasi menu dasar, dokumentasi, refleksi, dan AI disclosure Tugas 7 tersedia. Kondisi pengujian dijelaskan pada bagian Pengujian dan Analisis.
+**Status:** Implementasi Tugas 8 selesai (lima formulir portofolio tervalidasi, navigasi kartu dan drawer, dialog ringkasan dengan **Edit Isian**, serta 14 widget test lulus). Refleksi dan AI disclosure Tugas 8 akan dilengkapi pada tahap dokumentasi berikutnya.
 
 ## Daftar Isi
 
@@ -11,6 +11,7 @@ Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bag
 - [Teknologi](#teknologi)
 - [Struktur Proyek](#struktur-proyek)
 - [Menjalankan Secara Lokal](#menjalankan-secara-lokal)
+- [Contoh Alur Demo](#contoh-alur-demo)
 - [Pengujian dan Analisis](#pengujian-dan-analisis)
 - [Progres Mingguan](#progres-mingguan)
 - [Keterbatasan Saat Ini](#keterbatasan-saat-ini)
@@ -21,55 +22,79 @@ Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bag
 
 ## Tentang Proyek
 
-MyPortfolio Mobile menampilkan identitas pemilik portofolio dan menyediakan menu aksi awal. Aplikasi menggunakan widget Flutter yang dipisahkan berdasarkan tanggung jawab agar model data, komponen tampilan, dan halaman utama lebih mudah dipahami dan dikembangkan.
+MyPortfolio Mobile menampilkan identitas pemilik portofolio, menu beranda, drawer navigasi, serta lima halaman formulir untuk menambah data portofolio secara lokal. Aplikasi memisahkan model data, validator bersama, halaman form, dan komponen UI agar mudah dikembangkan dan diuji.
 
-Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https://github.com/reshandytaftazani/myportofolio). Pada versi saat ini, aplikasi mobile belum mengambil data atau melakukan autentikasi ke layanan web tersebut; konten profil dan menu masih didefinisikan langsung di aplikasi.
+Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https://github.com/reshandytaftazani/myportofolio). Pada cakupan Tugas 8, seluruh input divalidasi dan diringkas secara lokal di aplikasi menggunakan dialog ringkasan; integrasi HTTP, autentikasi, dan penyimpanan ke backend Django berada di luar cakupan tugas ini.
 
 ## Fitur
 
-- Header profil dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa.
-- Kartu informasi untuk NPM, nama, dan kelas.
-- Enam menu aksi dengan ikon dan warna berbeda: Lihat Proyek, Lihat Education, Lihat Skills, Lihat Experience, Tambah Proyek, dan Logout. Menu bagian portofolio mengacu pada Project, Education, Skill, dan Experience pada [proyek web](https://github.com/reshandytaftazani/myportofolio).
-- Grid menu dua kolom pada lebar area kurang dari 600 piksel logis dan tiga kolom pada area yang lebih lebar, dengan tinggi kartu mengikuti skala teks perangkat.
-- SnackBar kontekstual saat item menu ditekan, dengan tombol untuk menutup notifikasi.
-- Tema Material 3 dan tata letak yang dapat digulir.
-
-> Item menu saat ini merupakan demonstrasi interaksi. Item tersebut belum membuka halaman proyek, menambah data, ataupun mengakhiri sesi login.
+- Header profil (`ProfileHeader`) dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa, serta tiga kartu identitas (`InfoCard`) untuk NPM, nama, dan kelas.
+- Sepuluh menu aksi di beranda (`MyHomePage`):
+  - Lima tombol pembuka form: **Tambah Proyek**, **Tambah Pengalaman**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
+  - Lima tombol demonstrasi SnackBar: **Lihat Proyek**, **Lihat Education**, **Lihat Skills**, **Lihat Experience**, dan **Logout**.
+- Grid menu responsif: 2 kolom pada lebar `< 600` piksel logis dan 3 kolom pada lebar `>= 600` piksel logis, dengan tinggi kartu mengikuti skala teks perangkat.
+- Drawer navigasi bersama (`LeftDrawer`) pada beranda dan seluruh halaman form dengan opsi **Home**, **Add Project**, **Tambah Pengalaman**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
+- Lima formulir tervalidasi (`StatefulWidget` + `Form` + `GlobalKey<FormState>`) yang diselaraskan dengan model Django:
+  - **Tambah Pengalaman** (`ExperienceFormPage`): `title` (wajib, maks 255), `description` (wajib), `company` (opsional, maks 255), `category` (dropdown dengan pilihan Django, default `full-time`), `thumbnail` (opsional, URL HTTP(S) dengan hostname, maks 200), serta `started_at` dan `ended_at` via `showDatePicker()` dengan validasi tanggal akhir tidak mendahului tanggal mulai.
+  - **Tambah Pendidikan** (`EducationFormPage`): `school_name` (wajib, maks 255), `period` (wajib, maks 50), `detail` (wajib, maks 255), dan `start_year` (wajib, bilangan bulat positif 4 digit).
+  - **Tambah Keahlian** (`SkillFormPage`): `title` (wajib, maks 255), `description` (wajib), `level` (wajib, maks 50), dan `code_snippet` (multiline opsional dengan indentasi tetap terjaga).
+  - **Tambah Tech Stack** (`TechStackFormPage`): `name` (wajib, maks 50), `icon_url` (wajib, URL HTTP(S) dengan hostname, maks 200), `filename` (wajib, maks 50), `code_snippet` (multiline wajib dengan indentasi terjaga), dan `order` (bilangan bulat dengan nilai awal `0`).
+  - **Tambah Proyek** (`ProjectFormPage`): `title` (wajib, maks 255), `description` (wajib), `category` (dropdown dengan pilihan Django, default `Other`), `project_url` (opsional, URL HTTP(S), maks 200), `project_image_url` (opsional, URL HTTP(S), maks 500), dan switch `is_featured` (default `false`).
+- Dialog ringkasan bersama (`FormSummaryDialog`) yang hanya muncul ketika `FormState.validate()` lolos, menampilkan seluruh field termasuk yang kosong (`-`), dapat digulir pada layar sempit, dan menyediakan dua aksi:
+  - **Edit Isian**: menutup dialog sambil mempertahankan semua nilai (termasuk indentasi cuplikan kode) agar pengguna dapat memperbaiki isian.
+  - **Selesai**: menutup dialog dan mereset form ke kondisi awal.
 
 ## Teknologi
 
-- Flutter SDK dengan Dart `>=3.13.7 <4.0.0`, mengikuti `environment.sdk: ^3.13.7` pada [pubspec.yaml](pubspec.yaml).
-- Material 3 untuk komponen dan tema antarmuka.
-- `flutter_lints` untuk aturan analisis statis.
-- `flutter_test` untuk dukungan pengujian widget.
+- Flutter SDK dengan Dart `^3.13.7` pada [pubspec.yaml](pubspec.yaml).
+- `material_ui: ^1.11.1` dan tema Material 3 untuk komponen antarmuka.
+- `flutter_lints: ^6.0.0` untuk analisis statis.
+- `flutter_test` untuk pengujian widget.
 
-Versi Flutter/Dart yang digunakan oleh pengembang dapat berbeda. Untuk melihat versi yang tersedia di mesin Anda, jalankan `flutter --version`.
+Versi Flutter/Dart yang terpasang di mesin pengembang dapat diperiksa dengan `flutter --version`.
 
 ## Struktur Proyek
 
 ```text
 lib/
-├── main.dart                    # Titik masuk dan konfigurasi aplikasi
-├── menu.dart                    # Halaman utama dan data profil/menu
+├── main.dart                         # Titik masuk dan konfigurasi MaterialApp
+├── forms/
+│   └── form_validators.dart          # Validator bersama (URL HTTP(S), teks wajib, panjang)
 ├── models/
-│   └── item_homepage.dart       # Model untuk item menu
+│   ├── education.dart                # Model data Pendidikan
+│   ├── experience.dart               # Model data Pengalaman
+│   ├── item_homepage.dart            # Model item menu beranda
+│   ├── project.dart                  # Model data Proyek
+│   ├── skill.dart                    # Model data Keahlian
+│   └── tech_stack.dart               # Model data Tech Stack
+├── screens/
+│   ├── education_form.dart           # Halaman form Tambah Pendidikan
+│   ├── experience_form.dart          # Halaman form Tambah Pengalaman
+│   ├── menu.dart                     # Halaman utama (MyHomePage)
+│   ├── project_form.dart             # Halaman form Tambah Proyek
+│   ├── skill_form.dart               # Halaman form Tambah Keahlian
+│   └── tech_stack_form.dart          # Halaman form Tambah Tech Stack
 └── widgets/
-    ├── info_card.dart           # Kartu informasi identitas
-    ├── item_card.dart           # Kartu aksi dan SnackBar
-    └── profile_header.dart      # Header profil
+    ├── form_summary_dialog.dart      # Dialog ringkasan bersama (Edit Isian & Selesai)
+    ├── info_card.dart                # Kartu informasi identitas
+    ├── left_drawer.dart              # Drawer navigasi bersama
+    ├── profile_header.dart           # Header profil
+    └── project_card.dart             # Kartu aksi menu (ItemCard)
+test/
+└── widget_test.dart                  # 14 widget test navigasi, validasi, dialog, dan layout
 ```
 
 ## Menjalankan Secara Lokal
 
 ### Prasyarat
 
-- Flutter SDK yang menyertakan Dart `>=3.13.7 <4.0.0`. Periksa dengan `flutter --version`; versi Flutter minimum tidak ditetapkan secara terpisah di `pubspec.yaml`.
+- Flutter SDK yang menyertakan Dart `^3.13.7`. Periksa dengan `flutter --version`.
 - Editor seperti Visual Studio Code dengan ekstensi Flutter atau Android Studio.
-- Target untuk menjalankan aplikasi: Chrome, Android Emulator, atau perangkat Android. Target iOS memerlukan macOS dan Xcode.
+- Target eksekusi: Google Chrome, Android Emulator, atau perangkat Android (target iOS memerlukan macOS dan Xcode).
 
 ### Langkah-langkah
 
-Perintah berikut dijalankan dari terminal. Aplikasi saat ini tidak membutuhkan server Django, akun, atau konfigurasi `.env`.
+Perintah berikut dijalankan dari direktori akar proyek. Aplikasi belum membutuhkan server Django, akun, atau berkas `.env`.
 
 1. Clone repositori dan masuk ke direktori proyek:
 
@@ -90,61 +115,80 @@ Perintah berikut dijalankan dari terminal. Aplikasi saat ini tidak membutuhkan s
    flutter run
    ```
 
-   Untuk memilih target web secara eksplisit, gunakan `flutter run -d chrome`. Daftar target yang terdeteksi dapat dilihat dengan `flutter devices`.
+   Untuk menjalankan langsung di Chrome, gunakan:
+
+   ```bash
+   flutter run -d chrome
+   ```
+
+   Daftar target yang terdeteksi dapat diperiksa dengan `flutter devices`.
 
 ### Pemecahan Masalah
 
 | Gejala | Langkah penanganan |
 | --- | --- |
-| Perintah `flutter` tidak dikenali | Pastikan direktori `bin` Flutter SDK tercantum dalam PATH, lalu buka ulang terminal. |
-| `flutter pub get` menolak versi Dart | Periksa `flutter --version` dan gunakan Flutter SDK dengan versi Dart yang memenuhi batas di atas. |
+| Perintah `flutter` tidak dikenali | Pastikan direktori `bin` Flutter SDK tercantum dalam `PATH`, lalu buka ulang terminal. |
+| `flutter pub get` menolak versi Dart | Periksa `flutter --version` dan gunakan Flutter SDK dengan versi Dart yang memenuhi batas pada `pubspec.yaml`. |
 | Perangkat tidak muncul | Jalankan `flutter doctor` dan `flutter devices`; nyalakan emulator atau aktifkan USB debugging pada perangkat Android. |
+
+## Contoh Alur Demo
+
+Alur berikut dapat digunakan untuk mendemokan fitur utama dari beranda/drawer hingga dialog ringkasan:
+
+1. **Buka form dari kartu atau drawer**: Pada beranda, ketuk kartu **Tambah Pengalaman** (atau buka ikon menu kiri atas untuk membuka `LeftDrawer` lalu pilih **Tambah Pengalaman**).
+2. **Uji validasi gagal**: Langsung tekan **Simpan** tanpa mengisi field wajib, lalu coba masukkan URL thumbnail tidak valid (mis. `not-a-url`) atau pilih `ended_at` lebih awal dari `started_at`. Pesan error muncul di kolom terkait dan dialog tidak terbuka.
+3. **Isi data valid dan simpan**: Lengkapi `title`, `description`, `company` (opsional), pilih `category`, masukkan URL thumbnail valid (`https://...`), dan pilih rentang tanggal yang benar. Gulir ke bawah lalu tekan **Simpan**.
+4. **Periksa dialog ringkasan dan Edit Isian**: Dialog menampilkan semua field. Tekan **Edit Isian** untuk menutup dialog tanpa menghapus nilai di form, lalu ubah salah satu field dan tekan **Simpan** lagi.
+5. **Selesai dan kembali ke beranda**: Tekan **Selesai** pada dialog untuk mereset seluruh field form. Gunakan tombol **Back** (jika masuk lewat kartu) atau buka drawer lalu pilih **Home** untuk kembali ke beranda tanpa menumpuk rute.
+
+Pola yang sama berlaku untuk **Tambah Proyek**, **Tambah Pendidikan**, **Tambah Keahlian**, dan **Tambah Tech Stack**.
 
 ## Pengujian dan Analisis
 
-Jalankan analisis statis dan pengujian Flutter dari direktori proyek:
+Jalankan analisis statis dan pengujian widget dari direktori proyek:
 
 ```bash
 flutter analyze
 flutter test
 ```
 
-`flutter analyze` memeriksa masalah statis sesuai konfigurasi analyzer. `flutter test` menjalankan pengujian yang tersedia di direktori `test/`.
+### Hasil Pengujian Aktual (Tugas 8)
 
-**Kondisi pengujian:** [test/widget_test.dart](test/widget_test.dart) masih berisi tes counter bawaan Flutter yang mengharapkan teks `0`, `1`, dan ikon tambah. Ekspektasi tersebut tidak sesuai dengan halaman portofolio saat ini, sehingga tes itu perlu diperbarui sebelum dapat menjadi bukti kebenaran fitur. Perintah di atas merupakan panduan; bagian ini tidak menyatakan pengujian telah lulus.
+- **`flutter analyze`**: `No issues found!` (bersih tanpa error, warning, maupun lint issue).
+- **`flutter test`**: **14/14 tes di [test/widget_test.dart](test/widget_test.dart) lulus**, mencakup:
+  - Navigasi drawer dan kartu aksi untuk seluruh 5 form (`Proyek`, `Pengalaman`, `Pendidikan`, `Keahlian`, `Tech Stack`), termasuk perilaku `Back` dan `Home`.
+  - Validasi input wajib kosong/spasi, batas panjang karakter, URL HTTP(S), rentang tanggal Pengalaman, tahun 4 digit Pendidikan, dan urutan bilangan bulat Tech Stack.
+  - Dialog ringkasan: tampil hanya saat valid, `Edit Isian` mempertahankan seluruh nilai (termasuk indentasi `code_snippet`), dan `Selesai` mereset form.
+  - Keterjangkauan scroll pada lebar ponsel dengan keyboard terbuka serta dialog cuplikan kode panjang pada layar sempit.
 
-Untuk pemeriksaan manual setelah `flutter run`, gunakan skenario berikut. Tabel ini berisi hasil yang diharapkan berdasarkan kode, bukan laporan hasil pengujian yang sudah dilakukan.
+### Pemeriksaan Manual (Chrome / Perangkat)
 
 | Skenario | Hasil yang diharapkan |
 | --- | --- |
-| Membuka halaman utama | Profil, NPM `2506547651`, nama, kelas `PBP D`, dan enam menu tersedia; gulir halaman jika diperlukan. |
-| Menekan masing-masing menu | Pesan `Kamu telah menekan tombol <nama menu>!` muncul dengan warna sesuai kartu. |
-| Menekan `TUTUP` | SnackBar ditutup. |
-| Menekan menu lain saat SnackBar masih muncul | SnackBar sebelumnya disembunyikan dan pesan item terbaru muncul. |
-| Membiarkan SnackBar terbuka | Notifikasi menggunakan durasi konfigurasi dua detik. |
-| Mengecilkan ukuran jendela | Periksa keterbacaan profil, kartu identitas, dan label menu; catat ukuran layar jika terjadi overflow. |
+| Kartu aksi dan drawer pada lima form | Kedua jalur membuka form yang sesuai; **Home** dan **Back** kembali ke beranda tanpa menumpuk rute. |
+| Input wajib, panjang, URL, tanggal, dan angka | Pesan kesalahan tampil di kolom terkait dan dialog ringkasan tetap tertutup. |
+| Dialog ringkasan | Seluruh nilai valid tampil; **Edit Isian** mempertahankan isian dan **Selesai** mereset form. |
+| Layar ponsel (`390x844`) dan keyboard | Drawer, form, dan dialog dapat digulir hingga aksi terakhir (`Simpan`, `Edit Isian`, `Selesai`). |
 
 ## Progres Mingguan
 
-Ringkasan berikut mencatat perubahan yang terlihat dalam riwayat Git proyek. Minggu mengacu pada tanggal commit; catatan ini bukan bukti waktu pengumpulan tugas.
+Ringkasan berikut mencatat progres implementasi pada riwayat Git proyek:
 
 | Periode / kegiatan | Ringkasan pekerjaan | Bukti di riwayat Git | Status |
 | --- | --- | --- | --- |
-| 9–15 November 2026 — Tutorial 08 | Menyiapkan aplikasi Flutter dasar, memisahkan halaman utama, serta membuat model dan kartu informasi/menu awal. | `9616c0e` dan commit terkait | Selesai |
-| 9–15 November 2026 — Tugas 07: implementasi | Menambahkan warna semantik pada menu, merapikan struktur ke `models/` dan `widgets/`, membuat header profil, serta memperbarui SnackBar agar mengikuti warna item dan dapat ditutup. | `8049b21`, `d526f51`, `78c1f1e`, `2aee293`, `200e048`, `89f7e47`, `02d4ab5` | Implementasi selesai |
-| 9–15 November 2026 — Tugas 07: dokumentasi | Menyusun ringkasan, setup, progres mingguan, panduan pemeriksaan, refleksi, dan AI disclosure. | `83ffefa`, `40472fe`, `3875f98`; disclosure tersedia pada bagian AI Disclosure. | Task 3.1–3.3 selesai; disclosure disetujui pengembang untuk di-commit |
-
-Semua commit yang tercantum bertanggal 9–15 November 2026 berdasarkan riwayat lokal. Rincian commit dapat ditinjau dengan `git show <hash>`.
-
-Pelajaran teknis dari implementasi: model `ItemHomepage.color` membuat warna kartu dan notifikasi memakai sumber data yang sama; pemisahan widget menjaga `menu.dart` berfokus pada komposisi halaman; pemanggilan `hideCurrentSnackBar()` sebelum pesan baru menghindari antrean pesan lama saat menu ditekan berulang. Ini merupakan penjelasan keputusan yang terlihat di kode, bukan klaim hasil pengujian visual.
+| 9–15 November 2026 — Tutorial 08 & Tugas 07 | Menyiapkan aplikasi dasar, header profil, kartu identitas, 6 menu beranda berwarna, SnackBar kontekstual, serta dokumentasi/refleksi/AI disclosure Tugas 7. | `9616c0e`, `8049b21`–`02d4ab5`, `83ffefa`–`3875f98` | Selesai |
+| 17 November 2026 — Tutorial 09 | Menambahkan `LeftDrawer`, form awal Proyek, dialog ringkasan awal, navigasi dari kartu/drawer, serta refaktor struktur `models/`, `screens/`, `widgets/`. | `22d017c`, `0763f8f`, `33a638d`, `e7d61c0`, `0e9725f` | Selesai |
+| 20–21 November 2026 — Tugas 08 Stage 1 (Pengalaman & Dialog) | Membuat model & form `Experience` dengan validasi URL/tanggal, `FormSummaryDialog` dengan aksi **Edit Isian** & **Selesai**, integrasi kartu/drawer, dan widget test. | `c3b9ffc`, `798f680`, `e75aaad`, `217c8bc`, `290c9d8`, `0b623b6` | Selesai |
+| 21 November 2026 — Tugas 08 Stage 2 (Pendidikan & Keahlian) | Membuat model & form `Education` (validasi tahun 4 digit) dan `Skill` (cuplikan kode multiline), integrasi kartu/drawer, dan widget test. | `b1bebb4`, `49c97d8`, `947507f`, `a41dc2d`, `ecd9026` | Selesai |
+| 21 November 2026 — Tugas 08 Stage 3 (Tech Stack & Validator) | Membuat model & form `TechStack`, mengekstrak `form_validators.dart` bersama, integrasi kartu/drawer, dan uji ringkasan multiline. | `16a2790`, `af4b215`, `4a0ca52`, `056cd2a` | Selesai |
+| 21 November 2026 — Tugas 08 Stage 4 (Penyelarasan Proyek) | Menyelaraskan `Project` dan `ProjectFormPage` dengan model Django (`project_url`, `project_image_url`, `is_featured`), memakai `FormSummaryDialog` bersama, dan memperbarui tes regresi. | `395afcd`, `2522436`, `680e632`, `8bb6ea8` | Selesai |
+| 21 November 2026 — Tugas 08 Stage 5 (Verifikasi & Dokumentasi) | Verifikasi akhir (`flutter analyze` bersih, 14/14 `flutter test` lulus, pemeriksaan Chrome/perangkat) serta pembaruan panduan, struktur berkas, hasil uji, dan progres di `README.md`. | Branch `docs/tugas-8-final-verification-and-documentation` | Verifikasi dan panduan selesai |
 
 ## Keterbatasan Saat Ini
 
-- Konten profil dan item menu masih statis di `lib/menu.dart`.
-- Aksi menu hanya menampilkan SnackBar; belum terhubung ke fitur portofolio yang sebenarnya.
-- Belum ada integrasi API, autentikasi, penyimpanan lokal, atau sinkronisasi dengan proyek web Django.
-- Belum tersedia tangkapan layar atau demo publik khusus aplikasi mobile.
-- Grid menu sudah menyesuaikan jumlah kolom dan tinggi kartu, tetapi keterbacaan seluruh halaman, termasuk baris identitas, masih perlu diperiksa pada layar sangat sempit dan skala teks besar.
+- Empat menu **Lihat ...** (**Lihat Proyek**, **Lihat Education**, **Lihat Skills**, **Lihat Experience**) dan **Logout** masih bersifat demonstrasi SnackBar.
+- Data formulir baru divalidasi dan diringkas secara lokal di dialog; belum ada integrasi HTTP, autentikasi sesi, maupun sinkronisasi database ke backend Django.
+- Konten profil dan daftar menu beranda masih didefinisikan secara statis di `lib/screens/menu.dart`.
 
 ## Kontribusi dan Pelaporan Masalah
 
