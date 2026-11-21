@@ -1,162 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:myportofolio_mobile/data/dummy_portfolio.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
-import 'package:myportofolio_mobile/screens/education_form.dart';
-import 'package:myportofolio_mobile/screens/experience_form.dart';
-import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
-import 'package:myportofolio_mobile/screens/project_form.dart';
-import 'package:myportofolio_mobile/screens/skill_form.dart';
-import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
-import 'package:myportofolio_mobile/widgets/education_card.dart';
-import 'package:myportofolio_mobile/widgets/experience_card.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
-import 'package:myportofolio_mobile/widgets/project_item_card.dart';
-import 'package:myportofolio_mobile/widgets/skill_card.dart';
-import 'package:myportofolio_mobile/widgets/tech_stack_card.dart';
-
-/// Daftar konfigurasi 4 bagian utama portofolio untuk beranda dan drawer.
-final List<ItemHomepage> portfolioMenuItems = [
-  ItemHomepage(
-    name: "Projects",
-    subtitle: "Projects & Tech Stack",
-    icon: Icons.folder_outlined,
-    color: Colors.indigo,
-    pageBuilder: (_) => PortfolioSectionPage(
-      title: "Projects",
-      emptyMessage: "Tambahkan proyek portofolio atau kelola tech stack Anda.",
-      icon: Icons.folder_outlined,
-      accentColor: Colors.indigo,
-      primaryTabLabel: "Projects",
-      itemCount: DummyPortfolioData.projects.length,
-      itemBuilder: (context, index) {
-        final project = DummyPortfolioData.projects[index];
-        return ProjectItemCard(
-          project: project,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PortfolioDetailPage.project(project),
-            ),
-          ),
-        );
-      },
-      secondaryTabLabel: "Tech Stack",
-      secondaryItemCount: DummyPortfolioData.techStacks.length,
-      secondaryItemBuilder: (context, index) {
-        final techStack = DummyPortfolioData.techStacks[index];
-        return TechStackCard(
-          techStack: techStack,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PortfolioDetailPage.techStack(techStack),
-            ),
-          ),
-        );
-      },
-      primaryAction: SectionAction(
-        label: "Tambah Proyek",
-        icon: Icons.add,
-        builder: (_) => const ProjectFormPage(),
-      ),
-      secondaryAction: SectionAction(
-        label: "Tambah Tech Stack",
-        icon: Icons.layers_outlined,
-        builder: (_) => const TechStackFormPage(),
-      ),
-    ),
-  ),
-  ItemHomepage(
-    name: "Experiences",
-    subtitle: "Kerja & Organisasi",
-    icon: Icons.work_outline,
-    color: const Color(0xFF0277BD),
-    pageBuilder: (_) => PortfolioSectionPage(
-      title: "Experiences",
-      emptyMessage: "Catat pengalaman kerja, magang, atau organisasi Anda.",
-      icon: Icons.work_outline,
-      accentColor: const Color(0xFF0277BD),
-      itemCount: DummyPortfolioData.experiences.length,
-      itemBuilder: (context, index) {
-        final experience = DummyPortfolioData.experiences[index];
-        return ExperienceCard(
-          experience: experience,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PortfolioDetailPage.experience(experience),
-            ),
-          ),
-        );
-      },
-      primaryAction: SectionAction(
-        label: "Tambah Pengalaman",
-        icon: Icons.add,
-        builder: (_) => const ExperienceFormPage(),
-      ),
-    ),
-  ),
-  ItemHomepage(
-    name: "Education",
-    subtitle: "Riwayat Akademik",
-    icon: Icons.school_outlined,
-    color: const Color(0xFF00695C),
-    pageBuilder: (_) => PortfolioSectionPage(
-      title: "Education",
-      emptyMessage: "Tambahkan riwayat sekolah atau perguruan tinggi Anda.",
-      icon: Icons.school_outlined,
-      accentColor: const Color(0xFF00695C),
-      itemCount: DummyPortfolioData.educations.length,
-      itemBuilder: (context, index) {
-        final education = DummyPortfolioData.educations[index];
-        return EducationCard(
-          education: education,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PortfolioDetailPage.education(education),
-            ),
-          ),
-        );
-      },
-      primaryAction: SectionAction(
-        label: "Tambah Pendidikan",
-        icon: Icons.add,
-        builder: (_) => const EducationFormPage(),
-      ),
-    ),
-  ),
-  ItemHomepage(
-    name: "Skills",
-    subtitle: "Skill & Kode",
-    icon: Icons.code_rounded,
-    color: const Color(0xFF6A1B9A),
-    pageBuilder: (_) => PortfolioSectionPage(
-      title: "Skills",
-      emptyMessage: "Tambahkan keahlian teknis beserta tingkat kemahirannya.",
-      icon: Icons.code_rounded,
-      accentColor: const Color(0xFF6A1B9A),
-      itemCount: DummyPortfolioData.skills.length,
-      itemBuilder: (context, index) {
-        final skill = DummyPortfolioData.skills[index];
-        return SkillCard(
-          skill: skill,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PortfolioDetailPage.skill(skill),
-            ),
-          ),
-        );
-      },
-      primaryAction: SectionAction(
-        label: "Tambah Keahlian",
-        icon: Icons.add,
-        builder: (_) => const SkillFormPage(),
-      ),
-    ),
-  ),
-];
 
 /// Konfigurasi aksi tambahan pada halaman bagian portofolio.
 class SectionAction {
@@ -183,6 +27,9 @@ class SectionAction {
 /// tampilan kosong bila daftar belum memiliki data. Mendukung tab sekunder
 /// (misalnya tab Tech Stack pada bagian Projects).
 class PortfolioSectionPage extends StatelessWidget {
+  /// Identitas stabil bagian portofolio ini.
+  final PortfolioSection section;
+
   /// Judul bagian pada AppBar.
   final String title;
 
@@ -222,6 +69,7 @@ class PortfolioSectionPage extends StatelessWidget {
   /// Membuat instansi [PortfolioSectionPage].
   const PortfolioSectionPage({
     super.key,
+    required this.section,
     required this.title,
     required this.emptyMessage,
     required this.icon,
@@ -357,7 +205,7 @@ class PortfolioSectionPage extends StatelessWidget {
               )
             : null,
       ),
-      drawer: const LeftDrawer(),
+      drawer: LeftDrawer(activeSection: section),
       body: _buildBody(context),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openPage(context, primaryAction.builder),

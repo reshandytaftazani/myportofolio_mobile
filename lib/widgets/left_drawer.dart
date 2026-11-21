@@ -1,13 +1,19 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
-import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 
 class LeftDrawer extends StatelessWidget {
-  const LeftDrawer({super.key});
+  final PortfolioSection? activeSection;
+  final bool isHome;
+
+  const LeftDrawer({
+    super.key,
+    this.activeSection,
+    this.isHome = false,
+  });
 
   void _navigateToHome(BuildContext context) {
-    final isHome = context.findAncestorWidgetOfExactType<MyHomePage>() != null;
     Navigator.pop(context);
     if (isHome) return;
 
@@ -19,10 +25,7 @@ class LeftDrawer extends StatelessWidget {
   }
 
   void _navigateToSection(BuildContext context, ItemHomepage item) {
-    final currentSection =
-        context.findAncestorWidgetOfExactType<PortfolioSectionPage>();
-    final isCurrent = currentSection?.title == item.name;
-    final isHome = context.findAncestorWidgetOfExactType<MyHomePage>() != null;
+    final isCurrent = activeSection == item.section;
     Navigator.pop(context);
     if (isCurrent) return;
 

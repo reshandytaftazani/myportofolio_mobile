@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
+import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/profile_header.dart';
@@ -57,62 +57,85 @@ class MyHomePage extends StatelessWidget {
           ),
         ],
       ),
-      drawer: const LeftDrawer(),
+      drawer: const LeftDrawer(isHome: true),
       // Body halaman utama dengan dukungan scrolling responsif.
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Header profil visual pemilik portofolio.
-            ProfileHeader(name: nama),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxWidth = constraints.maxWidth;
+            const infoSpacing = 8.0;
+            final infoColumns = maxWidth < 300 ? 1 : 3;
+            final infoCardWidth =
+                (maxWidth - infoSpacing * (infoColumns - 1)) / infoColumns;
 
-            // Baris horizontal untuk menampilkan 3 InfoCard secara sejajar.
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            const menuSpacing = 12.0;
+            final menuColumns = maxWidth < 260 ? 1 : 2;
+            final menuCardWidth =
+                (maxWidth - menuSpacing * (menuColumns - 1)) / menuColumns;
+
+            final infoItems = [
+              (title: 'NPM', content: npm),
+              (title: 'Name', content: nama),
+              (title: 'Class', content: kelas),
+            ];
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                InfoCard(title: 'NPM', content: npm),
-                InfoCard(title: 'Name', content: nama),
-                InfoCard(title: 'Class', content: kelas),
-              ],
-            ),
+                // Header profil visual pemilik portofolio.
+                ProfileHeader(name: nama),
 
-            const SizedBox(height: 16.0),
+                // Ringkasan identitas adaptif terhadap ruang aktual.
+                Wrap(
+                  spacing: infoSpacing,
+                  runSpacing: infoSpacing,
+                  children: infoItems
+                      .map(
+                        (info) => SizedBox(
+                          width: infoCardWidth,
+                          child: InfoCard(
+                            title: info.title,
+                            content: info.content,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
 
-            // Bagian tengah: pesan sambutan dan kisi 2x2 menu portofolio.
-            Center(
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      'Selamat datang di MyPortfolio Mobile!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
-                      ),
+                const SizedBox(height: 16.0),
+
+                // Bagian tengah: pesan sambutan dan kartu menu portofolio.
+                const Padding(
+                  padding: EdgeInsets.only(top: 16.0, bottom: 20.0),
+                  child: Text(
+                    'Selamat datang di MyPortfolio Mobile!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
                     ),
                   ),
+                ),
 
-                  GridView.count(
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    crossAxisCount: 2,
-                    // Tinggi kartu mengikuti skala teks perangkat.
-                    mainAxisExtent:
-                        144 * MediaQuery.textScalerOf(context).scale(1),
-                    shrinkWrap: true,
-                    children: portfolioMenuItems
-                        .map((item) => ItemCard(item))
-                        .toList(),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                Wrap(
+                  spacing: menuSpacing,
+                  runSpacing: menuSpacing,
+                  children: portfolioMenuItems
+                      .map(
+                        (item) => SizedBox(
+                          width: menuCardWidth,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 136),
+                            child: ItemCard(item),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

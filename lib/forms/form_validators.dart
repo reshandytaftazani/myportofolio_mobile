@@ -1,3 +1,20 @@
+/// Memvalidasi teks wajib (tidak kosong atau hanya spasi) dengan batas panjang opsional.
+String? validateRequiredText(
+  String? value, {
+  required String fieldLabel,
+  int? maxLength,
+  String emptySuffix = '.',
+}) {
+  final trimmed = value?.trim() ?? '';
+  if (trimmed.isEmpty) {
+    return '$fieldLabel tidak boleh kosong$emptySuffix';
+  }
+  if (maxLength != null && trimmed.length > maxLength) {
+    return '$fieldLabel maksimal $maxLength karakter.';
+  }
+  return null;
+}
+
 /// Memvalidasi URL HTTP/HTTPS opsional maupun wajib dengan batas panjang.
 String? validateHttpUrl(
   String? value, {

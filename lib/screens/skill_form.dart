@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
@@ -34,21 +35,6 @@ class _SkillFormPageState extends State<SkillFormPage> {
     _levelController.clear();
     _descriptionController.clear();
     _codeSnippetController.clear();
-  }
-
-  String? _validateRequiredText(
-    String? value, {
-    required String fieldName,
-    int? maxLength,
-  }) {
-    final trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) {
-      return '$fieldName tidak boleh kosong.';
-    }
-    if (maxLength != null && trimmed.length > maxLength) {
-      return '$fieldName maksimal $maxLength karakter.';
-    }
-    return null;
   }
 
   Future<void> _submitForm() async {
@@ -92,19 +78,6 @@ class _SkillFormPageState extends State<SkillFormPage> {
     }
   }
 
-  InputDecoration _fieldDecoration({
-    required String labelText,
-    String? hintText,
-  }) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -129,28 +102,28 @@ class _SkillFormPageState extends State<SkillFormPage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama Keahlian',
                   hintText: 'Contoh: Flutter & Dart',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Nama keahlian',
+                  fieldLabel: 'Nama keahlian',
                   maxLength: 255,
                 ),
               ),
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _levelController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Level',
                   hintText: 'Contoh: Intermediate',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Level',
+                  fieldLabel: 'Level',
                   maxLength: 50,
                 ),
               ),
@@ -159,13 +132,13 @@ class _SkillFormPageState extends State<SkillFormPage> {
                 controller: _descriptionController,
                 maxLines: 4,
                 minLines: 3,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Deskripsi Keahlian',
                   hintText: 'Jelaskan pengalaman dan penerapan keahlian ini',
                 ),
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Deskripsi keahlian',
+                  fieldLabel: 'Deskripsi keahlian',
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -175,7 +148,7 @@ class _SkillFormPageState extends State<SkillFormPage> {
                 minLines: 4,
                 keyboardType: TextInputType.multiline,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 13.0),
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Cuplikan Kode (Opsional)',
                   hintText: 'void main() {\n  print("Hello");\n}',
                 ),

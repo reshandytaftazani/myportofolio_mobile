@@ -21,6 +21,11 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.indigo,
           secondary: Colors.amber[700],
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
         useMaterial3: true,
       ),
       home: const MyHomePage(),

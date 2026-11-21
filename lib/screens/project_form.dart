@@ -95,19 +95,6 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     }
   }
 
-  InputDecoration _fieldDecoration({
-    required String labelText,
-    String? hintText,
-  }) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -132,43 +119,38 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama Proyek',
                   hintText: 'Nama Proyek',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) {
-                  final trimmed = value?.trim() ?? '';
-                  if (trimmed.isEmpty) {
-                    return 'Nama proyek tidak boleh kosong!';
-                  }
-                  if (trimmed.length > 255) {
-                    return 'Nama proyek maksimal 255 karakter.';
-                  }
-                  return null;
-                },
+                validator: (value) => validateRequiredText(
+                  value,
+                  fieldLabel: 'Nama proyek',
+                  maxLength: 255,
+                  emptySuffix: '!',
+                ),
               ),
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 5,
                 minLines: 3,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Deskripsi Proyek',
                   hintText: 'Deskripsi Proyek',
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Deskripsi proyek tidak boleh kosong!';
-                  }
-                  return null;
-                },
+                validator: (value) => validateRequiredText(
+                  value,
+                  fieldLabel: 'Deskripsi proyek',
+                  emptySuffix: '!',
+                ),
               ),
               const SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: _category,
-                decoration: _fieldDecoration(labelText: 'Kategori Proyek'),
+                decoration: const InputDecoration(labelText: 'Kategori Proyek'),
                 items: Project.categoryChoices
                     .map(
                       (category) => DropdownMenuItem<String>(
@@ -189,7 +171,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 controller: _projectUrlController,
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Tautan Proyek (Opsional)',
                   hintText: 'https://example.com/project',
                 ),
@@ -204,7 +186,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 controller: _projectImageUrlController,
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.done,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'URL Gambar Proyek (Opsional)',
                   hintText: 'https://example.com/cover.png',
                 ),

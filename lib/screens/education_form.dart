@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/education.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
@@ -34,21 +35,6 @@ class _EducationFormPageState extends State<EducationFormPage> {
     _periodController.clear();
     _detailController.clear();
     _startYearController.clear();
-  }
-
-  String? _validateRequiredText(
-    String? value, {
-    required String fieldName,
-    required int maxLength,
-  }) {
-    final trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) {
-      return '$fieldName tidak boleh kosong.';
-    }
-    if (trimmed.length > maxLength) {
-      return '$fieldName maksimal $maxLength karakter.';
-    }
-    return null;
   }
 
   String? _validateStartYear(String? value) {
@@ -105,19 +91,6 @@ class _EducationFormPageState extends State<EducationFormPage> {
     }
   }
 
-  InputDecoration _fieldDecoration({
-    required String labelText,
-    String? hintText,
-  }) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -142,28 +115,28 @@ class _EducationFormPageState extends State<EducationFormPage> {
             children: [
               TextFormField(
                 controller: _schoolNameController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama Sekolah / Institusi',
                   hintText: 'Contoh: Universitas Indonesia',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Nama sekolah/institusi',
+                  fieldLabel: 'Nama sekolah/institusi',
                   maxLength: 255,
                 ),
               ),
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _periodController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Periode',
                   hintText: 'Contoh: 2024 - Sekarang',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Periode',
+                  fieldLabel: 'Periode',
                   maxLength: 50,
                 ),
               ),
@@ -172,14 +145,14 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 controller: _detailController,
                 maxLines: 3,
                 minLines: 2,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Detail Pendidikan',
                   hintText: 'Contoh: S1 Ilmu Komputer',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Detail pendidikan',
+                  fieldLabel: 'Detail pendidikan',
                   maxLength: 255,
                 ),
               ),
@@ -188,7 +161,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                 controller: _startYearController,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Tahun Mulai',
                   hintText: 'Contoh: 2024',
                 ),

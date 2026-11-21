@@ -1,3 +1,15 @@
+/// Status akhir dari sebuah entri [Experience].
+enum ExperienceEndStatus {
+  /// Pengalaman masih berlangsung (`isOngoing == true`).
+  ongoing,
+
+  /// Pengalaman memiliki tanggal selesai (`!isOngoing && endedAt != null`).
+  completed,
+
+  /// Pengalaman tidak sedang berlangsung dan tanggal selesai belum diketahui.
+  unknown,
+}
+
 /// Model data untuk entri Pengalaman (Experience) pada portofolio.
 class Experience {
   /// Pilihan kategori pengalaman sesuai model Django.
@@ -48,6 +60,13 @@ class Experience {
   /// Label tampilan yang ramah pengguna untuk [category].
   String get categoryLabel =>
       categoryDisplay ?? categoryChoices[category] ?? category;
+
+  /// Menentukan status akhir pengalaman secara konsisten untuk kartu dan detail.
+  ExperienceEndStatus get endStatus {
+    if (isOngoing) return ExperienceEndStatus.ongoing;
+    if (endedAt != null) return ExperienceEndStatus.completed;
+    return ExperienceEndStatus.unknown;
+  }
 
   /// Membuat instance [Experience] dari JSON response API Django.
   factory Experience.fromJson(Map<String, dynamic> json) {

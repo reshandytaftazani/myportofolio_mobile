@@ -33,13 +33,21 @@ class ExperienceCard extends StatelessWidget {
 
   String _buildDateRangeText() {
     if (experience.startedAt == null && experience.endedAt == null) {
-      return experience.isOngoing ? 'Ongoing' : 'Tanggal belum diisi';
+      return switch (experience.endStatus) {
+        ExperienceEndStatus.ongoing => 'Ongoing',
+        ExperienceEndStatus.completed ||
+        ExperienceEndStatus.unknown =>
+          'Tanggal belum diisi',
+      };
     }
-    final start =
-        experience.startedAt != null ? _formatDate(experience.startedAt!) : '?';
-    final end = (experience.isOngoing || experience.endedAt == null)
-        ? 'Sekarang'
-        : _formatDate(experience.endedAt!);
+    final start = experience.startedAt != null
+        ? _formatDate(experience.startedAt!)
+        : 'Belum diisi';
+    final end = switch (experience.endStatus) {
+      ExperienceEndStatus.ongoing => 'Sekarang',
+      ExperienceEndStatus.completed => _formatDate(experience.endedAt!),
+      ExperienceEndStatus.unknown => 'Belum diisi',
+    };
     return '$start – $end';
   }
 

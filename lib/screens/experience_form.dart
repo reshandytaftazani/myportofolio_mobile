@@ -156,21 +156,6 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
     }
   }
 
-  InputDecoration _fieldDecoration({
-    required String labelText,
-    String? hintText,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      suffixIcon: suffixIcon,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-
   Widget _buildDateField({
     required TextEditingController controller,
     required String labelText,
@@ -182,7 +167,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
       controller: controller,
       readOnly: true,
       onTap: () => _pickDate(isStart: isStart),
-      decoration: _fieldDecoration(
+      decoration: InputDecoration(
         labelText: labelText,
         hintText: 'YYYY-MM-DD',
         suffixIcon: selectedDate == null
@@ -221,26 +206,21 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama Pengalaman',
                   hintText: 'Contoh: Software Engineer Intern',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) {
-                  final trimmed = value?.trim() ?? '';
-                  if (trimmed.isEmpty) {
-                    return 'Nama pengalaman tidak boleh kosong.';
-                  }
-                  if (trimmed.length > 255) {
-                    return 'Nama pengalaman maksimal 255 karakter.';
-                  }
-                  return null;
-                },
+                validator: (value) => validateRequiredText(
+                  value,
+                  fieldLabel: 'Nama pengalaman',
+                  maxLength: 255,
+                ),
               ),
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _companyController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Perusahaan / Organisasi (Opsional)',
                   hintText: 'Contoh: Google',
                 ),
@@ -257,7 +237,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
               DropdownButtonFormField<String>(
                 isExpanded: true,
                 initialValue: _category,
-                decoration: _fieldDecoration(labelText: 'Kategori'),
+                decoration: const InputDecoration(labelText: 'Kategori'),
                 items: Experience.categoryChoices.entries
                     .map(
                       (entry) => DropdownMenuItem<String>(
@@ -278,24 +258,21 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                 controller: _descriptionController,
                 maxLines: 5,
                 minLines: 3,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Deskripsi Pengalaman',
                   hintText: 'Ceritakan peran dan pencapaianmu',
                 ),
-                validator: (value) {
-                  final trimmed = value?.trim() ?? '';
-                  if (trimmed.isEmpty) {
-                    return 'Deskripsi pengalaman tidak boleh kosong.';
-                  }
-                  return null;
-                },
+                validator: (value) => validateRequiredText(
+                  value,
+                  fieldLabel: 'Deskripsi pengalaman',
+                ),
               ),
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _thumbnailController,
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'URL Thumbnail (Opsional)',
                   hintText: 'https://example.com/image.png',
                 ),

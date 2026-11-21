@@ -92,12 +92,14 @@ class ProfileHeader extends StatelessWidget {
                         color: Colors.green.shade600,
                       ),
                       const SizedBox(width: 4.0),
-                      Text(
-                        'Active Student',
-                        style: TextStyle(
-                          fontSize: 11.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green.shade800,
+                      Flexible(
+                        child: Text(
+                          'Active Student',
+                          style: TextStyle(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade800,
+                          ),
                         ),
                       ),
                     ],

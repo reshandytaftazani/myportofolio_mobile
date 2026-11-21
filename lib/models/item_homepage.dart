@@ -1,10 +1,22 @@
 import 'package:material_ui/material_ui.dart';
 
+/// Identitas stabil untuk setiap bagian utama portofolio.
+enum PortfolioSection {
+  projects,
+  experiences,
+  education,
+  skills,
+}
+
 /// Model data yang merepresentasikan item menu kategori pada halaman utama portofolio.
 ///
-/// Setiap item memiliki judul ([name]), keterangan singkat ([subtitle]),
-/// ikon representatif ([icon]), warna aksen ([color]), dan halaman tujuan ([pageBuilder]).
+/// Setiap item memiliki identitas bagian ([section]), judul ([name]),
+/// keterangan singkat ([subtitle]), ikon representatif ([icon]),
+/// warna aksen ([color]), dan halaman tujuan ([pageBuilder]).
 class ItemHomepage {
+  /// Identitas stabil bagian portofolio.
+  final PortfolioSection section;
+
   /// Nama atau judul kategori menu.
   final String name;
 
@@ -22,6 +34,7 @@ class ItemHomepage {
 
   /// Membuat instansi [ItemHomepage].
   const ItemHomepage({
+    required this.section,
     required this.name,
     required this.subtitle,
     required this.icon,

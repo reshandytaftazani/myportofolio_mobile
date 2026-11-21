@@ -40,21 +40,6 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
     _orderController.text = '0';
   }
 
-  String? _validateRequiredText(
-    String? value, {
-    required String fieldName,
-    int? maxLength,
-  }) {
-    final trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) {
-      return '$fieldName tidak boleh kosong.';
-    }
-    if (maxLength != null && trimmed.length > maxLength) {
-      return '$fieldName maksimal $maxLength karakter.';
-    }
-    return null;
-  }
-
   String? _validateOrder(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) {
@@ -110,19 +95,6 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
     }
   }
 
-  InputDecoration _fieldDecoration({
-    required String labelText,
-    String? hintText,
-  }) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -147,14 +119,14 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama Tech Stack',
                   hintText: 'Contoh: Dart',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Nama tech stack',
+                  fieldLabel: 'Nama tech stack',
                   maxLength: 50,
                 ),
               ),
@@ -163,7 +135,7 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
                 controller: _iconUrlController,
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'URL Ikon',
                   hintText: 'https://cdn.example.com/dart.svg',
                 ),
@@ -177,14 +149,14 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _filenameController,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nama File',
                   hintText: 'Contoh: main.dart',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Nama file',
+                  fieldLabel: 'Nama file',
                   maxLength: 50,
                 ),
               ),
@@ -195,13 +167,13 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
                 minLines: 4,
                 keyboardType: TextInputType.multiline,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 13.0),
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Cuplikan Kode',
                   hintText: 'void main() {\n  print("Dart");\n}',
                 ),
-                validator: (value) => _validateRequiredText(
+                validator: (value) => validateRequiredText(
                   value,
-                  fieldName: 'Cuplikan kode',
+                  fieldLabel: 'Cuplikan kode',
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -211,7 +183,7 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
                   signed: true,
                 ),
                 textInputAction: TextInputAction.done,
-                decoration: _fieldDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Urutan Tampil',
                   hintText: '0',
                 ),

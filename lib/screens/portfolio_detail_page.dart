@@ -116,11 +116,11 @@ class PortfolioDetailPage extends StatelessWidget {
     final startText = experience.startedAt != null
         ? _formatFullDate(experience.startedAt!)
         : 'Belum diisi';
-    final endText = experience.isOngoing
-        ? 'Sekarang (Ongoing)'
-        : (experience.endedAt != null
-            ? _formatFullDate(experience.endedAt!)
-            : 'Belum diisi');
+    final endText = switch (experience.endStatus) {
+      ExperienceEndStatus.ongoing => 'Sekarang (Ongoing)',
+      ExperienceEndStatus.completed => _formatFullDate(experience.endedAt!),
+      ExperienceEndStatus.unknown => 'Belum diisi',
+    };
 
     return PortfolioDetailPage._(
       key: key,
