@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Kartu tampilan untuk satu entri [Experience] pada daftar portofolio.
 class ExperienceCard extends StatelessWidget {
@@ -79,10 +80,12 @@ class ExperienceCard extends StatelessWidget {
                     alpha: 0.5,
                   ),
                   child: hasThumbnail
-                      ? Image.network(
-                          experience.thumbnail!,
+                      ? PortfolioNetworkImage(
+                          imageUrl: experience.thumbnail!,
+                          width: 56,
+                          height: 56,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
+                          fallbackBuilder: (_) =>
                               _buildThumbnailFallback(theme),
                         )
                       : _buildThumbnailFallback(theme),

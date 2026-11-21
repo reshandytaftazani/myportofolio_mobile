@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
@@ -25,6 +26,30 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
   String _category = Experience.defaultCategory;
   DateTime? _startedAt;
   DateTime? _endedAt;
+  bool _wasDirty = false;
+
+  bool get _isDirty =>
+      _titleController.text.isNotEmpty ||
+      _companyController.text.isNotEmpty ||
+      _descriptionController.text.isNotEmpty ||
+      _thumbnailController.text.isNotEmpty ||
+      _category != Experience.defaultCategory ||
+      _startedAt != null ||
+      _endedAt != null;
+
+  void _syncDirtyState() {
+    final dirty = _isDirty;
+    if (dirty != _wasDirty) {
+      setState(() {
+        _wasDirty = dirty;
+      });
+    }
+  }
+
+  Future<bool> _confirmDiscardDraft() async {
+    if (!_isDirty) return true;
+    return showDiscardDraftDialog(context);
+  }
 
   @override
   void dispose() {
@@ -66,6 +91,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
         _endedAt = picked;
         _endedAtController.text = _formatDate(picked);
       }
+      _wasDirty = _isDirty;
     });
   }
 
@@ -78,6 +104,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
         _endedAt = null;
         _endedAtController.clear();
       }
+      _wasDirty = _isDirty;
     });
   }
 
@@ -93,6 +120,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
       _category = Experience.defaultCategory;
       _startedAt = null;
       _endedAt = null;
+      _wasDirty = false;
     });
   }
 
@@ -177,139 +205,147 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Tambah Pengalaman',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    return FormDraftPopScope(
+      isDirty: _isDirty,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Tambah Pengalaman',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: colorScheme.primary,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        backgroundColor: colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      drawer: const LeftDrawer(),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Pengalaman',
-                  hintText: 'Contoh: Software Engineer Intern',
-                ),
-                textInputAction: TextInputAction.next,
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Nama pengalaman',
-                  maxLength: 255,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _companyController,
-                decoration: const InputDecoration(
-                  labelText: 'Perusahaan / Organisasi (Opsional)',
-                  hintText: 'Contoh: Google',
-                ),
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  final trimmed = value?.trim() ?? '';
-                  if (trimmed.length > 255) {
-                    return 'Nama perusahaan/organisasi maksimal 255 karakter.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: _category,
-                decoration: const InputDecoration(labelText: 'Kategori'),
-                items: Experience.categoryChoices.entries
-                    .map(
-                      (entry) => DropdownMenuItem<String>(
-                        value: entry.key,
-                        child: Text(entry.value),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (newValue) {
-                  if (newValue == null) return;
-                  setState(() {
-                    _category = newValue;
-                  });
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 5,
-                minLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Deskripsi Pengalaman',
-                  hintText: 'Ceritakan peran dan pencapaianmu',
-                ),
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Deskripsi pengalaman',
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _thumbnailController,
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'URL Thumbnail (Opsional)',
-                  hintText: 'https://example.com/image.png',
-                ),
-                validator: (value) =>
-                    validateHttpUrl(value, fieldLabel: 'URL thumbnail'),
-              ),
-              const SizedBox(height: 16.0),
-              _buildDateField(
-                controller: _startedAtController,
-                labelText: 'Tanggal Mulai (Opsional)',
-                selectedDate: _startedAt,
-                isStart: true,
-              ),
-              const SizedBox(height: 16.0),
-              _buildDateField(
-                controller: _endedAtController,
-                labelText: 'Tanggal Selesai (Opsional)',
-                selectedDate: _endedAt,
-                isStart: false,
-                validator: (_) {
-                  if (_startedAt != null &&
-                      _endedAt != null &&
-                      _endedAt!.isBefore(_startedAt!)) {
-                    return 'Tanggal selesai harus sama dengan atau setelah tanggal mulai.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24.0),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+        drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
+        body: Form(
+          key: _formKey,
+          onChanged: _syncDirtyState,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Pengalaman',
+                    hintText: 'Contoh: Software Engineer Intern',
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => validateRequiredText(
+                    value,
+                    fieldLabel: 'Nama pengalaman',
+                    maxLength: 255,
                   ),
                 ),
-                onPressed: _submitForm,
-                child: const Text(
-                  'Simpan',
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _companyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Perusahaan / Organisasi (Opsional)',
+                    hintText: 'Contoh: Google',
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    final trimmed = value?.trim() ?? '';
+                    if (trimmed.length > 255) {
+                      return 'Nama perusahaan/organisasi maksimal 255 karakter.';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 16.0),
-            ],
+                const SizedBox(height: 16.0),
+                DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: _category,
+                  decoration: const InputDecoration(labelText: 'Kategori'),
+                  items: Experience.categoryChoices.entries
+                      .map(
+                        (entry) => DropdownMenuItem<String>(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (newValue) {
+                    if (newValue == null) return;
+                    setState(() {
+                      _category = newValue;
+                      _wasDirty = _isDirty;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 5,
+                  minLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Deskripsi Pengalaman',
+                    hintText: 'Ceritakan peran dan pencapaianmu',
+                  ),
+                  validator: (value) => validateRequiredText(
+                    value,
+                    fieldLabel: 'Deskripsi pengalaman',
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _thumbnailController,
+                  keyboardType: TextInputType.url,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'URL Thumbnail (Opsional)',
+                    hintText: 'https://example.com/image.png',
+                  ),
+                  validator: (value) =>
+                      validateHttpUrl(value, fieldLabel: 'URL thumbnail'),
+                ),
+                const SizedBox(height: 16.0),
+                _buildDateField(
+                  controller: _startedAtController,
+                  labelText: 'Tanggal Mulai (Opsional)',
+                  selectedDate: _startedAt,
+                  isStart: true,
+                ),
+                const SizedBox(height: 16.0),
+                _buildDateField(
+                  controller: _endedAtController,
+                  labelText: 'Tanggal Selesai (Opsional)',
+                  selectedDate: _endedAt,
+                  isStart: false,
+                  validator: (_) {
+                    if (_startedAt != null &&
+                        _endedAt != null &&
+                        _endedAt!.isBefore(_startedAt!)) {
+                      return 'Tanggal selesai harus sama dengan atau setelah tanggal mulai.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24.0),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  onPressed: _submitForm,
+                  child: const Text(
+                    'Simpan',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+              ],
+            ),
           ),
         ),
       ),

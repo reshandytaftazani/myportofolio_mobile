@@ -4,6 +4,8 @@ import 'package:myportofolio_mobile/models/experience.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
+import 'package:myportofolio_mobile/utils/url_launcher_helper.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Halaman detail lengkap untuk menampilkan seluruh atribut item portofolio.
 class PortfolioDetailPage extends StatelessWidget {
@@ -65,7 +67,11 @@ class PortfolioDetailPage extends StatelessWidget {
         if (project.techStack != null && project.techStack!.trim().isNotEmpty)
           DetailRow(label: 'Tech Stack', value: project.techStack!),
         if (project.projectUrl != null && project.projectUrl!.trim().isNotEmpty)
-          DetailRow(label: 'URL Proyek', value: project.projectUrl!),
+          DetailRow(
+            label: 'URL Proyek',
+            value: project.projectUrl!,
+            isLink: true,
+          ),
         if (project.projectImageUrl != null &&
             project.projectImageUrl!.trim().isNotEmpty)
           DetailRow(label: 'URL Gambar', value: project.projectImageUrl!),
@@ -252,11 +258,13 @@ class PortfolioDetailPage extends StatelessWidget {
                 width: double.infinity,
                 color: accentColor.withValues(alpha: 0.1),
                 child: hasImage
-                    ? Image.network(
-                        imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildBannerFallback(),
+                    ? PortfolioNetworkImage(
+                        imageUrl: imageUrl!,
+                        height: 160,
+                        fit: isSvgImageUrl(imageUrl!)
+                            ? BoxFit.contain
+                            : BoxFit.cover,
+                        fallbackBuilder: (_) => _buildBannerFallback(),
                       )
                     : _buildBannerFallback(),
               ),
@@ -292,8 +300,7 @@ class PortfolioDetailPage extends StatelessWidget {
                         Flexible(
                           child: Text(
                             badge.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: fgColor,
                               fontWeight: FontWeight.w600,
@@ -385,26 +392,91 @@ class PortfolioDetailPage extends StatelessWidget {
                     ...metadataRows.map(
                       (row) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 130,
-                              child: Text(
-                                row.label,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final textScale =
+                                MediaQuery.textScalerOf(context).scale(14.0) /
+                                14.0;
+                            final isCompact =
+                                constraints.maxWidth < 260 || textScale >= 1.3;
+                            final labelWidget = Text(
+                              row.label,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ),
-                            Expanded(
-                              child: SelectableText(
-                                row.value,
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ),
-                          ],
+                            );
+                            final valueWidget = row.isLink
+                                ? Semantics(
+                                    link: true,
+                                    label: 'Buka ${row.label} ${row.value}',
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(6),
+                                      onTap: () =>
+                                          launchExternalUrl(context, row.value),
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          minHeight: 44,
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 6,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  row.value,
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        color: theme
+                                                            .colorScheme
+                                                            .primary,
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
+                                                      ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Icon(
+                                                Icons.open_in_new_rounded,
+                                                size: 14,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : SelectableText(
+                                    row.value,
+                                    style: theme.textTheme.bodySmall,
+                                  );
+
+                            if (isCompact) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  labelWidget,
+                                  const SizedBox(height: 2),
+                                  valueWidget,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(width: 130, child: labelWidget),
+                                Expanded(child: valueWidget),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -469,6 +541,11 @@ class DetailBadge {
 class DetailRow {
   final String label;
   final String value;
+  final bool isLink;
 
-  const DetailRow({required this.label, required this.value});
+  const DetailRow({
+    required this.label,
+    required this.value,
+    this.isLink = false,
+  });
 }

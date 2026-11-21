@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Kartu tampilan untuk satu entri [TechStack] beserta preview code block.
 class TechStackCard extends StatelessWidget {
@@ -37,11 +38,12 @@ class TechStackCard extends StatelessWidget {
                       height: 40,
                       color: theme.colorScheme.surfaceContainerHighest,
                       child: techStack.iconUrl.isNotEmpty
-                          ? Image.network(
-                              techStack.iconUrl,
+                          ? PortfolioNetworkImage(
+                              imageUrl: techStack.iconUrl,
+                              width: 40,
+                              height: 40,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildIconFallback(theme),
+                              fallbackBuilder: (_) => _buildIconFallback(theme),
                             )
                           : _buildIconFallback(theme),
                     ),

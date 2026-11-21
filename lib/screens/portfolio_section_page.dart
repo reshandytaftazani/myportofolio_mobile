@@ -25,8 +25,9 @@ class SectionAction {
 ///
 /// Menampilkan daftar item menggunakan [ListView.builder] atau fallback ke
 /// tampilan kosong bila daftar belum memiliki data. Mendukung tab sekunder
-/// (misalnya tab Tech Stack pada bagian Projects).
-class PortfolioSectionPage extends StatelessWidget {
+/// (misalnya tab Tech Stack pada bagian Projects) dengan tombol tambah (FAB)
+/// yang menyesuaikan tab aktif.
+class PortfolioSectionPage extends StatefulWidget {
   /// Identitas stabil bagian portofolio ini.
   final PortfolioSection section;
 
@@ -84,6 +85,67 @@ class PortfolioSectionPage extends StatelessWidget {
     this.secondaryItemBuilder,
   });
 
+  @override
+  State<PortfolioSectionPage> createState() => _PortfolioSectionPageState();
+}
+
+class _PortfolioSectionPageState extends State<PortfolioSectionPage>
+    with SingleTickerProviderStateMixin {
+  TabController? _tabController;
+  int _activeTabIndex = 0;
+
+  bool get _hasTabs => widget.secondaryTabLabel != null;
+
+  SectionAction get _activeAction {
+    if (_activeTabIndex == 1 && widget.secondaryAction != null) {
+      return widget.secondaryAction!;
+    }
+    return widget.primaryAction;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _syncTabController();
+  }
+
+  @override
+  void didUpdateWidget(covariant PortfolioSectionPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.secondaryTabLabel != widget.secondaryTabLabel) {
+      _syncTabController();
+    }
+  }
+
+  void _syncTabController() {
+    _tabController?.removeListener(_handleTabChanged);
+    _tabController?.dispose();
+    _tabController = null;
+    _activeTabIndex = 0;
+
+    if (_hasTabs) {
+      _tabController = TabController(length: 2, vsync: this)
+        ..addListener(_handleTabChanged);
+    }
+  }
+
+  void _handleTabChanged() {
+    final controller = _tabController;
+    if (controller == null) return;
+    if (controller.index != _activeTabIndex) {
+      setState(() {
+        _activeTabIndex = controller.index;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_handleTabChanged);
+    _tabController?.dispose();
+    super.dispose();
+  }
+
   void _openPage(BuildContext context, WidgetBuilder builder) {
     Navigator.push(context, MaterialPageRoute(builder: builder));
   }
@@ -93,15 +155,17 @@ class PortfolioSectionPage extends StatelessWidget {
     required int count,
     required IndexedWidgetBuilder? builder,
     required String emptyTitle,
+    required SectionAction emptyPrimaryAction,
+    required SectionAction? emptySecondaryAction,
   }) {
     if (count == 0 || builder == null) {
       return _EmptySectionView(
         title: emptyTitle,
-        emptyMessage: emptyMessage,
-        icon: icon,
-        accentColor: accentColor,
-        primaryAction: primaryAction,
-        secondaryAction: secondaryAction,
+        emptyMessage: widget.emptyMessage,
+        icon: widget.icon,
+        accentColor: widget.accentColor,
+        primaryAction: emptyPrimaryAction,
+        secondaryAction: emptySecondaryAction,
         onOpenPage: (pageBuilder) => _openPage(context, pageBuilder),
       );
     }
@@ -117,58 +181,68 @@ class PortfolioSectionPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    final hasTabs = secondaryTabLabel != null;
-
-    if (!hasTabs) {
+    if (!_hasTabs) {
       return _buildListOrEmpty(
         context: context,
-        count: itemCount,
-        builder: itemBuilder,
-        emptyTitle: 'Belum ada data $title',
+        count: widget.itemCount,
+        builder: widget.itemBuilder,
+        emptyTitle: 'Belum ada data ${widget.title}',
+        emptyPrimaryAction: widget.primaryAction,
+        emptySecondaryAction: widget.secondaryAction,
       );
     }
 
-    return Column(
+    return TabBarView(
+      controller: _tabController,
       children: [
-        if (secondaryAction != null)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant
-                      .withValues(alpha: 0.6),
+        Column(
+          children: [
+            if (widget.secondaryAction != null && widget.itemCount > 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant
+                          .withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        _openPage(context, widget.secondaryAction!.builder),
+                    icon: Icon(widget.secondaryAction!.icon, size: 18),
+                    label: Text(widget.secondaryAction!.label),
+                  ),
                 ),
               ),
-            ),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
-                onPressed: () => _openPage(context, secondaryAction!.builder),
-                icon: Icon(secondaryAction!.icon, size: 18),
-                label: Text(secondaryAction!.label),
-              ),
-            ),
-          ),
-        Expanded(
-          child: TabBarView(
-            children: [
-              _buildListOrEmpty(
+            Expanded(
+              child: _buildListOrEmpty(
                 context: context,
-                count: itemCount,
-                builder: itemBuilder,
-                emptyTitle: 'Belum ada data ${primaryTabLabel ?? title}',
+                count: widget.itemCount,
+                builder: widget.itemBuilder,
+                emptyTitle:
+                    'Belum ada data ${widget.primaryTabLabel ?? widget.title}',
+                emptyPrimaryAction: widget.primaryAction,
+                emptySecondaryAction: widget.secondaryAction,
               ),
-              _buildListOrEmpty(
-                context: context,
-                count: secondaryItemCount,
-                builder: secondaryItemBuilder,
-                emptyTitle: 'Belum ada data $secondaryTabLabel',
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
+        _buildListOrEmpty(
+          context: context,
+          count: widget.secondaryItemCount,
+          builder: widget.secondaryItemBuilder,
+          emptyTitle: 'Belum ada data ${widget.secondaryTabLabel}',
+          emptyPrimaryAction: widget.secondaryAction ?? widget.primaryAction,
+          emptySecondaryAction: null,
         ),
       ],
     );
@@ -177,12 +251,12 @@ class PortfolioSectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasTabs = secondaryTabLabel != null;
+    final activeAction = _activeAction;
 
-    final scaffold = Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(
-          title,
+          widget.title,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -190,33 +264,29 @@ class PortfolioSectionPage extends StatelessWidget {
         ),
         backgroundColor: theme.colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
-        bottom: hasTabs
+        bottom: _hasTabs
             ? TabBar(
+                controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
                 indicatorColor: Colors.white,
                 tabs: [
-                  Tab(text: primaryTabLabel ?? title),
-                  Tab(text: secondaryTabLabel!),
+                  Tab(text: widget.primaryTabLabel ?? widget.title),
+                  Tab(text: widget.secondaryTabLabel!),
                 ],
               )
             : null,
       ),
-      drawer: LeftDrawer(activeSection: section),
+      drawer: LeftDrawer(activeSection: widget.section),
       body: _buildBody(context),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openPage(context, primaryAction.builder),
-        icon: Icon(primaryAction.icon),
-        label: Text(primaryAction.label),
+        onPressed: () => _openPage(context, activeAction.builder),
+        icon: Icon(activeAction.icon),
+        label: Text(activeAction.label),
       ),
     );
-
-    if (hasTabs) {
-      return DefaultTabController(length: 2, child: scaffold);
-    }
-    return scaffold;
   }
 }
 

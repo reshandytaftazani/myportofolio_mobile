@@ -8,6 +8,31 @@ class SkillCard extends StatelessWidget {
 
   const SkillCard({super.key, required this.skill, this.onTap});
 
+  Widget _buildTitle(ThemeData theme) {
+    return Text(
+      skill.title,
+      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildLevelBadge(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        skill.level,
+        softWrap: true,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onTertiaryContainer,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,36 +55,31 @@ class SkillCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      skill.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.tertiaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      skill.level,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onTertiaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final textScale =
+                      MediaQuery.textScalerOf(context).scale(14.0) / 14.0;
+                  final isCompact =
+                      constraints.maxWidth < 280 || textScale >= 1.3;
+                  if (isCompact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitle(theme),
+                        const SizedBox(height: 6),
+                        _buildLevelBadge(theme),
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: _buildTitle(theme)),
+                      const SizedBox(width: 8),
+                      Flexible(child: _buildLevelBadge(theme)),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 8),
               Text(

@@ -28,7 +28,13 @@ class ItemCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: item.pageBuilder));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              settings: RouteSettings(name: item.routeName),
+              builder: item.pageBuilder,
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(14),

@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/utils/url_launcher_helper.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Kartu tampilan ringkas untuk satu entri [Project] pada daftar portofolio.
 class ProjectItemCard extends StatelessWidget {
@@ -34,11 +36,11 @@ class ProjectItemCard extends StatelessWidget {
               SizedBox(
                 height: 150,
                 width: double.infinity,
-                child: Image.network(
-                  project.projectImageUrl!,
+                child: PortfolioNetworkImage(
+                  imageUrl: project.projectImageUrl!,
+                  height: 150,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildImageFallback(theme),
+                  fallbackBuilder: (_) => _buildImageFallback(theme),
                 ),
               )
             else
@@ -83,26 +85,51 @@ class ProjectItemCard extends StatelessWidget {
                     ),
                   ),
                   if (hasUrl) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.link_rounded,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            project.projectUrl!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
+                    const SizedBox(height: 8),
+                    Semantics(
+                      link: true,
+                      label: 'Buka tautan proyek ${project.projectUrl!}',
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () =>
+                            launchExternalUrl(context, project.projectUrl!),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 44),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.link_rounded,
+                                  size: 16,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    project.projectUrl!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.open_in_new_rounded,
+                                  size: 14,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ],

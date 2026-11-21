@@ -2,34 +2,91 @@ import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 
 class LeftDrawer extends StatelessWidget {
   final PortfolioSection? activeSection;
   final bool isHome;
 
-  const LeftDrawer({super.key, this.activeSection, this.isHome = false});
+  /// Sumber data opsional yang diteruskan ke halaman kategori yang dibuka
+  /// melalui drawer, sehingga drawer tidak terikat langsung pada data dummy.
+  final PortfolioDataSource? dataSource;
 
-  void _navigateToHome(BuildContext context) {
-    Navigator.pop(context);
+  /// Callback opsional sebelum drawer menavigasikan keluar dari halaman aktif
+  /// (misalnya untuk meminta konfirmasi sebelum membuang draf form yang berubah).
+  final Future<bool> Function()? onWillNavigate;
+
+  const LeftDrawer({
+    super.key,
+    this.activeSection,
+    this.isHome = false,
+    this.dataSource,
+    this.onWillNavigate,
+  });
+
+  Future<void> _navigateToHome(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    navigator.pop();
     if (isHome) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const MyHomePage()),
+    if (onWillNavigate != null) {
+      final shouldProceed = await onWillNavigate!();
+      if (!shouldProceed || !navigator.mounted) return;
+    }
+
+    if (navigator.canPop()) {
+      navigator.popUntil((route) => route.isFirst);
+      return;
+    }
+
+    navigator.pushAndRemoveUntil(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/'),
+        builder: (context) => const MyHomePage(),
+      ),
       (route) => false,
     );
   }
 
-  void _navigateToSection(BuildContext context, ItemHomepage item) {
-    final isCurrent = activeSection == item.section;
-    Navigator.pop(context);
+  Future<void> _navigateToSection(
+    BuildContext context,
+    PortfolioCategoryConfig category,
+  ) async {
+    final isCurrent = activeSection == category.section;
+    final navigator = Navigator.of(context);
+    navigator.pop();
     if (isCurrent) return;
 
-    final route = MaterialPageRoute(builder: item.pageBuilder);
+    if (onWillNavigate != null) {
+      final shouldProceed = await onWillNavigate!();
+      if (!shouldProceed || !navigator.mounted) return;
+    }
+
+    // Jika rute kategori yang dituju sudah terbuka di bawah halaman saat ini
+    // (mis. memilih Projects dari form yang dibuka lewat Projects), gunakan
+    // kembali rute tersebut agar tidak menumpuk dua layar kategori berturut-turut.
+    final existingRoute = portfolioRouteObserver.routeForName(
+      navigator,
+      category.routeName,
+    );
+    if (existingRoute != null) {
+      navigator.popUntil((route) => route == existingRoute || route.isFirst);
+      return;
+    }
+
+    final route = MaterialPageRoute(
+      settings: RouteSettings(name: category.routeName),
+      builder: (_) =>
+          buildPortfolioSectionPage(category.section, dataSource: dataSource),
+    );
     if (isHome) {
-      Navigator.push(context, route);
+      navigator.push(route);
+    } else if (portfolioRouteObserver.hasAnySectionRoute(navigator)) {
+      // Berpindah ke kategori lain dari dalam form atau halaman kategori lain:
+      // jaga stack tetap [Home, TargetSection] tanpa menggandakan halaman kategori.
+      navigator.pushAndRemoveUntil(route, (existing) => existing.isFirst);
     } else {
-      Navigator.pushReplacement(context, route);
+      navigator.pushReplacement(route);
     }
   }
 
@@ -73,11 +130,11 @@ class LeftDrawer extends StatelessWidget {
             // Navigasi ke halaman utama portofolio
             onTap: () => _navigateToHome(context),
           ),
-          ...portfolioMenuItems.map(
-            (item) => ListTile(
-              leading: Icon(item.icon),
-              title: Text(item.name),
-              onTap: () => _navigateToSection(context, item),
+          ...portfolioCategoryConfigs.map(
+            (category) => ListTile(
+              leading: Icon(category.icon),
+              title: Text(category.name),
+              onTap: () => _navigateToSection(context, category),
             ),
           ),
         ],

@@ -47,24 +47,25 @@ class PortfolioDataSource {
   }
 }
 
-/// Merakit daftar konfigurasi 4 bagian utama portofolio dari [dataSource].
-List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
+/// Membangun halaman bagian portofolio untuk [section] dari [dataSource]
+/// secara terpisah dari konfigurasi menu dan komponen navigasi.
+Widget buildPortfolioSectionPage(
+  PortfolioSection section, {
+  PortfolioDataSource? dataSource,
+}) {
   final data = dataSource ?? PortfolioDataSource.dummy();
-  return [
-    ItemHomepage(
-      section: PortfolioSection.projects,
-      name: "Projects",
-      subtitle: "Projects & Tech Stack",
-      icon: Icons.folder_outlined,
-      color: Colors.indigo,
-      pageBuilder: (_) => PortfolioSectionPage(
-        section: PortfolioSection.projects,
-        title: "Projects",
+  final config = categoryConfigForSection(section);
+
+  switch (section) {
+    case PortfolioSection.projects:
+      return PortfolioSectionPage(
+        section: config.section,
+        title: config.name,
         emptyMessage:
-            "Tambahkan proyek portofolio atau kelola tech stack Anda.",
-        icon: Icons.folder_outlined,
-        accentColor: Colors.indigo,
-        primaryTabLabel: "Projects",
+            'Tambahkan proyek portofolio atau kelola tech stack Anda.',
+        icon: config.icon,
+        accentColor: config.color,
+        primaryTabLabel: 'Projects',
         itemCount: data.projects.length,
         itemBuilder: (context, index) {
           final project = data.projects[index];
@@ -78,7 +79,7 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
             ),
           );
         },
-        secondaryTabLabel: "Tech Stack",
+        secondaryTabLabel: 'Tech Stack',
         secondaryItemCount: data.techStacks.length,
         secondaryItemBuilder: (context, index) {
           final techStack = data.techStacks[index];
@@ -93,29 +94,23 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
           );
         },
         primaryAction: SectionAction(
-          label: "Tambah Proyek",
+          label: 'Tambah Proyek',
           icon: Icons.add,
           builder: (_) => const ProjectFormPage(),
         ),
         secondaryAction: SectionAction(
-          label: "Tambah Tech Stack",
+          label: 'Tambah Tech Stack',
           icon: Icons.layers_outlined,
           builder: (_) => const TechStackFormPage(),
         ),
-      ),
-    ),
-    ItemHomepage(
-      section: PortfolioSection.experiences,
-      name: "Experiences",
-      subtitle: "Kerja & Organisasi",
-      icon: Icons.work_outline,
-      color: const Color(0xFF0277BD),
-      pageBuilder: (_) => PortfolioSectionPage(
-        section: PortfolioSection.experiences,
-        title: "Experiences",
-        emptyMessage: "Catat pengalaman kerja, magang, atau organisasi Anda.",
-        icon: Icons.work_outline,
-        accentColor: const Color(0xFF0277BD),
+      );
+    case PortfolioSection.experiences:
+      return PortfolioSectionPage(
+        section: config.section,
+        title: config.name,
+        emptyMessage: 'Catat pengalaman kerja, magang, atau organisasi Anda.',
+        icon: config.icon,
+        accentColor: config.color,
         itemCount: data.experiences.length,
         itemBuilder: (context, index) {
           final experience = data.experiences[index];
@@ -130,24 +125,18 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
           );
         },
         primaryAction: SectionAction(
-          label: "Tambah Pengalaman",
+          label: 'Tambah Pengalaman',
           icon: Icons.add,
           builder: (_) => const ExperienceFormPage(),
         ),
-      ),
-    ),
-    ItemHomepage(
-      section: PortfolioSection.education,
-      name: "Education",
-      subtitle: "Riwayat Akademik",
-      icon: Icons.school_outlined,
-      color: const Color(0xFF00695C),
-      pageBuilder: (_) => PortfolioSectionPage(
-        section: PortfolioSection.education,
-        title: "Education",
-        emptyMessage: "Tambahkan riwayat sekolah atau perguruan tinggi Anda.",
-        icon: Icons.school_outlined,
-        accentColor: const Color(0xFF00695C),
+      );
+    case PortfolioSection.education:
+      return PortfolioSectionPage(
+        section: config.section,
+        title: config.name,
+        emptyMessage: 'Tambahkan riwayat sekolah atau perguruan tinggi Anda.',
+        icon: config.icon,
+        accentColor: config.color,
         itemCount: data.educations.length,
         itemBuilder: (context, index) {
           final education = data.educations[index];
@@ -162,24 +151,18 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
           );
         },
         primaryAction: SectionAction(
-          label: "Tambah Pendidikan",
+          label: 'Tambah Pendidikan',
           icon: Icons.add,
           builder: (_) => const EducationFormPage(),
         ),
-      ),
-    ),
-    ItemHomepage(
-      section: PortfolioSection.skills,
-      name: "Skills",
-      subtitle: "Skill & Kode",
-      icon: Icons.code_rounded,
-      color: const Color(0xFF6A1B9A),
-      pageBuilder: (_) => PortfolioSectionPage(
-        section: PortfolioSection.skills,
-        title: "Skills",
-        emptyMessage: "Tambahkan keahlian teknis beserta tingkat kemahirannya.",
-        icon: Icons.code_rounded,
-        accentColor: const Color(0xFF6A1B9A),
+      );
+    case PortfolioSection.skills:
+      return PortfolioSectionPage(
+        section: config.section,
+        title: config.name,
+        emptyMessage: 'Tambahkan keahlian teknis beserta tingkat kemahirannya.',
+        icon: config.icon,
+        accentColor: config.color,
         itemCount: data.skills.length,
         itemBuilder: (context, index) {
           final skill = data.skills[index];
@@ -194,13 +177,30 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
           );
         },
         primaryAction: SectionAction(
-          label: "Tambah Keahlian",
+          label: 'Tambah Keahlian',
           icon: Icons.add,
           builder: (_) => const SkillFormPage(),
         ),
-      ),
-    ),
-  ];
+      );
+  }
+}
+
+/// Merakit daftar konfigurasi 4 bagian utama portofolio dari [dataSource].
+List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
+  final data = dataSource ?? PortfolioDataSource.dummy();
+  return portfolioCategoryConfigs
+      .map(
+        (config) => ItemHomepage(
+          section: config.section,
+          name: config.name,
+          subtitle: config.subtitle,
+          icon: config.icon,
+          color: config.color,
+          pageBuilder: (_) =>
+              buildPortfolioSectionPage(config.section, dataSource: data),
+        ),
+      )
+      .toList();
 }
 
 /// Daftar konfigurasi 4 bagian utama portofolio bawaan untuk beranda dan drawer.

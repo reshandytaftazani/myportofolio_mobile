@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
+import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
@@ -20,6 +21,28 @@ class _SkillFormPageState extends State<SkillFormPage> {
   final _descriptionController = TextEditingController();
   final _codeSnippetController = TextEditingController();
 
+  bool _wasDirty = false;
+
+  bool get _isDirty =>
+      _titleController.text.isNotEmpty ||
+      _levelController.text.isNotEmpty ||
+      _descriptionController.text.isNotEmpty ||
+      _codeSnippetController.text.isNotEmpty;
+
+  void _syncDirtyState() {
+    final dirty = _isDirty;
+    if (dirty != _wasDirty) {
+      setState(() {
+        _wasDirty = dirty;
+      });
+    }
+  }
+
+  Future<bool> _confirmDiscardDraft() async {
+    if (!_isDirty) return true;
+    return showDiscardDraftDialog(context);
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -35,6 +58,7 @@ class _SkillFormPageState extends State<SkillFormPage> {
     _levelController.clear();
     _descriptionController.clear();
     _codeSnippetController.clear();
+    _syncDirtyState();
   }
 
   Future<void> _submitForm() async {
@@ -76,95 +100,105 @@ class _SkillFormPageState extends State<SkillFormPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Tambah Keahlian',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    return FormDraftPopScope(
+      isDirty: _isDirty,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Tambah Keahlian',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: colorScheme.primary,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        backgroundColor: colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      drawer: const LeftDrawer(),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Keahlian',
-                  hintText: 'Contoh: Flutter & Dart',
-                ),
-                textInputAction: TextInputAction.next,
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Nama keahlian',
-                  maxLength: 255,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _levelController,
-                decoration: const InputDecoration(
-                  labelText: 'Level',
-                  hintText: 'Contoh: Intermediate',
-                ),
-                textInputAction: TextInputAction.next,
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Level',
-                  maxLength: 50,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 4,
-                minLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Deskripsi Keahlian',
-                  hintText: 'Jelaskan pengalaman dan penerapan keahlian ini',
-                ),
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Deskripsi keahlian',
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _codeSnippetController,
-                maxLines: 6,
-                minLines: 4,
-                keyboardType: TextInputType.multiline,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 13.0),
-                decoration: const InputDecoration(
-                  labelText: 'Cuplikan Kode (Opsional)',
-                  hintText: 'void main() {\n  print("Hello");\n}',
-                ),
-              ),
-              const SizedBox(height: 24.0),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+        drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
+        body: Form(
+          key: _formKey,
+          onChanged: _syncDirtyState,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Keahlian',
+                    hintText: 'Contoh: Flutter & Dart',
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => validateRequiredText(
+                    value,
+                    fieldLabel: 'Nama keahlian',
+                    maxLength: 255,
                   ),
                 ),
-                onPressed: _submitForm,
-                child: const Text(
-                  'Simpan',
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _levelController,
+                  decoration: const InputDecoration(
+                    labelText: 'Level',
+                    hintText: 'Contoh: Intermediate',
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => validateRequiredText(
+                    value,
+                    fieldLabel: 'Level',
+                    maxLength: 50,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16.0),
-            ],
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 4,
+                  minLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Deskripsi Keahlian',
+                    hintText: 'Jelaskan pengalaman dan penerapan keahlian ini',
+                  ),
+                  validator: (value) => validateRequiredText(
+                    value,
+                    fieldLabel: 'Deskripsi keahlian',
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _codeSnippetController,
+                  maxLines: 6,
+                  minLines: 4,
+                  keyboardType: TextInputType.multiline,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13.0,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Cuplikan Kode (Opsional)',
+                    hintText: 'void main() {\n  print("Hello");\n}',
+                  ),
+                ),
+                const SizedBox(height: 24.0),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  onPressed: _submitForm,
+                  child: const Text(
+                    'Simpan',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+              ],
+            ),
           ),
         ),
       ),

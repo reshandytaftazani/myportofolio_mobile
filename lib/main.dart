@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/data/portfolio_menu.dart';
+import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,14 +12,61 @@ void main() {
 /// Root widget dari aplikasi MyPortfolio Mobile.
 ///
 /// Mengatur konfigurasi dasar aplikasi seperti judul, tema warna Material 3,
-/// dan menentukan [MyHomePage] sebagai halaman utama aplikasi.
+/// resolver rute kategori untuk deep link/refresh web, dan menentukan
+/// [MyHomePage] sebagai halaman utama aplikasi.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    if (settings.name == Navigator.defaultRouteName) {
+      return MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/'),
+        builder: (_) => const MyHomePage(),
+      );
+    }
+    final section = portfolioSectionFromRouteName(settings.name);
+    if (section != null) {
+      return MaterialPageRoute<void>(
+        settings: RouteSettings(
+          name: section.routeName,
+          arguments: settings.arguments,
+        ),
+        builder: (_) => buildPortfolioSectionPage(section),
+      );
+    }
+    return null;
+  }
+
+  List<Route<dynamic>> _onGenerateInitialRoutes(String initialRoute) {
+    final homeRoute = MaterialPageRoute<void>(
+      settings: const RouteSettings(name: '/'),
+      builder: (_) => const MyHomePage(),
+    );
+    final section = portfolioSectionFromRouteName(initialRoute);
+    if (section != null) {
+      final sectionRoute = _onGenerateRoute(
+        RouteSettings(name: section.routeName),
+      )!;
+      return [homeRoute, sectionRoute];
+    }
+    return [homeRoute];
+  }
+
+  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
+    return MaterialPageRoute<void>(
+      settings: const RouteSettings(name: '/'),
+      builder: (_) => const MyHomePage(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MyPortfolio',
+      navigatorObservers: [portfolioRouteObserver],
+      onGenerateInitialRoutes: _onGenerateInitialRoutes,
+      onGenerateRoute: _onGenerateRoute,
+      onUnknownRoute: _onUnknownRoute,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.indigo,
@@ -33,7 +83,6 @@ class MyApp extends StatelessWidget {
         }
         return _WebPhoneViewport(child: child);
       },
-      home: const MyHomePage(),
     );
   }
 }
