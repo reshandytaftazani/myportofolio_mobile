@@ -245,6 +245,35 @@ Hot reload menerapkan perubahan kode dan membangun ulang UI sambil mempertahanka
 
 Hot reload tidak menjalankan ulang `main()` atau `initState()`. Perubahan pada inisialisasi data yang sudah tersimpan mungkin memerlukan hot restart. Perubahan kode native memerlukan penghentian dan pembangunan ulang aplikasi. Karena mekanismenya berbeda, tampilan yang belum berubah setelah hot reload perlu ditinjau berdasarkan lokasi inisialisasi datanya. Lihat [panduan hot reload Flutter](https://docs.flutter.dev/tools/hot-reload).
 
+### Tugas 8
+
+#### 1. Bagaimana perbedaan `Navigator.push`, `Navigator.pushReplacement`, dan `Navigator.pop`, serta bagaimana alur navigasi `Home` diterapkan?
+
+- `Navigator.push` menambahkan route baru di atas stack navigasi sehingga tombol **Back** dapat kembali ke halaman sebelumnya. Pada [project_card.dart](lib/widgets/project_card.dart), mengetuk kartu aksi (misalnya **Tambah Pengalaman**) memanggil `Navigator.push(context, MaterialPageRoute(...))`. Di [left_drawer.dart](lib/widgets/left_drawer.dart), membuka form dari beranda (`isHome == true`) juga memakai `Navigator.push`.
+- `Navigator.pushReplacement` mengganti route yang sedang aktif di puncak stack dengan route baru tanpa menambah tumpukan halaman form. Di `LeftDrawer._navigateToForm`, saat pengguna berpindah dari satu form ke form lain (`isHome == false`), aplikasi memanggil `Navigator.pushReplacement`, sehingga menekan **Back** tidak melewati riwayat form sebelumnya satu per satu.
+- `Navigator.pop` menutup route teratas pada stack—digunakan di `LeftDrawer` untuk menutup drawer sebelum berpindah halaman, dan di [form_summary_dialog.dart](lib/widgets/form_summary_dialog.dart) untuk menutup `AlertDialog` sambil mengembalikan nilai `false` (**Edit Isian**) atau `true` (**Selesai**).
+- Untuk opsi **Home**, `LeftDrawer._navigateToHome` menutup drawer dengan `Navigator.pop(context)`. Jika sudah berada di `MyHomePage` (`isHome == true`), navigasi berhenti agar tidak membuat salinan beranda. Jika sedang berada di halaman form, aplikasi memanggil `Navigator.pushAndRemoveUntil(..., (route) => false)` untuk membersihkan stack dan kembali ke `MyHomePage` sebagai satu-satunya route.
+
+#### 2. Bagaimana struktur `Scaffold`, `AppBar`, dan `Drawer` menyusun halaman form serta memanfaatkan tema aplikasi?
+
+Setiap halaman form (misalnya `ExperienceFormPage` di [experience_form.dart](lib/screens/experience_form.dart)) dibungkus oleh `Scaffold` dengan `AppBar`, `drawer: const LeftDrawer()`, dan `body` berupa `Form`. `AppBar` menampilkan judul halaman berwarna putih tebal, `iconTheme` putih, serta `backgroundColor: Theme.of(context).colorScheme.primary`.
+
+Skema warna utama (`indigo`) dan sekunder (`amber[700]`) dikonfigurasi terpusat pada `ThemeData(colorScheme: ColorScheme.fromSeed(...), useMaterial3: true)` di `MyApp` ([main.dart](lib/main.dart)). Tombol **Simpan** (`ElevatedButton`) pada seluruh halaman form juga mengambil `colorScheme.primary` dari `Theme.of(context).colorScheme`, sementara `LeftDrawer` dipakai ulang secara konsisten di `MyHomePage` dan kelima halaman form.
+
+#### 3. Widget jarak dan pengguliran apa yang digunakan agar halaman tetap nyaman pada ruang terbatas dan saat keyboard terbuka?
+
+- Pada halaman form (seperti [experience_form.dart](lib/screens/experience_form.dart)), `Column` input dibungkus `SingleChildScrollView(padding: const EdgeInsets.all(16.0), keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag)`. Saat viewport sempit (misalnya lebar ponsel `390x844`) atau keyboard terbuka, pengguna tetap dapat menggulir sampai tombol **Simpan** dan menutup keyboard dengan menggeser layar.
+- Jarak antar-kolom form diatur menggunakan `const SizedBox(height: 16.0)` (dan `24.0` sebelum tombol **Simpan**, ditambah `16.0` di bawah tombol).
+- Pada `LeftDrawer` ([left_drawer.dart](lib/widgets/left_drawer.dart)), daftar menu memakai `ListView` dan isi `DrawerHeader` dibungkus `SingleChildScrollView` agar tidak overflow pada layar pendek atau skala teks besar.
+- Pada `FormSummaryDialog` ([form_summary_dialog.dart](lib/widgets/form_summary_dialog.dart)), isi ringkasan dibungkus `SingleChildScrollView` di dalam `SizedBox(width: double.maxFinite)` supaya cuplikan kode panjang tetap dapat digulir tanpa mendorong aksi **Edit Isian** dan **Selesai** keluar layar.
+
+#### 4. Bagaimana peran `GlobalKey<FormState>`, `validator`, dan `validate()` dalam validasi form, beserta satu contoh input yang ditolak?
+
+- Setiap halaman form menyimpan `final _formKey = GlobalKey<FormState>()` yang dipasang ke widget `Form(key: _formKey, ...)`. `GlobalKey<FormState>` memberi akses ke `FormState` dari handler tombol **Simpan** (`_submitForm`).
+- Setiap `TextFormField` mendaftarkan fungsi `validator` yang mengembalikan `String` pesan kesalahan jika input tidak valid, atau `null` jika valid. Aturan URL HTTP(S) bersama diekstrak ke `validateHttpUrl` di [form_validators.dart](lib/forms/form_validators.dart) untuk dipakai ulang di `ExperienceFormPage`, `TechStackFormPage`, dan `ProjectFormPage`.
+- Saat **Simpan** ditekan, `_formKey.currentState!.validate()` memicu seluruh `validator` pada form sekaligus. Jika ada field yang tidak valid, `validate()` mengembalikan `false`, pesan kesalahan muncul di kolom terkait, dan `showFormSummaryDialog(...)` tidak dipanggil.
+- **Contoh input yang ditolak:** Pada `ExperienceFormPage`, mengisi `URL Thumbnail` dengan `not-a-url` (atau tanpa skema `http`/`https` dan hostname) ditolak oleh `validateHttpUrl` dengan pesan `'Gunakan URL HTTP/HTTPS yang valid dengan hostname.'` sehingga dialog ringkasan tidak terbuka. Selain itu, memilih `Tanggal Selesai` lebih awal dari `Tanggal Mulai` juga ditolak dengan pesan `'Tanggal selesai harus sama dengan atau setelah tanggal mulai.'`.
+
 ## AI Disclosure
 
 Dalam pengerjaan MyPortfolio Mobile untuk Tugas 7, saya menggunakan bantuan AI untuk memahami masalah teknis, mengevaluasi alternatif pengembangan Flutter, serta membantu penyusunan dan revisi dokumentasi berdasarkan arahan saya. Saran AI diperlakukan sebagai draf yang perlu diperiksa terhadap kode, kebutuhan tugas, dan hasil pengujian. Disclosure ini berfokus pada aplikasi mobile dalam repositori ini.
