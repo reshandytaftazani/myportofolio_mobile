@@ -3,6 +3,7 @@ import 'package:myportofolio_mobile/data/dummy_portfolio.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
+import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
 import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
@@ -27,14 +28,32 @@ final List<ItemHomepage> portfolioMenuItems = [
       accentColor: Colors.indigo,
       primaryTabLabel: "Projects",
       itemCount: DummyPortfolioData.projects.length,
-      itemBuilder: (context, index) => ProjectItemCard(
-        project: DummyPortfolioData.projects[index],
-      ),
+      itemBuilder: (context, index) {
+        final project = DummyPortfolioData.projects[index];
+        return ProjectItemCard(
+          project: project,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage.project(project),
+            ),
+          ),
+        );
+      },
       secondaryTabLabel: "Tech Stack",
       secondaryItemCount: DummyPortfolioData.techStacks.length,
-      secondaryItemBuilder: (context, index) => TechStackCard(
-        techStack: DummyPortfolioData.techStacks[index],
-      ),
+      secondaryItemBuilder: (context, index) {
+        final techStack = DummyPortfolioData.techStacks[index];
+        return TechStackCard(
+          techStack: techStack,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage.techStack(techStack),
+            ),
+          ),
+        );
+      },
       primaryAction: SectionAction(
         label: "Tambah Proyek",
         icon: Icons.add,
@@ -58,9 +77,18 @@ final List<ItemHomepage> portfolioMenuItems = [
       icon: Icons.work_outline,
       accentColor: const Color(0xFF0277BD),
       itemCount: DummyPortfolioData.experiences.length,
-      itemBuilder: (context, index) => ExperienceCard(
-        experience: DummyPortfolioData.experiences[index],
-      ),
+      itemBuilder: (context, index) {
+        final experience = DummyPortfolioData.experiences[index];
+        return ExperienceCard(
+          experience: experience,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage.experience(experience),
+            ),
+          ),
+        );
+      },
       primaryAction: SectionAction(
         label: "Tambah Pengalaman",
         icon: Icons.add,
@@ -79,9 +107,18 @@ final List<ItemHomepage> portfolioMenuItems = [
       icon: Icons.school_outlined,
       accentColor: const Color(0xFF00695C),
       itemCount: DummyPortfolioData.educations.length,
-      itemBuilder: (context, index) => EducationCard(
-        education: DummyPortfolioData.educations[index],
-      ),
+      itemBuilder: (context, index) {
+        final education = DummyPortfolioData.educations[index];
+        return EducationCard(
+          education: education,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage.education(education),
+            ),
+          ),
+        );
+      },
       primaryAction: SectionAction(
         label: "Tambah Pendidikan",
         icon: Icons.add,
@@ -100,9 +137,18 @@ final List<ItemHomepage> portfolioMenuItems = [
       icon: Icons.code_rounded,
       accentColor: const Color(0xFF6A1B9A),
       itemCount: DummyPortfolioData.skills.length,
-      itemBuilder: (context, index) => SkillCard(
-        skill: DummyPortfolioData.skills[index],
-      ),
+      itemBuilder: (context, index) {
+        final skill = DummyPortfolioData.skills[index];
+        return SkillCard(
+          skill: skill,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage.skill(skill),
+            ),
+          ),
+        );
+      },
       primaryAction: SectionAction(
         label: "Tambah Keahlian",
         icon: Icons.add,
