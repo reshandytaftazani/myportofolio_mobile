@@ -2,7 +2,7 @@
 
 Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (CSGE602022)**, Fakultas Ilmu Komputer, Universitas Indonesia. Proyek mobile ini melengkapi [portofolio web Django](https://github.com/reshandytaftazani/myportofolio) dengan tampilan ringkas untuk perangkat mobile.
 
-**Status:** Implementasi Tugas 8 selesai (lima formulir portofolio tervalidasi, navigasi kartu dan drawer, dialog ringkasan dengan **Edit Isian**, serta 14 widget test lulus). Refleksi dan AI disclosure Tugas 8 akan dilengkapi pada tahap dokumentasi berikutnya.
+**Status:** Implementasi dan dokumentasi Tugas 8 selesai (lima formulir portofolio tervalidasi, navigasi kartu dan drawer, dialog ringkasan dengan **Edit Isian**, 14 widget test lulus, refleksi, serta AI disclosure).
 
 ## Daftar Isi
 
@@ -276,23 +276,24 @@ Skema warna utama (`indigo`) dan sekunder (`amber[700]`) dikonfigurasi terpusat 
 
 ## AI Disclosure
 
-Dalam pengerjaan MyPortfolio Mobile untuk Tugas 7, saya menggunakan bantuan AI untuk memahami masalah teknis, mengevaluasi alternatif pengembangan Flutter, serta membantu penyusunan dan revisi dokumentasi berdasarkan arahan saya. Saran AI diperlakukan sebagai draf yang perlu diperiksa terhadap kode, kebutuhan tugas, dan hasil pengujian. Disclosure ini berfokus pada aplikasi mobile dalam repositori ini.
+Dalam pengerjaan MyPortfolio Mobile, saya menggunakan bantuan AI sebagai pemandu dalam implementasi dan validator terhadap kesesuaian spesifikasi, pemahaman masalah teknis, evaluasi alternatif pengembangan Flutter, serta penyusunan dan revisi dokumentasi berdasarkan arahan saya. Saran AI diperlakukan sebagai draf yang perlu diperiksa terhadap kode, kebutuhan tugas, dan hasil pengujian. Disclosure ini berfokus pada aplikasi mobile dalam repositori ini.
 
 ### Alat yang Digunakan
 
-Antigravity (powered by Google Gemini), Claude.ai, gemini.google, dan OpenAI Codex digunakan dalam eksplorasi ekosistem proyek, sesuai catatan penggunaan pengembang. Untuk sesi dokumentasi mobile yang tercatat di sini, bantuan diberikan melalui OpenAI Codex. Daftar ini tidak menyatakan bahwa setiap alat digunakan pada setiap bagian tugas. Persentase kontribusi tidak dicantumkan karena tidak ada pengukuran yang mendukungnya.
+Antigravity (powered by Google Gemini), Claude.ai, gemini.google, dan OpenAI Codex digunakan dalam eksplorasi ekosistem proyek, sesuai catatan penggunaan pengembang. Untuk sesi dokumentasi mobile sebelumnya, bantuan diberikan melalui OpenAI Codex, sedangkan pada tahap pemanduan implementasi formulir, validasi, dan pembaruan dokumentasi lanjutan, bantuan diberikan melalui Antigravity (powered by Google Gemini). Daftar ini tidak menyatakan bahwa setiap alat digunakan pada setiap bagian tugas. Persentase kontribusi tidak dicantumkan karena tidak ada pengukuran yang mendukungnya.
 
 ### Strategi Prompting
 
 - **Memberikan konteks masalah:** Menyertakan pesan error, potongan kode, perilaku aktual, dan hasil yang diharapkan.
-- **Membatasi ruang lingkup:** Memberikan rubrik Tugas 7, repositori referensi, dan batasan Flutter dasar agar saran tetap sesuai tahap pembelajaran. Pada dokumentasi mobile, penulisan diarahkan untuk mengikuti isi `lib/`, konfigurasi dependensi, dan riwayat commit.
+- **Membatasi ruang lingkup:** Memberikan rubrik tugas, repositori referensi Django (`myportofolio`), dan batasan Flutter dasar agar saran tetap sesuai tahap pembelajaran serta tidak melampaui cakupan tugas (lokal tanpa integrasi HTTP/autentikasi pada tahap ini). Pada dokumentasi mobile, penulisan diarahkan untuk mengikuti isi `lib/`, konfigurasi dependensi, dan riwayat commit.
 - **Memeriksa keluaran secara bertahap:** Meminta pencocokan dokumentasi dengan rencana tugas, mempertanyakan klaim yang tidak didukung berkas, dan meminta revisi sebelum perubahan dianggap siap.
-- **Memisahkan penulisan dan persetujuan:** Disclosure dikerjakan setelah dokumentasi dasar dan refleksi, kemudian ditinjau manual sebelum di-commit.
+- **Memisahkan penulisan dan persetujuan:** Dokumentasi, refleksi, dan disclosure ditinjau manual sebelum di-commit; pengerjaan diminta **tanpa commit terlebih dahulu** hingga hasilnya diperiksa dan disetujui pengembang.
 
 ### Bagian Spesifik yang Dibantu oleh AI
 
 - **Panduan pengembangan selanjutnya:** AI membantu memberikan arahan mengenai langkah pengembangan, urutan pengerjaan, dan bagian yang masih perlu diperbaiki berdasarkan kondisi proyek serta batasan materi Flutter dasar.
 - **Saran peningkatan untuk target nilai 4:** AI membantu mencocokkan kondisi proyek dengan rubrik dan mengidentifikasi peningkatan yang relevan, seperti modularisasi widget, penguatan identitas profil, interaktivitas SnackBar, serta kelengkapan dokumentasi dan progres mingguan. Saran tersebut menjadi bahan pertimbangan pengembang; pencapaian nilai tetap bergantung pada hasil implementasi, verifikasi, dan penilaian pengajar.
+- **Pemandu implementasi dan validator:** AI berperan sebagai pemandu langkah demi langkah saat menerapkan model, formulir (`Experience`, `Education`, `Skill`, `TechStack`, dan penyelarasan `Project`), validator URL bersama (`lib/forms/form_validators.dart`), serta dialog ringkasan bersama (`FormSummaryDialog`), sekaligus membantu memvalidasi konsistensi kode dan skenario pengujian (`flutter analyze` dan `flutter test`) terhadap acuan model Django dan rencana kerja.
 
 ### Keterbatasan AI dan Koreksi yang Dilakukan
 
@@ -308,17 +309,21 @@ Koreksi manual dalam catatan ini merujuk pada peninjauan, keputusan, dan arahan 
 
 3. **Selesainya kode dapat keliru dianggap sebagai selesainya seluruh tugas.**
    - **Keterbatasan AI:** Draf progres menyatakan Tugas 07 selesai saat refleksi dan disclosure belum lengkap. Label status yang terlalu luas mengaburkan pekerjaan yang masih tersisa.
-   - **Koreksi pengembang:** Saya meminta pemeriksaan ulang terhadap rencana tugas. Status implementasi dan dokumentasi kemudian diperjelas, dan commit Task 3.1–3.2 dipisahkan. Status akhir tetap perlu mengikuti pemeriksaan kelengkapan, bukan hanya keberadaan kode.
+   - **Koreksi pengembang:** Saya meminta pemeriksaan ulang terhadap rencana tugas. Status implementasi dan dokumentasi kemudian diperjelas, dan commit terpisah dibuat sesuai tahapannya. Status akhir tetap perlu mengikuti pemeriksaan kelengkapan, bukan hanya keberadaan kode.
 
 4. **Saran perintah pengujian tidak sama dengan bukti pengujian berhasil.**
    - **Keterbatasan AI:** Draf awal mencantumkan `flutter test` tanpa menjelaskan bahwa `test/widget_test.dart` masih menguji counter bawaan. Tes tersebut belum mewakili fitur portofolio. Demikian pula, hasil analyzer yang bersih tidak membuktikan warna, layout, atau interaksi sudah benar secara visual.
-   - **Koreksi dokumentasi:** Kondisi tes dicatat secara eksplisit dan skenario pemeriksaan manual diberi label sebagai hasil yang diharapkan. Belum ada klaim seluruh tes lulus atau pengujian visual selesai dalam sesi dokumentasi ini. Memperbarui tes dan menjalankan pemeriksaan aplikasi tetap merupakan pekerjaan yang perlu dilakukan.
+   - **Koreksi dokumentasi:** Kondisi tes dicatat secara eksplisit pada tahap awal dan kemudian diperbarui dengan hasil aktual setelah 14 widget test ditulis dan dijalankan (`flutter analyze` bersih dan `flutter test` lulus).
 
 5. **Analisis kode tidak cukup untuk menjamin responsivitas antarmuka.**
    - **Keterbatasan AI:** `SingleChildScrollView` dan lebar kartu berbasis `MediaQuery` dapat membantu layout, tetapi tidak menjamin bebas overflow. Grid awal memakai tiga kolom tetap; penambahan menu kemudian memakai dua atau tiga kolom sesuai ruang tersedia. Lebar kartu tetap perlu memperhitungkan padding, margin, serta ukuran teks.
-   - **Koreksi dokumentasi:** Klaim jaminan bebas overflow diganti dengan penjelasan keterbatasan dan skenario pemeriksaan pada layar sempit serta skala teks besar. Tidak dicantumkan klaim penambahan widget secara manual atau hasil visual tertentu tanpa bukti pelaksanaan.
+   - **Koreksi dokumentasi:** Klaim jaminan bebas overflow diganti dengan penjelasan keterbatasan dan skenario pemeriksaan pada layar sempit serta skala teks besar.
 
-Catatan interaksi yang dapat ditelusuri mencakup permintaan revisi README, koreksi klaim MIT, pemeriksaan rencana tugas, dan permintaan commit terpisah. Perubahan Task 3.1–3.2 tersedia pada commit `40472fe` dan `3875f98`; commit menunjukkan perubahan berkas, bukan transkrip percakapan. Ekspor chat lengkap belum disertakan. Pengembang tetap bertanggung jawab memeriksa ketepatan isi, memahami jawaban reflektif, dan memvalidasi perilaku aplikasi sebelum pengumpulan.
+6. **Verifikasi otomatis browser bergantung pada konfigurasi debugging lokal.**
+   - **Keterbatasan AI:** Saat menjalankan pemeriksaan Chrome melalui subagent browser pada `http://localhost:8080`, koneksi gagal karena `DevToolsActivePort` belum tersedia (`chrome://inspect/#remote-debugging` belum diaktifkan).
+   - **Koreksi pengembang:** Pengembang menjalankan pemeriksaan manual secara langsung di Chrome/perangkat untuk memastikan kelima form, navigasi drawer/kartu, serta tombol **Simpan** saat keyboard terbuka berfungsi dengan baik sebelum menyetujui tahap verifikasi selesai.
+
+Catatan interaksi dan jejak perubahan yang dapat ditelusuri mencakup permintaan revisi README, koreksi klaim MIT, pemeriksaan rencana tugas, dan permintaan commit terpisah (antara lain `40472fe`, `3875f98`, serta rangkaian commit lanjutan `c3b9ffc`–`8bb6ea8`, `8f1118b`, dan `3cae34b`); commit menunjukkan perubahan berkas, bukan transkrip percakapan. Ekspor chat lengkap belum disertakan. Pengembang tetap bertanggung jawab memeriksa ketepatan isi, memahami jawaban reflektif, dan memvalidasi perilaku aplikasi sebelum pengumpulan.
 
 ## Informasi Pengembang
 
