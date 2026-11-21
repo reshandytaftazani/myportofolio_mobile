@@ -62,23 +62,14 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       context: context,
       title: 'Ringkasan Proyek',
       entries: [
-        FormSummaryEntry(
-          label: 'Nama Proyek',
-          value: project.title,
-        ),
+        FormSummaryEntry(label: 'Nama Proyek', value: project.title),
         FormSummaryEntry(
           label: 'Deskripsi',
           value: project.description,
           isMultiline: true,
         ),
-        FormSummaryEntry(
-          label: 'Kategori',
-          value: project.category,
-        ),
-        FormSummaryEntry(
-          label: 'Tautan Proyek',
-          value: project.projectUrl,
-        ),
+        FormSummaryEntry(label: 'Kategori', value: project.category),
+        FormSummaryEntry(label: 'Tautan Proyek', value: project.projectUrl),
         FormSummaryEntry(
           label: 'URL Gambar Proyek',
           value: project.projectImageUrl,
@@ -200,7 +191,9 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Proyek Unggulan'),
-                subtitle: const Text('Tandai sebagai proyek unggulan di portofolio'),
+                subtitle: const Text(
+                  'Tandai sebagai proyek unggulan di portofolio',
+                ),
                 value: _isFeatured,
                 onChanged: (value) {
                   setState(() {

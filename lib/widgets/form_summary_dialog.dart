@@ -26,10 +26,8 @@ Future<bool?> showFormSummaryDialog({
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (dialogContext) => FormSummaryDialog(
-      title: title,
-      entries: entries,
-    ),
+    builder: (dialogContext) =>
+        FormSummaryDialog(title: title, entries: entries),
   );
 }
 
@@ -74,7 +72,9 @@ class FormSummaryDialog extends StatelessWidget {
   Widget _buildEntry(FormSummaryEntry entry) {
     final rawValue = entry.value;
     final isEmpty = rawValue == null || rawValue.trim().isEmpty;
-    final displayValue = isEmpty ? '-' : (entry.isCode ? rawValue : rawValue.trim());
+    final displayValue = isEmpty
+        ? '-'
+        : (entry.isCode ? rawValue : rawValue.trim());
 
     if (entry.isMultiline || entry.isCode) {
       return Padding(

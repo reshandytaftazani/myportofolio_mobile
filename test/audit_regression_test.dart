@@ -43,9 +43,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: const TextScaler.linear(1.3),
-              ),
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(1.3)),
               child: child!,
             ),
             home: const MyApp(),
@@ -74,7 +73,9 @@ void main() {
         expect(exp.endStatus, ExperienceEndStatus.unknown);
 
         await tester.pumpWidget(
-          MaterialApp(home: Scaffold(body: ExperienceCard(experience: exp))),
+          MaterialApp(
+            home: Scaffold(body: ExperienceCard(experience: exp)),
+          ),
         );
         expect(find.text('Feb 2025 – Belum diisi'), findsOneWidget);
         expect(find.textContaining('Sekarang'), findsNothing);
@@ -102,7 +103,9 @@ void main() {
         expect(exp.endStatus, ExperienceEndStatus.ongoing);
 
         await tester.pumpWidget(
-          MaterialApp(home: Scaffold(body: ExperienceCard(experience: exp))),
+          MaterialApp(
+            home: Scaffold(body: ExperienceCard(experience: exp)),
+          ),
         );
         expect(find.text('Agu 2025 – Sekarang'), findsOneWidget);
 
@@ -128,7 +131,9 @@ void main() {
         expect(exp.endStatus, ExperienceEndStatus.completed);
 
         await tester.pumpWidget(
-          MaterialApp(home: Scaffold(body: ExperienceCard(experience: exp))),
+          MaterialApp(
+            home: Scaffold(body: ExperienceCard(experience: exp)),
+          ),
         );
         expect(find.text('Jan 2025 – Mei 2025'), findsOneWidget);
 
@@ -153,9 +158,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(builder: projectsMenu.pageBuilder),
-          ),
+          MaterialApp(home: Builder(builder: projectsMenu.pageBuilder)),
         );
         await tester.pumpAndSettle();
 
@@ -167,23 +170,26 @@ void main() {
   });
 
   group('Shared form validator', () {
-    test('validateRequiredText handles empty, whitespace, maxLength, and suffix', () {
-      expect(
-        validateRequiredText(null, fieldLabel: 'Judul'),
-        'Judul tidak boleh kosong.',
-      );
-      expect(
-        validateRequiredText('   ', fieldLabel: 'Judul', emptySuffix: '!'),
-        'Judul tidak boleh kosong!',
-      );
-      expect(
-        validateRequiredText('abcdef', fieldLabel: 'Judul', maxLength: 5),
-        'Judul maksimal 5 karakter.',
-      );
-      expect(
-        validateRequiredText('abcde', fieldLabel: 'Judul', maxLength: 5),
-        isNull,
-      );
-    });
+    test(
+      'validateRequiredText handles empty, whitespace, maxLength, and suffix',
+      () {
+        expect(
+          validateRequiredText(null, fieldLabel: 'Judul'),
+          'Judul tidak boleh kosong.',
+        );
+        expect(
+          validateRequiredText('   ', fieldLabel: 'Judul', emptySuffix: '!'),
+          'Judul tidak boleh kosong!',
+        );
+        expect(
+          validateRequiredText('abcdef', fieldLabel: 'Judul', maxLength: 5),
+          'Judul maksimal 5 karakter.',
+        );
+        expect(
+          validateRequiredText('abcde', fieldLabel: 'Judul', maxLength: 5),
+          isNull,
+        );
+      },
+    );
   });
 }

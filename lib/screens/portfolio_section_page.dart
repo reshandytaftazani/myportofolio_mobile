@@ -138,9 +138,8 @@ class PortfolioSectionPage extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerLow,
               border: Border(
                 bottom: BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: 0.6),
                 ),
               ),
             ),

@@ -70,10 +70,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
           label: 'Nama Sekolah / Institusi',
           value: education.schoolName,
         ),
-        FormSummaryEntry(
-          label: 'Periode',
-          value: education.period,
-        ),
+        FormSummaryEntry(label: 'Periode', value: education.period),
         FormSummaryEntry(
           label: 'Detail',
           value: education.detail,

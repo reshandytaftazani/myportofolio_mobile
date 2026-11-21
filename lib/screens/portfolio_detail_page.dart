@@ -90,11 +90,8 @@ class PortfolioDetailPage extends StatelessWidget {
       imageUrl: techStack.iconUrl,
       fallbackIcon: Icons.layers_rounded,
       accentColor: Colors.indigo,
-      badges: [
-        DetailBadge(label: 'Order #${techStack.order}'),
-      ],
-      bodyText:
-          'Contoh implementasi kode pada berkas ${techStack.filename}.',
+      badges: [DetailBadge(label: 'Order #${techStack.order}')],
+      bodyText: 'Contoh implementasi kode pada berkas ${techStack.filename}.',
       metadataRows: [
         if (techStack.id != null)
           DetailRow(label: 'ID', value: techStack.id.toString()),
@@ -144,7 +141,10 @@ class PortfolioDetailPage extends StatelessWidget {
         if (experience.id != null)
           DetailRow(label: 'ID', value: experience.id!),
         if (experience.company != null && experience.company!.trim().isNotEmpty)
-          DetailRow(label: 'Perusahaan / Organisasi', value: experience.company!),
+          DetailRow(
+            label: 'Perusahaan / Organisasi',
+            value: experience.company!,
+          ),
         DetailRow(label: 'Kategori', value: experience.categoryLabel),
         DetailRow(label: 'Tanggal Mulai', value: startText),
         DetailRow(label: 'Tanggal Selesai', value: endText),
@@ -167,9 +167,7 @@ class PortfolioDetailPage extends StatelessWidget {
       subtitle: education.period,
       fallbackIcon: Icons.school_rounded,
       accentColor: const Color(0xFF00695C),
-      badges: [
-        DetailBadge(label: 'Mulai ${education.startYear}'),
-      ],
+      badges: [DetailBadge(label: 'Mulai ${education.startYear}')],
       bodyText: education.detail,
       metadataRows: [
         if (education.id != null)
@@ -192,9 +190,7 @@ class PortfolioDetailPage extends StatelessWidget {
       title: skill.title,
       fallbackIcon: Icons.code_rounded,
       accentColor: const Color(0xFF6A1B9A),
-      badges: [
-        DetailBadge(label: skill.level),
-      ],
+      badges: [DetailBadge(label: skill.level)],
       bodyText: skill.description,
       metadataRows: [
         if (skill.id != null) DetailRow(label: 'ID', value: skill.id!),
@@ -330,9 +326,7 @@ class PortfolioDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               bodyText,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                height: 1.5,
-              ),
+              style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
             if (hasCode) ...[
               const SizedBox(height: 20),
@@ -371,7 +365,9 @@ class PortfolioDetailPage extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.8),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.8,
+                  ),
                 ),
               ),
               child: Padding(
@@ -474,8 +470,5 @@ class DetailRow {
   final String label;
   final String value;
 
-  const DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const DetailRow({required this.label, required this.value});
 }

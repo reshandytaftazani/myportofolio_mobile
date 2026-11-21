@@ -72,24 +72,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('project card pushes section, form and system Back returns home', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.ensureVisible(find.text('Projects'));
-    await tester.tap(find.text('Projects'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tambah Proyek').first);
-    await tester.pumpAndSettle();
-    expect(find.byType(ProjectFormPage), findsOneWidget);
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.byType(MyHomePage), findsOneWidget);
-    expect(find.byType(ProjectFormPage), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'project card pushes section, form and system Back returns home',
+    (tester) async {
+      await tester.pumpWidget(const MyApp());
+      await tester.ensureVisible(find.text('Projects'));
+      await tester.tap(find.text('Projects'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tambah Proyek').first);
+      await tester.pumpAndSettle();
+      expect(find.byType(ProjectFormPage), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(MyHomePage), findsOneWidget);
+      expect(find.byType(ProjectFormPage), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'form validates, summarizes all inputs and resets for another submission',
@@ -121,10 +122,7 @@ void main() {
         'https://example.com/${List.filled(485, 'i').join()}',
       );
       await saveForm(tester);
-      expect(
-        find.text('Nama proyek maksimal 255 karakter.'),
-        findsOneWidget,
-      );
+      expect(find.text('Nama proyek maksimal 255 karakter.'), findsOneWidget);
       expect(find.text('URL proyek maksimal 200 karakter.'), findsOneWidget);
       expect(
         find.text('URL gambar proyek maksimal 500 karakter.'),
@@ -200,14 +198,14 @@ void main() {
         tester.widget<TextFormField>(field('Nama Proyek')).controller?.text,
         'Proyek A',
       );
-      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isTrue);
+      expect(
+        tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+        isTrue,
+      );
 
       await tester.enterText(field('Nama Proyek'), 'Proyek A Edit');
       await saveForm(tester);
-      expect(
-        find.textContaining('Nama Proyek: Proyek A Edit'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Nama Proyek: Proyek A Edit'), findsOneWidget);
 
       await tester.tap(find.text('Selesai'));
       await tester.pumpAndSettle();
@@ -344,7 +342,10 @@ void main() {
 
       await tester.enterText(field('Nama Pengalaman'), '   ');
       await tester.enterText(field('Deskripsi Pengalaman'), '   ');
-      await tester.enterText(field('URL Thumbnail (Opsional)'), 'ftp://bad url');
+      await tester.enterText(
+        field('URL Thumbnail (Opsional)'),
+        'ftp://bad url',
+      );
       await submitExperienceForm(tester);
       expect(find.text('Nama pengalaman tidak boleh kosong.'), findsOneWidget);
       expect(
@@ -472,38 +473,37 @@ void main() {
     },
   );
 
-  testWidgets(
-    'experience form remains scrollable on phone with keyboard',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      addTearDown(tester.view.resetViewInsets);
+  testWidgets('experience form remains scrollable on phone with keyboard', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetViewInsets);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: const TextScaler.linear(1.5)),
-            child: child!,
-          ),
-          home: const ExperienceFormPage(),
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.5)),
+          child: child!,
         ),
-      );
+        home: const ExperienceFormPage(),
+      ),
+    );
 
-      await tester.enterText(field('Nama Pengalaman'), 'Mobile Dev');
-      await tester.enterText(field('Deskripsi Pengalaman'), 'Build Flutter UI');
-      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
-      await tester.pumpAndSettle();
+    await tester.enterText(field('Nama Pengalaman'), 'Mobile Dev');
+    await tester.enterText(field('Deskripsi Pengalaman'), 'Build Flutter UI');
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    await tester.pumpAndSettle();
 
-      await submitExperienceForm(tester);
-      expect(find.byType(AlertDialog), findsOneWidget);
-      await tester.tap(find.text('Selesai'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    },
-  );
+    await submitExperienceForm(tester);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text('Selesai'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'education and skill cards and drawer open forms, Back and Home return cleanly',
@@ -625,10 +625,7 @@ void main() {
         find.textContaining('Nama Sekolah / Institusi: Universitas Indonesia'),
         findsOneWidget,
       );
-      expect(
-        find.textContaining('Periode: 2024 - Sekarang'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Periode: 2024 - Sekarang'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byType(AlertDialog),
@@ -694,10 +691,7 @@ void main() {
       await tester.enterText(field('Level'), List.filled(51, 'b').join());
       await tester.enterText(field('Deskripsi Keahlian'), 'Valid description');
       await submitExperienceForm(tester);
-      expect(
-        find.text('Nama keahlian maksimal 255 karakter.'),
-        findsOneWidget,
-      );
+      expect(find.text('Nama keahlian maksimal 255 karakter.'), findsOneWidget);
       expect(find.text('Level maksimal 50 karakter.'), findsOneWidget);
       expect(find.byType(AlertDialog), findsNothing);
 
@@ -855,10 +849,7 @@ void main() {
         find.textContaining('URL Ikon: https://cdn.example.com/dart.svg'),
         findsOneWidget,
       );
-      expect(
-        find.textContaining('Nama File: dart_stack.dart'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Nama File: dart_stack.dart'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byType(AlertDialog),

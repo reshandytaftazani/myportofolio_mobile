@@ -7,11 +7,7 @@ class LeftDrawer extends StatelessWidget {
   final PortfolioSection? activeSection;
   final bool isHome;
 
-  const LeftDrawer({
-    super.key,
-    this.activeSection,
-    this.isHome = false,
-  });
+  const LeftDrawer({super.key, this.activeSection, this.isHome = false});
 
   void _navigateToHome(BuildContext context) {
     Navigator.pop(context);

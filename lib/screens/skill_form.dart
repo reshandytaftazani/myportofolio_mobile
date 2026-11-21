@@ -52,14 +52,8 @@ class _SkillFormPageState extends State<SkillFormPage> {
       context: context,
       title: 'Ringkasan Keahlian',
       entries: [
-        FormSummaryEntry(
-          label: 'Nama Keahlian',
-          value: skill.title,
-        ),
-        FormSummaryEntry(
-          label: 'Level',
-          value: skill.level,
-        ),
+        FormSummaryEntry(label: 'Nama Keahlian', value: skill.title),
+        FormSummaryEntry(label: 'Level', value: skill.level),
         FormSummaryEntry(
           label: 'Deskripsi',
           value: skill.description,

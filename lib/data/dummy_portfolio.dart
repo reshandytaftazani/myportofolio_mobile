@@ -13,8 +13,7 @@ class DummyPortfolioData {
     Project(
       id: 'proj-1',
       title: 'MyPortfolio Mobile',
-      description:
-          'Aplikasi mobile lintas platform berbasis Flutter untuk mengelola dan menampilkan portofolio proyek, pengalaman, pendidikan, serta keahlian teknis.',
+      description: 'Aplikasi mobile lintas platform berbasis Flutter untuk mengelola dan menampilkan portofolio proyek, pengalaman, pendidikan, serta keahlian teknis.',
       category: 'Mobile Development',
       techStack: 'Flutter, Dart, Django REST',
       projectUrl: 'https://github.com/reshandytaftazani/myportofolio_mobile',
@@ -26,8 +25,7 @@ class DummyPortfolioData {
     Project(
       id: 'proj-2',
       title: 'MyPortfolio Web',
-      description:
-          'Situs portofolio personal berbasis Django dengan REST API, autentikasi berbasis cookie, serta fitur star untuk setiap item portofolio.',
+      description: 'Situs portofolio personal berbasis Django dengan REST API, autentikasi berbasis cookie, serta fitur star untuk setiap item portofolio.',
       category: 'Web Development',
       techStack: 'Django, Python, Tailwind CSS',
       projectUrl: 'https://github.com/reshandytaftazani/myportofolio',
@@ -37,8 +35,7 @@ class DummyPortfolioData {
     Project(
       id: 'proj-3',
       title: 'Campus Event Classifier',
-      description:
-          'Model klasifikasi teks sederhana untuk mengelompokkan pengumuman kegiatan kampus berdasarkan kategori minat mahasiswa.',
+      description: 'Model klasifikasi teks sederhana untuk mengelompokkan pengumuman kegiatan kampus berdasarkan kategori minat mahasiswa.',
       category: 'Machine Learning',
       techStack: 'Python, scikit-learn',
       isFeatured: false,
@@ -89,8 +86,7 @@ ORDER BY is_featured DESC;''',
       id: 'exp-1',
       title: 'Teaching Assistant — Dasar Pemrograman',
       company: 'Fakultas Ilmu Komputer UI',
-      description:
-          'Membantu mahasiswa memahami konsep dasar pemrograman Python, debugging tugas mingguan, serta melakukan review kode.',
+      description: 'Membantu mahasiswa memahami konsep dasar pemrograman Python, debugging tugas mingguan, serta melakukan review kode.',
       category: 'part-time',
       categoryDisplay: 'Part-Time',
       startedAt: DateTime(2025, 8, 1),
@@ -103,8 +99,7 @@ ORDER BY is_featured DESC;''',
       id: 'exp-2',
       title: 'Mobile Developer Intern',
       company: 'Tech Nusantara Studio',
-      description:
-          'Mengembangkan fitur UI modular pada aplikasi Flutter, menyusun widget reusable, dan melakukan integrasi REST API.',
+      description: 'Mengembangkan fitur UI modular pada aplikasi Flutter, menyusun widget reusable, dan melakukan integrasi REST API.',
       category: 'internship',
       categoryDisplay: 'Internship',
       startedAt: DateTime(2025, 1, 10),
@@ -139,8 +134,7 @@ ORDER BY is_featured DESC;''',
     Skill(
       id: 'skill-1',
       title: 'Flutter & Dart',
-      description:
-          'Membangun antarmuka Material 3 yang responsif, state management lokal, dan navigasi multi-halaman.',
+      description: 'Membangun antarmuka Material 3 yang responsif, state management lokal, dan navigasi multi-halaman.',
       level: 'Intermediate',
       codeSnippet: '''Widget build(BuildContext context) {
   return const Scaffold(body: Center(child: Text('Hello Flutter')));
@@ -152,8 +146,7 @@ ORDER BY is_featured DESC;''',
     Skill(
       id: 'skill-2',
       title: 'Django & REST Framework',
-      description:
-          'Merancang model relasional, serializer dengan validasi sanitasi, dan endpoint JSON untuk klien mobile.',
+      description: 'Merancang model relasional, serializer dengan validasi sanitasi, dan endpoint JSON untuk klien mobile.',
       level: 'Intermediate',
       codeSnippet: '''class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -164,8 +157,7 @@ ORDER BY is_featured DESC;''',
     Skill(
       id: 'skill-3',
       title: 'Git & Collaborative Workflow',
-      description:
-          'Mengelola branching per fitur, commit terstruktur, dan code review sebelum merge ke main.',
+      description: 'Mengelola branching per fitur, commit terstruktur, dan code review sebelum merge ke main.',
       level: 'Advanced',
       starCount: 3,
     ),

@@ -6,11 +6,7 @@ class ExperienceCard extends StatelessWidget {
   final Experience experience;
   final VoidCallback? onTap;
 
-  const ExperienceCard({
-    super.key,
-    required this.experience,
-    this.onTap,
-  });
+  const ExperienceCard({super.key, required this.experience, this.onTap});
 
   static const List<String> _monthNames = [
     'Jan',
@@ -36,8 +32,7 @@ class ExperienceCard extends StatelessWidget {
       return switch (experience.endStatus) {
         ExperienceEndStatus.ongoing => 'Ongoing',
         ExperienceEndStatus.completed ||
-        ExperienceEndStatus.unknown =>
-          'Tanggal belum diisi',
+        ExperienceEndStatus.unknown => 'Tanggal belum diisi',
       };
     }
     final start = experience.startedAt != null

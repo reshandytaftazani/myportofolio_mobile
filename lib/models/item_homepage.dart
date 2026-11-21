@@ -1,12 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 /// Identitas stabil untuk setiap bagian utama portofolio.
-enum PortfolioSection {
-  projects,
-  experiences,
-  education,
-  skills,
-}
+enum PortfolioSection { projects, experiences, education, skills }
 
 /// Model data yang merepresentasikan item menu kategori pada halaman utama portofolio.
 ///

@@ -6,11 +6,7 @@ class TechStackCard extends StatelessWidget {
   final TechStack techStack;
   final VoidCallback? onTap;
 
-  const TechStackCard({
-    super.key,
-    required this.techStack,
-    this.onTap,
-  });
+  const TechStackCard({super.key, required this.techStack, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -103,10 +99,6 @@ class TechStackCard extends StatelessWidget {
   }
 
   Widget _buildIconFallback(ThemeData theme) {
-    return Icon(
-      Icons.code_rounded,
-      color: theme.colorScheme.primary,
-      size: 22,
-    );
+    return Icon(Icons.code_rounded, color: theme.colorScheme.primary, size: 22);
   }
 }

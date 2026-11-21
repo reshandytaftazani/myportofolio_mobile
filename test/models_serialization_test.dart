@@ -191,7 +191,10 @@ void main() {
 
       expect(skill.id, 'uuid-skill-1');
       expect(skill.title, 'Flutter');
-      expect(skill.description, 'Pengembangan aplikasi mobile lintas platform.');
+      expect(
+        skill.description,
+        'Pengembangan aplikasi mobile lintas platform.',
+      );
       expect(skill.level, 'Intermediate');
       expect(
         skill.codeSnippet,

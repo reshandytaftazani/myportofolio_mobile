@@ -77,11 +77,17 @@ class ProfileHeader extends StatelessWidget {
                 const SizedBox(height: 6.0),
                 // Badge status aktif mahasiswa
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 2.0,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     borderRadius: BorderRadius.circular(20.0),
-                    border: Border.all(color: Colors.green.shade600, width: 0.8),
+                    border: Border.all(
+                      color: Colors.green.shade600,
+                      width: 0.8,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

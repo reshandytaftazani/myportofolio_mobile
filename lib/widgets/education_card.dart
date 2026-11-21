@@ -6,11 +6,7 @@ class EducationCard extends StatelessWidget {
   final Education education;
   final VoidCallback? onTap;
 
-  const EducationCard({
-    super.key,
-    required this.education,
-    this.onTap,
-  });
+  const EducationCard({super.key, required this.education, this.onTap});
 
   @override
   Widget build(BuildContext context) {

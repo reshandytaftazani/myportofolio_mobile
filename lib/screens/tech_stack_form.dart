@@ -66,18 +66,9 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
       context: context,
       title: 'Ringkasan Tech Stack',
       entries: [
-        FormSummaryEntry(
-          label: 'Nama Tech Stack',
-          value: techStack.name,
-        ),
-        FormSummaryEntry(
-          label: 'URL Ikon',
-          value: techStack.iconUrl,
-        ),
-        FormSummaryEntry(
-          label: 'Nama File',
-          value: techStack.filename,
-        ),
+        FormSummaryEntry(label: 'Nama Tech Stack', value: techStack.name),
+        FormSummaryEntry(label: 'URL Ikon', value: techStack.iconUrl),
+        FormSummaryEntry(label: 'Nama File', value: techStack.filename),
         FormSummaryEntry(
           label: 'Cuplikan Kode',
           value: techStack.codeSnippet,
@@ -171,10 +162,8 @@ class _TechStackFormPageState extends State<TechStackFormPage> {
                   labelText: 'Cuplikan Kode',
                   hintText: 'void main() {\n  print("Dart");\n}',
                 ),
-                validator: (value) => validateRequiredText(
-                  value,
-                  fieldLabel: 'Cuplikan kode',
-                ),
+                validator: (value) =>
+                    validateRequiredText(value, fieldLabel: 'Cuplikan kode'),
               ),
               const SizedBox(height: 16.0),
               TextFormField(

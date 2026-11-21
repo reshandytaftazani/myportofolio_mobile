@@ -32,10 +32,7 @@ class InfoCard extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
-            Text(
-              content,
-              textAlign: TextAlign.center,
-            ),
+            Text(content, textAlign: TextAlign.center),
           ],
         ),
       ),

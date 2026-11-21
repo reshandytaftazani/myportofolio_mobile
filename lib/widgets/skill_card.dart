@@ -6,11 +6,7 @@ class SkillCard extends StatelessWidget {
   final Skill skill;
   final VoidCallback? onTap;
 
-  const SkillCard({
-    super.key,
-    required this.skill,
-    this.onTap,
-  });
+  const SkillCard({super.key, required this.skill, this.onTap});
 
   @override
   Widget build(BuildContext context) {

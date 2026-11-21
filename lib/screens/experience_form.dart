@@ -115,27 +115,18 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
       context: context,
       title: 'Ringkasan Pengalaman',
       entries: [
-        FormSummaryEntry(
-          label: 'Nama Pengalaman',
-          value: experience.title,
-        ),
+        FormSummaryEntry(label: 'Nama Pengalaman', value: experience.title),
         FormSummaryEntry(
           label: 'Perusahaan / Organisasi',
           value: experience.company,
         ),
-        FormSummaryEntry(
-          label: 'Kategori',
-          value: experience.categoryLabel,
-        ),
+        FormSummaryEntry(label: 'Kategori', value: experience.categoryLabel),
         FormSummaryEntry(
           label: 'Deskripsi',
           value: experience.description,
           isMultiline: true,
         ),
-        FormSummaryEntry(
-          label: 'URL Thumbnail',
-          value: experience.thumbnail,
-        ),
+        FormSummaryEntry(label: 'URL Thumbnail', value: experience.thumbnail),
         FormSummaryEntry(
           label: 'Tanggal Mulai',
           value: experience.startedAt != null

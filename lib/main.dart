@@ -22,9 +22,7 @@ class MyApp extends StatelessWidget {
           secondary: Colors.amber[700],
         ),
         inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
         useMaterial3: true,
       ),
@@ -32,4 +30,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

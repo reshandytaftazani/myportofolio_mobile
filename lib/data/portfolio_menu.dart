@@ -60,7 +60,8 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
       pageBuilder: (_) => PortfolioSectionPage(
         section: PortfolioSection.projects,
         title: "Projects",
-        emptyMessage: "Tambahkan proyek portofolio atau kelola tech stack Anda.",
+        emptyMessage:
+            "Tambahkan proyek portofolio atau kelola tech stack Anda.",
         icon: Icons.folder_outlined,
         accentColor: Colors.indigo,
         primaryTabLabel: "Projects",
