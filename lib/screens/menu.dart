@@ -65,9 +65,7 @@ class MyHomePage extends StatelessWidget {
           builder: (context, constraints) {
             final maxWidth = constraints.maxWidth;
             const infoSpacing = 8.0;
-            final infoColumns = maxWidth < 300 ? 1 : 3;
-            final infoCardWidth =
-                (maxWidth - infoSpacing * (infoColumns - 1)) / infoColumns;
+            final stackInfoCards = maxWidth < 300;
 
             const menuSpacing = 12.0;
             final menuColumns = maxWidth < 260 ? 1 : 2;
@@ -86,22 +84,37 @@ class MyHomePage extends StatelessWidget {
                 // Header profil visual pemilik portofolio.
                 ProfileHeader(name: nama),
 
-                // Ringkasan identitas adaptif terhadap ruang aktual.
-                Wrap(
-                  spacing: infoSpacing,
-                  runSpacing: infoSpacing,
-                  children: infoItems
-                      .map(
-                        (info) => SizedBox(
-                          width: infoCardWidth,
-                          child: InfoCard(
-                            title: info.title,
-                            content: info.content,
-                          ),
+                // Ringkasan identitas adaptif dengan tinggi kartu seragam saat sejajar.
+                if (stackInfoCards)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < infoItems.length; i++) ...[
+                        if (i > 0) const SizedBox(height: infoSpacing),
+                        InfoCard(
+                          title: infoItems[i].title,
+                          content: infoItems[i].content,
                         ),
-                      )
-                      .toList(),
-                ),
+                      ],
+                    ],
+                  )
+                else
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < infoItems.length; i++) ...[
+                          if (i > 0) const SizedBox(width: infoSpacing),
+                          Expanded(
+                            child: InfoCard(
+                              title: infoItems[i].title,
+                              content: infoItems[i].content,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
 
                 const SizedBox(height: 16.0),
 
