@@ -1,50 +1,41 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
-import 'package:myportofolio_mobile/widgets/project_card.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/profile_header.dart';
+import 'package:myportofolio_mobile/widgets/project_card.dart';
 
 /// Halaman menu utama aplikasi MyPortfolio Mobile.
 ///
 /// Menyajikan ringkasan identitas pemilik portofolio ([ProfileHeader] dan [InfoCard])
-/// serta menu tombol aksi interaktif berkode warna ([ItemCard]).
+/// serta 4 kategori menu utama ([ItemCard]) yang masing-masing menampung aksi
+/// lihat dan tambah data.
 class MyHomePage extends StatelessWidget {
   /// Membuat instansi [MyHomePage].
-  MyHomePage({super.key});
+  const MyHomePage({super.key});
 
   final String npm = "2506547651";
   final String nama = "Reshandy Taftazani Aulya";
   final String kelas = "PBP D";
 
-  final List<ItemHomepage> items = [
-    ItemHomepage("Lihat Proyek", Icons.folder, Colors.indigo),
-    ItemHomepage("Lihat Education", Icons.school, const Color(0xFF00695C)),
-    ItemHomepage("Lihat Skills", Icons.code, const Color(0xFF6A1B9A)),
-    ItemHomepage("Lihat Experience", Icons.work, const Color(0xFF01579B)),
-    ItemHomepage("Tambah Proyek", Icons.add_circle, const Color(0xFF2E7D32)),
-    ItemHomepage(
-      "Tambah Pengalaman",
-      Icons.work_outline,
-      const Color(0xFF00838F),
-    ),
-    ItemHomepage(
-      "Tambah Pendidikan",
-      Icons.school_outlined,
-      const Color(0xFF00796B),
-    ),
-    ItemHomepage(
-      "Tambah Keahlian",
-      Icons.terminal,
-      const Color(0xFF7B1FA2),
-    ),
-    ItemHomepage(
-      "Tambah Tech Stack",
-      Icons.layers_outlined,
-      const Color(0xFF4527A0),
-    ),
-    ItemHomepage("Logout", Icons.logout, const Color(0xFFC62828)),
-  ];
+  void _handleLogout(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text(
+            "Kamu telah menekan tombol Logout!",
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: const Color(0xFFC62828),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +49,13 @@ class MyHomePage extends StatelessWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
       ),
       drawer: const LeftDrawer(),
       // Body halaman utama dengan dukungan scrolling responsif.
@@ -81,7 +79,7 @@ class MyHomePage extends StatelessWidget {
 
             const SizedBox(height: 16.0),
 
-            // Bagian tengah: pesan sambutan dan kisi tombol menu portofolio.
+            // Bagian tengah: pesan sambutan dan kisi 2x2 menu portofolio.
             Center(
               child: Column(
                 children: [
@@ -96,23 +94,20 @@ class MyHomePage extends StatelessWidget {
                     ),
                   ),
 
-                  // Dua kolom pada ruang sempit, tiga kolom pada ruang lebar.
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return GridView.count(
-                        primary: false,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        crossAxisCount: constraints.maxWidth >= 600 ? 3 : 2,
-                        // Tinggi kartu mengikuti skala teks perangkat.
-                        mainAxisExtent:
-                            144 * MediaQuery.textScalerOf(context).scale(1),
-                        shrinkWrap: true,
-                        children: items.map((item) => ItemCard(item)).toList(),
-                      );
-                    },
+                  GridView.count(
+                    primary: false,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    crossAxisCount: 2,
+                    // Tinggi kartu mengikuti skala teks perangkat.
+                    mainAxisExtent:
+                        144 * MediaQuery.textScalerOf(context).scale(1),
+                    shrinkWrap: true,
+                    children: portfolioMenuItems
+                        .map((item) => ItemCard(item))
+                        .toList(),
                   ),
                 ],
               ),

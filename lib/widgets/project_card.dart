@@ -1,25 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
-import 'package:myportofolio_mobile/screens/education_form.dart';
-import 'package:myportofolio_mobile/screens/experience_form.dart';
-import 'package:myportofolio_mobile/screens/project_form.dart';
-import 'package:myportofolio_mobile/screens/skill_form.dart';
-import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 
-/// Widget kartu tombol aksi pada menu beranda portofolio.
+/// Widget kartu kategori pada menu beranda portofolio.
 ///
-/// Kartu ini menampilkan ikon dan nama item portofolio dengan latar belakang
-/// berwarna dinamis sesuai konfigurasi [ItemHomepage.color]. Ketika ditekan,
-/// kartu akan memunculkan [SnackBar] dengan pesan konfirmasi interaktif.
+/// Menampilkan ikon beraksen warna lembut, judul kategori, dan keterangan
+/// singkat, lalu menavigasikan pengguna ke halaman bagian terkait saat ditekan.
 class ItemCard extends StatelessWidget {
-  static final Map<String, WidgetBuilder> _formRoutes = {
-    'Tambah Proyek': (_) => const ProjectFormPage(),
-    'Tambah Pengalaman': (_) => const ExperienceFormPage(),
-    'Tambah Pendidikan': (_) => const EducationFormPage(),
-    'Tambah Keahlian': (_) => const SkillFormPage(),
-    'Tambah Tech Stack': (_) => const TechStackFormPage(),
-  };
-
   /// Data konfigurasi item yang dirender oleh kartu ini.
   final ItemHomepage item;
 
@@ -28,63 +14,57 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      // Menentukan warna latar kartu secara dinamis dari properti item.
-      color: item.color,
-      borderRadius: BorderRadius.circular(12),
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
+      ),
+      elevation: 1,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        // Aksi ketika kartu ditekan oleh pengguna.
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // Menampilkan SnackBar interaktif dengan warna harmonis dan aksi tutup instan.
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  "Kamu telah menekan tombol ${item.name}!",
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: item.pageBuilder),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: item.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: item.color,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                duration: const Duration(seconds: 2),
-                action: SnackBarAction(
-                  label: 'TUTUP',
-                  textColor: Colors.white,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
+                child: Icon(item.icon, color: item.color, size: 28.0),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                item.name,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            );
-
-          // Navigate ke halaman yang sesuai
-          final routeBuilder = _formRoutes[item.name];
-          if (routeBuilder != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: routeBuilder),
-            );
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.icon, color: Colors.white, size: 30.0),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
+              const SizedBox(height: 2),
+              Text(
+                item.subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

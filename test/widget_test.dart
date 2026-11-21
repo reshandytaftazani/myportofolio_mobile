@@ -6,6 +6,7 @@ import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
 import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
@@ -60,9 +61,9 @@ void main() {
     await openDrawer(tester);
     expect(find.text('My Portfolio'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Add Project'));
+    await tester.tap(find.text('Projects').last);
     await tester.pumpAndSettle();
-    expect(find.byType(ProjectFormPage), findsOneWidget);
+    expect(find.byType(PortfolioSectionPage), findsOneWidget);
     await openDrawer(tester);
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('Home'));
@@ -71,15 +72,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('project card pushes form and system Back returns home', (
+  testWidgets('project card pushes section, form and system Back returns home', (
     tester,
   ) async {
     await tester.pumpWidget(const MyApp());
-    await tester.ensureVisible(find.text('Tambah Proyek'));
-    await tester.tap(find.text('Tambah Proyek'));
+    await tester.ensureVisible(find.text('Projects'));
+    await tester.tap(find.text('Projects'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tambah Proyek').first);
     await tester.pumpAndSettle();
     expect(find.byType(ProjectFormPage), findsOneWidget);
-    await tester.tap(find.text('TUTUP'));
+    await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -265,8 +268,10 @@ void main() {
       );
       await openDrawer(tester);
       expect(tester.takeException(), isNull);
-      await tester.ensureVisible(find.text('Add Project'));
-      await tester.tap(find.text('Add Project'));
+      await tester.ensureVisible(find.text('Projects'));
+      await tester.tap(find.text('Projects'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tambah Proyek').first);
       await tester.pumpAndSettle();
       await tester.enterText(field('Nama Proyek'), 'Proyek Ponsel');
       await tester.enterText(field('Deskripsi Proyek'), 'Deskripsi ponsel');
@@ -286,12 +291,14 @@ void main() {
     (tester) async {
       await tester.pumpWidget(const MyApp());
 
-      await tester.ensureVisible(find.text('Tambah Pengalaman'));
-      await tester.tap(find.text('Tambah Pengalaman'));
+      await tester.ensureVisible(find.text('Experiences'));
+      await tester.tap(find.text('Experiences'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tambah Pengalaman').first);
       await tester.pumpAndSettle();
       expect(find.byType(ExperienceFormPage), findsOneWidget);
 
-      await tester.tap(find.text('TUTUP'));
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
@@ -299,21 +306,21 @@ void main() {
       expect(find.byType(ExperienceFormPage), findsNothing);
 
       await openDrawer(tester);
-      await tester.tap(find.text('Tambah Pengalaman').last);
+      await tester.tap(find.text('Experiences').last);
       await tester.pumpAndSettle();
-      expect(find.byType(ExperienceFormPage), findsOneWidget);
+      expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
       // Selecting the active page in drawer only closes the drawer.
       await openDrawer(tester);
-      await tester.tap(find.text('Tambah Pengalaman').last);
+      await tester.tap(find.text('Experiences').last);
       await tester.pumpAndSettle();
-      expect(find.byType(ExperienceFormPage), findsOneWidget);
+      expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
       await openDrawer(tester);
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
       expect(find.byType(MyHomePage), findsOneWidget);
-      expect(find.byType(ExperienceFormPage), findsNothing);
+      expect(find.byType(PortfolioSectionPage), findsNothing);
 
       // Ensure Home did not push a duplicate route.
       final homeContext = tester.element(find.byType(MyHomePage));
@@ -503,19 +510,22 @@ void main() {
     (tester) async {
       await tester.pumpWidget(const MyApp());
 
-      for (final entry in <(String, Type)>[
-        ('Tambah Pendidikan', EducationFormPage),
-        ('Tambah Keahlian', SkillFormPage),
+      for (final entry in <(String, String, Type)>[
+        ('Education', 'Tambah Pendidikan', EducationFormPage),
+        ('Skills', 'Tambah Keahlian', SkillFormPage),
       ]) {
-        final label = entry.$1;
-        final pageType = entry.$2;
+        final sectionLabel = entry.$1;
+        final label = entry.$2;
+        final pageType = entry.$3;
 
-        await tester.ensureVisible(find.text(label));
-        await tester.tap(find.text(label));
+        await tester.ensureVisible(find.text(sectionLabel));
+        await tester.tap(find.text(sectionLabel));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(label).first);
         await tester.pumpAndSettle();
         expect(find.byType(pageType), findsOneWidget);
 
-        await tester.tap(find.text('TUTUP'));
+        await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
@@ -523,23 +533,23 @@ void main() {
         expect(find.byType(pageType), findsNothing);
 
         await openDrawer(tester);
-        await tester.ensureVisible(find.text(label).last);
-        await tester.tap(find.text(label).last);
+        await tester.ensureVisible(find.text(sectionLabel).last);
+        await tester.tap(find.text(sectionLabel).last);
         await tester.pumpAndSettle();
-        expect(find.byType(pageType), findsOneWidget);
+        expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
         // Selecting the active page in drawer only closes the drawer.
         await openDrawer(tester);
-        await tester.ensureVisible(find.text(label).last);
-        await tester.tap(find.text(label).last);
+        await tester.ensureVisible(find.text(sectionLabel).last);
+        await tester.tap(find.text(sectionLabel).last);
         await tester.pumpAndSettle();
-        expect(find.byType(pageType), findsOneWidget);
+        expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
         await openDrawer(tester);
         await tester.tap(find.text('Home'));
         await tester.pumpAndSettle();
         expect(find.byType(MyHomePage), findsOneWidget);
-        expect(find.byType(pageType), findsNothing);
+        expect(find.byType(PortfolioSectionPage), findsNothing);
 
         final homeContext = tester.element(find.byType(MyHomePage));
         expect(Navigator.of(homeContext).canPop(), isFalse);
@@ -759,12 +769,14 @@ void main() {
     (tester) async {
       await tester.pumpWidget(const MyApp());
 
-      await tester.ensureVisible(find.text('Tambah Tech Stack'));
+      await tester.ensureVisible(find.text('Projects'));
+      await tester.tap(find.text('Projects'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Tambah Tech Stack'));
       await tester.pumpAndSettle();
       expect(find.byType(TechStackFormPage), findsOneWidget);
 
-      await tester.tap(find.text('TUTUP'));
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
@@ -772,22 +784,22 @@ void main() {
       expect(find.byType(TechStackFormPage), findsNothing);
 
       await openDrawer(tester);
-      await tester.ensureVisible(find.text('Tambah Tech Stack').last);
-      await tester.tap(find.text('Tambah Tech Stack').last);
+      await tester.ensureVisible(find.text('Projects').last);
+      await tester.tap(find.text('Projects').last);
       await tester.pumpAndSettle();
-      expect(find.byType(TechStackFormPage), findsOneWidget);
+      expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
       await openDrawer(tester);
-      await tester.ensureVisible(find.text('Tambah Tech Stack').last);
-      await tester.tap(find.text('Tambah Tech Stack').last);
+      await tester.ensureVisible(find.text('Projects').last);
+      await tester.tap(find.text('Projects').last);
       await tester.pumpAndSettle();
-      expect(find.byType(TechStackFormPage), findsOneWidget);
+      expect(find.byType(PortfolioSectionPage), findsOneWidget);
 
       await openDrawer(tester);
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
       expect(find.byType(MyHomePage), findsOneWidget);
-      expect(find.byType(TechStackFormPage), findsNothing);
+      expect(find.byType(PortfolioSectionPage), findsNothing);
 
       final homeContext = tester.element(find.byType(MyHomePage));
       expect(Navigator.of(homeContext).canPop(), isFalse);

@@ -1,19 +1,31 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Model data yang merepresentasikan item menu aksi pada halaman utama portofolio.
+/// Model data yang merepresentasikan item menu kategori pada halaman utama portofolio.
 ///
-/// Setiap item memiliki label ([name]), ikon representatif ([icon]),
-/// serta warna latar belakang kartu ([color]) yang unik dan bermakna semantik.
+/// Setiap item memiliki judul ([name]), keterangan singkat ([subtitle]),
+/// ikon representatif ([icon]), warna aksen ([color]), dan halaman tujuan ([pageBuilder]).
 class ItemHomepage {
-  /// Nama atau judul tombol aksi.
+  /// Nama atau judul kategori menu.
   final String name;
 
-  /// Ikon yang merepresentasikan aksi tombol.
+  /// Keterangan singkat isi kategori.
+  final String subtitle;
+
+  /// Ikon yang merepresentasikan kategori.
   final IconData icon;
 
-  /// Warna latar belakang kartu tombol aksi.
+  /// Warna aksen ikon dan indikator kartu.
   final Color color;
 
-  /// Membuat instansi [ItemHomepage] dengan parameter wajib.
-  const ItemHomepage(this.name, this.icon, this.color);
+  /// Builder halaman tujuan saat kartu ditekan.
+  final WidgetBuilder pageBuilder;
+
+  /// Membuat instansi [ItemHomepage].
+  const ItemHomepage({
+    required this.name,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.pageBuilder,
+  });
 }
