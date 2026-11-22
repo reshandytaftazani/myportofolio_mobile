@@ -2,7 +2,7 @@
 
 Aplikasi portofolio pribadi multiplatform yang dibuat dengan Flutter sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (CSGE602022)**, Fakultas Ilmu Komputer, Universitas Indonesia. Proyek mobile ini melengkapi [portofolio web Django](https://github.com/reshandytaftazani/myportofolio) dengan tampilan ringkas untuk perangkat mobile.
 
-**Status:** Tugas 8 selesai dan Tahap 1–3 persiapan Tugas 9 telah ter-merge ke `main` (sinkronisasi 5 model & serialisasi JSON, 5 widget card daftar portofolio, data dummy lokal, halaman daftar bertab, halaman detail `PortfolioDetailPage`, serta 22 unit & widget test lulus).
+**Status:** Tugas 8 selesai, Tahap 1–3 persiapan Tugas 9 telah ter-merge ke `main`, serta perbaikan audit UI, rute web, proteksi draf form, dukungan SVG, dan uji regresi telah diterapkan (`flutter analyze` bersih, **49/49** tes lulus).
 
 ## Daftar Isi
 
@@ -28,10 +28,13 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 
 ## Fitur
 
-- Header profil (`ProfileHeader`) dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa, serta tiga kartu identitas (`InfoCard`) untuk NPM, nama, dan kelas.
-- Empat kartu kategori utama di beranda (`MyHomePage`) dalam kisi 2 kolom: **Projects**, **Experiences**, **Education**, dan **Skills**, dengan tinggi kartu mengikuti skala teks perangkat, serta tombol aksi **Logout** pada `AppBar`.
-- Halaman bagian portofolio (`PortfolioSectionPage`) yang menampilkan daftar item menggunakan `ListView.builder` (dengan data dummy lokal `DummyPortfolioData` sementara serta fallback *empty state* bila daftar kosong) dan tombol **Tambah** (`FloatingActionButton.extended`). Pada bagian **Projects**, tersedia tab **Projects** dan **Tech Stack** beserta aksi **Tambah Proyek** dan **Tambah Tech Stack**.
-- Lima widget kartu daftar (`ProjectItemCard`, `TechStackCard`, `ExperienceCard`, `EducationCard`, dan `SkillCard`) yang dapat ditekan untuk membuka halaman detail lengkap (`PortfolioDetailPage`) berisi seluruh atribut model, *code snippet* monospace penuh, tanggal lengkap, status `Featured`/`Ongoing`, URL proyek, dan metadata *star*.
+- Header profil (`ProfileHeader`) dengan avatar inisial, nama, deskripsi peran, dan status mahasiswa, serta tiga kartu identitas (`InfoCard`) dengan tinggi seragam untuk NPM, nama, dan kelas.
+- Empat kartu kategori utama di beranda (`MyHomePage`) dalam kisi 2 kolom: **Projects**, **Experiences**, **Education**, dan **Skills**, dengan tinggi kartu mengikuti skala teks perangkat, tombol aksi **Logout** pada `AppBar`, serta pembatas pratinjau ponsel (`_WebPhoneViewport`) saat mode debug di Web.
+- Halaman bagian portofolio (`PortfolioSectionPage`) yang menampilkan daftar item menggunakan `ListView.builder` (dengan data dummy lokal `DummyPortfolioData` sementara serta fallback *empty state* bila daftar kosong) dan tombol **Tambah** (`FloatingActionButton.extended`) yang menyesuaikan tab aktif. Pada bagian **Projects**, tersedia tab **Projects** dan **Tech Stack** beserta aksi **Tambah Proyek** dan **Tambah Tech Stack**.
+- Lima widget kartu daftar (`ProjectItemCard`, `TechStackCard`, `ExperienceCard`, `EducationCard`, dan `SkillCard`) yang dapat ditekan untuk membuka halaman detail lengkap (`PortfolioDetailPage`) berisi seluruh atribut model, *code snippet* monospace penuh, tanggal lengkap, status `Featured`/`Ongoing`, URL proyek yang dapat dibuka (`url_launcher`), dan metadata *star*.
+- Dukungan pemuatan gambar dan ikon SVG jaringan melalui `PortfolioNetworkImage` (`flutter_svg` dengan loader IO/stub), dekode gambar terukur (`ResizeImage`) pada kartu, serta tata letak responsif pada layar sempit dan skala teks besar di `SkillCard` dan `PortfolioDetailPage`.
+- Resolver rute kategori web (`/section/projects`, `/section/experiences`, `/section/education`, `/section/skills`) melalui `onGenerateInitialRoutes`, `onGenerateRoute`, dan `onUnknownRoute` di `main.dart` serta penggunaan ulang rute kategori di `LeftDrawer` via `PortfolioRouteObserver`.
+- Proteksi draf formulir (`FormDraftPopScope` & `draft_confirm_dialog.dart`) pada seluruh 5 form yang meminta konfirmasi sebelum membuang perubahan yang belum disimpan, sekaligus menutup drawer terlebih dahulu saat tombol **Back** ditekan ketika drawer terbuka.
 - Serialisasi JSON (`fromJson` & `toJson`) pada seluruh 5 model (`Education`, `Experience`, `Project`, `Skill`, `TechStack`) yang diselaraskan dengan `main/serializers.py` pada backend Django (termasuk `id`, `starCount`, `isStarred`, `starredByNames`, serta `techStack`, `categoryDisplay`, dan `isOngoing`).
 - Drawer navigasi bersama (`LeftDrawer`) pada beranda, halaman bagian, dan seluruh halaman form yang disamakan dengan menu beranda (**Home**, **Projects**, **Experiences**, **Education**, dan **Skills**).
 - Lima formulir tervalidasi (`StatefulWidget` + `Form` + `GlobalKey<FormState>`) yang diselaraskan dengan model Django:
@@ -48,6 +51,8 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 
 - Flutter SDK dengan Dart `^3.13.7` pada [pubspec.yaml](pubspec.yaml).
 - `material_ui: ^1.11.1` dan tema Material 3 untuk komponen antarmuka.
+- `flutter_svg: ^2.5.0` untuk merender ikon SVG jaringan pada komponen Tech Stack.
+- `url_launcher: ^6.3.3` untuk membuka tautan URL proyek dari halaman detail.
 - `flutter_lints: ^6.0.0` untuk analisis statis.
 - `flutter_test` untuk pengujian widget.
 
@@ -57,9 +62,10 @@ Versi Flutter/Dart yang terpasang di mesin pengembang dapat diperiksa dengan `fl
 
 ```text
 lib/
-├── main.dart                         # Titik masuk dan konfigurasi MaterialApp
+├── main.dart                         # Titik masuk, MaterialApp, resolver rute web, & _WebPhoneViewport
 ├── data/
-│   └── dummy_portfolio.dart          # Data dummy lokal sementara untuk 5 model
+│   ├── dummy_portfolio.dart          # Data dummy lokal sementara untuk 5 model
+│   └── portfolio_menu.dart           # Definisi menu kategori, data source, & helper rute bagian
 ├── forms/
 │   └── form_validators.dart          # Validator bersama (URL HTTP(S), teks wajib, panjang)
 ├── models/
@@ -78,20 +84,28 @@ lib/
 │   ├── project_form.dart             # Halaman form Tambah Proyek
 │   ├── skill_form.dart               # Halaman form Tambah Keahlian
 │   └── tech_stack_form.dart          # Halaman form Tambah Tech Stack
+├── utils/
+│   ├── portfolio_route_observer.dart # Observer rute untuk navigasi kategori di LeftDrawer
+│   └── url_launcher_helper.dart      # Helper pembuka tautan URL proyek
 └── widgets/
+    ├── draft_confirm_dialog.dart     # Guard & dialog konfirmasi buang draf formulir
     ├── education_card.dart           # Kartu daftar Pendidikan
     ├── experience_card.dart          # Kartu daftar Pengalaman
     ├── form_summary_dialog.dart      # Dialog ringkasan bersama (Edit Isian & Selesai)
     ├── info_card.dart                # Kartu informasi identitas
     ├── left_drawer.dart              # Drawer navigasi bersama
+    ├── portfolio_network_image.dart  # Widget gambar jaringan dengan dukungan SVG & raster
+    ├── portfolio_svg_loader_io.dart  # Pemuat SVG jaringan untuk platform IO
+    ├── portfolio_svg_loader_stub.dart# Pemuat SVG jaringan untuk platform non-IO (Web)
     ├── profile_header.dart           # Header profil
     ├── project_card.dart             # Kartu aksi menu (ItemCard)
     ├── project_item_card.dart        # Kartu daftar Proyek
     ├── skill_card.dart               # Kartu daftar Keahlian
     └── tech_stack_card.dart          # Kartu daftar Tech Stack
 test/
+├── audit_regression_test.dart        # Uji regresi rute web, proteksi draf, SVG, & responsivitas
 ├── models_serialization_test.dart    # 8 unit test serialisasi JSON (fromJson & toJson)
-└── widget_test.dart                  # 14 widget test navigasi, validasi, dialog, dan layout
+└── widget_test.dart                  # Widget test navigasi, validasi, dialog, dan layout
 ```
 
 ## Menjalankan Secara Lokal
@@ -162,16 +176,13 @@ flutter analyze
 flutter test
 ```
 
-### Hasil Pengujian Aktual (Persiapan Tugas 9 — Tahap 1–3)
+### Hasil Pengujian Aktual
 
 - **`flutter analyze`**: `No issues found!` (bersih tanpa error, warning, maupun lint issue).
-- **`flutter test`**: **22/22 tes lulus**, terdiri dari:
-  - **8 unit test di [test/models_serialization_test.dart](test/models_serialization_test.dart)**: menguji `fromJson` dan `toJson` untuk seluruh 5 model (`Education`, `Experience`, `Project`, `Skill`, `TechStack`).
-  - **14 widget test di [test/widget_test.dart](test/widget_test.dart)**, mencakup:
-  - Navigasi kartu beranda, halaman bagian (`Projects`, `Experiences`, `Education`, `Skills`), dan drawer menuju seluruh 5 form (`Proyek`, `Pengalaman`, `Pendidikan`, `Keahlian`, `Tech Stack`), termasuk perilaku `Back` dan `Home`.
-  - Validasi input wajib kosong/spasi, batas panjang karakter, URL HTTP(S), rentang tanggal Pengalaman, tahun 4 digit Pendidikan, dan urutan bilangan bulat Tech Stack.
-  - Dialog ringkasan: tampil hanya saat valid, `Edit Isian` mempertahankan seluruh nilai (termasuk indentasi `code_snippet`), dan `Selesai` mereset form.
-  - Keterjangkauan scroll pada lebar ponsel dengan keyboard terbuka serta dialog cuplikan kode panjang pada layar sempit.
+- **`flutter test`**: **49/49 tes lulus**, terdiri dari:
+  - **Unit test di [test/models_serialization_test.dart](test/models_serialization_test.dart)**: menguji `fromJson` dan `toJson` untuk seluruh 5 model (`Education`, `Experience`, `Project`, `Skill`, `TechStack`).
+  - **Widget test di [test/widget_test.dart](test/widget_test.dart)**: menguji navigasi kartu beranda, halaman bagian, dan drawer menuju seluruh 5 form, validasi input, dialog ringkasan (`Edit Isian` & `Selesai`), serta keterjangkauan scroll pada layar sempit.
+  - **Uji regresi di [test/audit_regression_test.dart](test/audit_regression_test.dart)**: menguji *decoupling* sumber data kosong, proteksi draf formulir & penggunaan ulang rute drawer, pemuatan ikon SVG (`SvgPicture`), resolusi rute kategori web (`/section/<name>`) & perilaku tombol Back saat drawer terbuka, serta responsivitas pada layar sempit.
 
 ### Pemeriksaan Manual (Chrome / Perangkat)
 
@@ -199,12 +210,15 @@ Ringkasan berikut mencatat progres implementasi pada riwayat Git proyek:
 | 21 November 2026 — Sinkronisasi 5 Model & Serialisasi JSON | Menambahkan field `id`, status, dan *star* serta `fromJson`/`toJson` pada 5 model dan 8 unit test di `test/models_serialization_test.dart`. | `06a5979`–`bf42204`, `1d056b1` | Selesai |
 | 21 November 2026 — Widget Card, Data Dummy, & Daftar Portofolio | Membuat 5 widget card, `DummyPortfolioData`, daftar `ListView.builder` pada `PortfolioSectionPage`, serta tab `Projects` & `Tech Stack`. | `e3333eb`–`6a4fec2`, `948f13a` | Selesai |
 | 21 November 2026 — Halaman Detail Item & Navigasi Card | Membuat `PortfolioDetailPage` untuk ke-5 model dan menghubungkan navigasi `onTap` dari setiap card daftar ke halaman detail. | `6eefab0`, `067109d`, `5c62c9f` | Selesai |
+| 21 November 2026 — Perbaikan Overflow Beranda, Refaktor Menu, & Pemformatan | Mengatasi overflow beranda, menyatukan status `Experience`, mengekstrak `portfolio_menu.dart`, merapikan form & navigasi, menambah uji regresi awal, dan menjalankan `dart format`. | `af65998`, `945ab0c` | Selesai |
+| 22 November 2026 — Pratinjau Viewport Ponsel Web & Penyeragaman `InfoCard` | Menambahkan `_WebPhoneViewport` untuk mode debug Web dan menyamakan tinggi `InfoCard` pada halaman beranda. | `c8d7069` | Selesai |
+| 22 November 2026 — Rute Kategori Web, Proteksi Draf Form, Dukungan SVG, & Regresi | Menambahkan resolver rute `/section/<name>`, `PortfolioRouteObserver`, `FormDraftPopScope` & dialog konfirmasi draf pada 5 form, pemuat SVG (`flutter_svg`), tautan URL (`url_launcher`), izin jaringan Android/macOS, perbaikan responsivitas, serta memperluas `test/audit_regression_test.dart` hingga 49/49 tes lulus. | `d831a7d` | Selesai |
 
 ## Keterbatasan Saat Ini
 
 - Daftar pada `PortfolioSectionPage` masih menggunakan data dummy lokal (`DummyPortfolioData`), dan tombol **Logout** pada `AppBar` masih bersifat demonstrasi SnackBar.
 - Data formulir baru divalidasi dan diringkas secara lokal di dialog; belum ada integrasi HTTP, autentikasi sesi, maupun sinkronisasi database ke backend Django.
-- Konten profil dan daftar menu beranda masih didefinisikan secara statis di `lib/screens/menu.dart`.
+- Konten profil masih didefinisikan secara statis di `lib/screens/menu.dart`, sedangkan konfigurasi menu kategori beranda berada di `lib/data/portfolio_menu.dart` dan belum diambil dari backend.
 
 ## Kontribusi dan Pelaporan Masalah
 
