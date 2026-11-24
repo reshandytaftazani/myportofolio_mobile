@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 /// Konfigurasi aksi tambahan pada halaman bagian portofolio.
@@ -13,11 +14,15 @@ class SectionAction {
   /// Builder halaman tujuan saat tombol ditekan.
   final WidgetBuilder builder;
 
+  /// Menandakan apakah aksi ini membutuhkan pengguna login terlebih dahulu.
+  final bool requiresAuth;
+
   /// Membuat instansi [SectionAction].
   const SectionAction({
     required this.label,
     required this.icon,
     required this.builder,
+    this.requiresAuth = false,
   });
 }
 
@@ -70,6 +75,9 @@ class PortfolioSectionPage extends StatefulWidget {
   /// Konten kustom opsional untuk tab utama (mis. [ProjectListView]).
   final Widget? primaryBody;
 
+  /// Callback opsional setelah [primaryAction] selesai dijalankan.
+  final Future<void>? Function()? onPrimaryActionSuccess;
+
   /// Membuat instansi [PortfolioSectionPage].
   const PortfolioSectionPage({
     super.key,
@@ -87,6 +95,7 @@ class PortfolioSectionPage extends StatefulWidget {
     this.secondaryItemCount = 0,
     this.secondaryItemBuilder,
     this.primaryBody,
+    this.onPrimaryActionSuccess,
   });
 
   @override
@@ -150,8 +159,21 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
     super.dispose();
   }
 
-  void _openPage(BuildContext context, WidgetBuilder builder) {
-    Navigator.push(context, MaterialPageRoute(builder: builder));
+  Future<void> _openAction(BuildContext context, SectionAction action) async {
+    if (action.requiresAuth) {
+      final loggedIn = await ensureLoggedIn(context);
+      if (!loggedIn || !context.mounted) return;
+    }
+
+    final result = await Navigator.push<Object?>(
+      context,
+      MaterialPageRoute<Object?>(builder: action.builder),
+    );
+    if (!context.mounted) return;
+    if (action == widget.primaryAction &&
+        (result == true || action.requiresAuth)) {
+      await widget.onPrimaryActionSuccess?.call();
+    }
   }
 
   Widget _buildListOrEmpty({
@@ -170,7 +192,7 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
         accentColor: widget.accentColor,
         primaryAction: emptyPrimaryAction,
         secondaryAction: emptySecondaryAction,
-        onOpenPage: (pageBuilder) => _openPage(context, pageBuilder),
+        onOpenAction: (action) => _openAction(context, action),
       );
     }
 
@@ -225,7 +247,7 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
                   alignment: Alignment.centerRight,
                   child: OutlinedButton.icon(
                     onPressed: () =>
-                        _openPage(context, widget.secondaryAction!.builder),
+                        _openAction(context, widget.secondaryAction!),
                     icon: Icon(widget.secondaryAction!.icon, size: 18),
                     label: Text(widget.secondaryAction!.label),
                   ),
@@ -292,7 +314,7 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
       drawer: LeftDrawer(activeSection: widget.section),
       body: _buildBody(context),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openPage(context, activeAction.builder),
+        onPressed: () => _openAction(context, activeAction),
         icon: Icon(activeAction.icon),
         label: Text(activeAction.label),
       ),
@@ -307,7 +329,7 @@ class _EmptySectionView extends StatelessWidget {
   final Color accentColor;
   final SectionAction primaryAction;
   final SectionAction? secondaryAction;
-  final ValueChanged<WidgetBuilder> onOpenPage;
+  final ValueChanged<SectionAction> onOpenAction;
 
   const _EmptySectionView({
     required this.title,
@@ -316,7 +338,7 @@ class _EmptySectionView extends StatelessWidget {
     required this.accentColor,
     required this.primaryAction,
     required this.secondaryAction,
-    required this.onOpenPage,
+    required this.onOpenAction,
   });
 
   @override
@@ -362,13 +384,13 @@ class _EmptySectionView extends StatelessWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   FilledButton.icon(
-                    onPressed: () => onOpenPage(primaryAction.builder),
+                    onPressed: () => onOpenAction(primaryAction),
                     icon: Icon(primaryAction.icon),
                     label: Text(primaryAction.label),
                   ),
                   if (secondaryAction != null)
                     OutlinedButton.icon(
-                      onPressed: () => onOpenPage(secondaryAction!.builder),
+                      onPressed: () => onOpenAction(secondaryAction!),
                       icon: Icon(secondaryAction!.icon),
                       label: Text(secondaryAction!.label),
                     ),

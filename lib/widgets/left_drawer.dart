@@ -1,8 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 class LeftDrawer extends StatelessWidget {
   final PortfolioSection? activeSection;
@@ -90,8 +95,46 @@ class LeftDrawer extends StatelessWidget {
     }
   }
 
+  Future<void> _openAddProject(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    navigator.pop();
+
+    if (onWillNavigate != null) {
+      final shouldProceed = await onWillNavigate!();
+      if (!shouldProceed || !navigator.mounted) return;
+    }
+
+    final loggedIn = await ensureLoggedIn(navigator.context);
+    if (!loggedIn || !navigator.mounted) return;
+
+    await navigator.push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => const ProjectFormPage()),
+    );
+  }
+
+  Future<void> _openLogin(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    navigator.pop();
+    await navigator.push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => const LoginScreen()),
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final authState = context.read<AuthState>();
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pop();
+
+    await authState.logout();
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Berhasil logout.')));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+
     return Drawer(
       child: ListView(
         children: [
@@ -137,6 +180,24 @@ class LeftDrawer extends StatelessWidget {
               onTap: () => _navigateToSection(context, category),
             ),
           ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.add_box_outlined),
+            title: const Text('Add Project'),
+            onTap: () => _openAddProject(context),
+          ),
+          if (isLoggedIn)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () => _handleLogout(context),
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Login'),
+              onTap: () => _openLogin(context),
+            ),
         ],
       ),
     );

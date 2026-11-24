@@ -59,6 +59,9 @@ Widget buildPortfolioSectionPage(
 
   switch (section) {
     case PortfolioSection.projects:
+      final projectListKey = dataSource == null
+          ? GlobalKey<ProjectListViewState>()
+          : null;
       return PortfolioSectionPage(
         section: config.section,
         title: config.name,
@@ -67,7 +70,12 @@ Widget buildPortfolioSectionPage(
         icon: config.icon,
         accentColor: config.color,
         primaryTabLabel: 'Projects',
-        primaryBody: dataSource == null ? const ProjectListView() : null,
+        primaryBody: projectListKey != null
+            ? ProjectListView(key: projectListKey)
+            : null,
+        onPrimaryActionSuccess: projectListKey != null
+            ? () => projectListKey.currentState?.reload()
+            : null,
         itemCount: data.projects.length,
         itemBuilder: (context, index) {
           final project = data.projects[index];
@@ -98,6 +106,7 @@ Widget buildPortfolioSectionPage(
         primaryAction: SectionAction(
           label: 'Tambah Proyek',
           icon: Icons.add,
+          requiresAuth: true,
           builder: (_) => const ProjectFormPage(),
         ),
         secondaryAction: SectionAction(

@@ -1,9 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/profile_header.dart';
 import 'package:myportofolio_mobile/widgets/project_card.dart';
+import 'package:provider/provider.dart';
 
 /// Halaman menu utama aplikasi MyPortfolio Mobile.
 ///
@@ -18,13 +21,15 @@ class MyHomePage extends StatelessWidget {
   final String nama = "Reshandy Taftazani Aulya";
   final String kelas = "PBP D";
 
-  void _handleLogout(BuildContext context) {
-    ScaffoldMessenger.of(context)
+  Future<void> _handleLogout(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await context.read<AuthState>().logout();
+    messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: const Text(
-            "Kamu telah menekan tombol Logout!",
+            'Berhasil logout.',
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
           backgroundColor: const Color(0xFFC62828),
@@ -37,8 +42,17 @@ class MyHomePage extends StatelessWidget {
       );
   }
 
+  void _openLogin(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<bool>(builder: (_) => const LoginScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<AuthState>().isLoggedIn;
+
     // Scaffold menyediakan struktur visual dasar halaman (AppBar, Body, SnackBar).
     return Scaffold(
       // AppBar menampilkan bar bagian atas halaman aplikasi.
@@ -50,11 +64,18 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () => _handleLogout(context),
-          ),
+          if (isLoggedIn)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () => _handleLogout(context),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.login),
+              tooltip: 'Login',
+              onPressed: () => _openLogin(context),
+            ),
         ],
       ),
       drawer: const LeftDrawer(isHome: true),

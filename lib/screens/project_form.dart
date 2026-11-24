@@ -1,9 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 /// Halaman formulir untuk menambahkan entri Proyek baru.
 class ProjectFormPage extends StatefulWidget {
@@ -18,16 +22,19 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _techStackController = TextEditingController();
   final _projectUrlController = TextEditingController();
   final _projectImageUrlController = TextEditingController();
 
   String _category = Project.defaultCategory;
   bool _isFeatured = false;
   bool _wasDirty = false;
+  bool _isSubmitting = false;
 
   bool get _isDirty =>
       _titleController.text.isNotEmpty ||
       _descriptionController.text.isNotEmpty ||
+      _techStackController.text.isNotEmpty ||
       _projectUrlController.text.isNotEmpty ||
       _projectImageUrlController.text.isNotEmpty ||
       _category != Project.defaultCategory ||
@@ -51,6 +58,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _techStackController.dispose();
     _projectUrlController.dispose();
     _projectImageUrlController.dispose();
     super.dispose();
@@ -60,6 +68,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     _formKey.currentState?.reset();
     _titleController.clear();
     _descriptionController.clear();
+    _techStackController.clear();
     _projectUrlController.clear();
     _projectImageUrlController.clear();
     setState(() {
@@ -72,42 +81,90 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final projectUrl = _projectUrlController.text.trim();
-    final projectImageUrl = _projectImageUrlController.text.trim();
+    final loggedIn = await ensureLoggedIn(context);
+    if (!loggedIn || !mounted) return;
+
+    final token = context.read<AuthState>().token;
+    if (token == null) return;
+
     final project = Project(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       category: _category,
-      projectUrl: projectUrl,
-      projectImageUrl: projectImageUrl,
+      techStack: _techStackController.text.trim(),
+      projectUrl: _projectUrlController.text.trim(),
+      projectImageUrl: _projectImageUrlController.text.trim(),
       isFeatured: _isFeatured,
     );
 
-    final shouldReset = await showFormSummaryDialog(
-      context: context,
-      title: 'Ringkasan Proyek',
-      entries: [
-        FormSummaryEntry(label: 'Nama Proyek', value: project.title),
-        FormSummaryEntry(
-          label: 'Deskripsi',
-          value: project.description,
-          isMultiline: true,
-        ),
-        FormSummaryEntry(label: 'Kategori', value: project.category),
-        FormSummaryEntry(label: 'Tautan Proyek', value: project.projectUrl),
-        FormSummaryEntry(
-          label: 'URL Gambar Proyek',
-          value: project.projectImageUrl,
-        ),
-        FormSummaryEntry(
-          label: 'Proyek Unggulan',
-          value: project.isFeatured ? 'Ya' : 'Tidak',
-        ),
-      ],
-    );
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    if (shouldReset == true && mounted) {
-      _resetForm();
+    try {
+      final created = await context.read<ApiClient>().createProject(
+        project,
+        token: token,
+      );
+      if (!mounted) return;
+
+      final shouldReset = await showFormSummaryDialog(
+        context: context,
+        title: 'Proyek Berhasil Disimpan',
+        entries: [
+          FormSummaryEntry(label: 'Nama Proyek', value: created.title),
+          FormSummaryEntry(
+            label: 'Deskripsi',
+            value: created.description,
+            isMultiline: true,
+          ),
+          FormSummaryEntry(label: 'Kategori', value: created.category),
+          FormSummaryEntry(label: 'Tech Stack', value: created.techStack),
+          FormSummaryEntry(label: 'Tautan Proyek', value: created.projectUrl),
+          FormSummaryEntry(
+            label: 'URL Gambar Proyek',
+            value: created.projectImageUrl,
+          ),
+          FormSummaryEntry(
+            label: 'Proyek Unggulan',
+            value: created.isFeatured ? 'Ya' : 'Tidak',
+          ),
+        ],
+      );
+
+      if (shouldReset == true && mounted) {
+        _resetForm();
+      }
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.statusCode == 401) {
+        await context.read<AuthState>().logout();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sesi login berakhir (401). Silakan login kembali.'),
+          ),
+        );
+        await ensureLoggedIn(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal menyimpan proyek (${e.statusCode}): ${e.message}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -190,6 +247,21 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
+                  controller: _techStackController,
+                  decoration: const InputDecoration(
+                    labelText: 'Tech Stack (Opsional)',
+                    hintText: 'Contoh: Flutter, Django, PostgreSQL',
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value != null && value.trim().length > 255) {
+                      return 'Tech stack maksimal 255 karakter';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
                   controller: _projectUrlController,
                   keyboardType: TextInputType.url,
                   textInputAction: TextInputAction.next,
@@ -243,14 +315,23 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  onPressed: _submitForm,
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  onPressed: _isSubmitting ? null : _submitForm,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20.0,
+                          width: 20.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 16.0),
               ],
