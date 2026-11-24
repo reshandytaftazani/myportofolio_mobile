@@ -3,7 +3,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +18,10 @@ void main() {
 /// resolver rute kategori untuk deep link/refresh web, dan menentukan
 /// [MyHomePage] sebagai halaman utama aplikasi.
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.apiClient, this.initialToken});
+
+  final ApiClient? apiClient;
+  final String? initialToken;
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     if (settings.name == Navigator.defaultRouteName) {
@@ -61,28 +67,39 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MyPortfolio',
-      navigatorObservers: [portfolioRouteObserver],
-      onGenerateInitialRoutes: _onGenerateInitialRoutes,
-      onGenerateRoute: _onGenerateRoute,
-      onUnknownRoute: _onUnknownRoute,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          secondary: Colors.amber[700],
+    return MultiProvider(
+      providers: [
+        Provider<ApiClient>(create: (_) => apiClient ?? ApiClient()),
+        ChangeNotifierProvider<AuthState>(
+          create: (context) =>
+              AuthState(context.read<ApiClient>(), initialToken: initialToken),
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+      ],
+      child: MaterialApp(
+        title: 'MyPortfolio',
+        navigatorObservers: [portfolioRouteObserver],
+        onGenerateInitialRoutes: _onGenerateInitialRoutes,
+        onGenerateRoute: _onGenerateRoute,
+        onUnknownRoute: _onUnknownRoute,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.indigo,
+            secondary: Colors.amber[700],
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        builder: (context, child) {
+          if (!kIsWeb || !kDebugMode || child == null) {
+            return child ?? const SizedBox.shrink();
+          }
+          return _WebPhoneViewport(child: child);
+        },
       ),
-      builder: (context, child) {
-        if (!kIsWeb || !kDebugMode || child == null) {
-          return child ?? const SizedBox.shrink();
-        }
-        return _WebPhoneViewport(child: child);
-      },
     );
   }
 }
