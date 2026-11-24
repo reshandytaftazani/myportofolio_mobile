@@ -49,3 +49,6 @@ app.*.map.json
 
 # Planning Lokal
 Planning/
+
+# Generated json_serializable files
+*.g.dart
