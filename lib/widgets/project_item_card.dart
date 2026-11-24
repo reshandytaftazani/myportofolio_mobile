@@ -13,9 +13,8 @@ class ProjectItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage =
-        project.projectImageUrl != null && project.projectImageUrl!.isNotEmpty;
-    final hasUrl = project.projectUrl != null && project.projectUrl!.isNotEmpty;
+    final hasImage = project.projectImageUrl.isNotEmpty;
+    final hasUrl = project.projectUrl.isNotEmpty;
 
     return Card(
       elevation: 1,
@@ -37,7 +36,7 @@ class ProjectItemCard extends StatelessWidget {
                 height: 150,
                 width: double.infinity,
                 child: PortfolioNetworkImage(
-                  imageUrl: project.projectImageUrl!,
+                  imageUrl: project.projectImageUrl,
                   height: 150,
                   fit: BoxFit.cover,
                   fallbackBuilder: (_) => _buildImageFallback(theme),
@@ -88,11 +87,11 @@ class ProjectItemCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Semantics(
                       link: true,
-                      label: 'Buka tautan proyek ${project.projectUrl!}',
+                      label: 'Buka tautan proyek ${project.projectUrl}',
                       child: InkWell(
                         borderRadius: BorderRadius.circular(8),
                         onTap: () =>
-                            launchExternalUrl(context, project.projectUrl!),
+                            launchExternalUrl(context, project.projectUrl),
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(minHeight: 44),
                           child: Padding(
@@ -110,7 +109,7 @@ class ProjectItemCard extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    project.projectUrl!,
+                                    project.projectUrl,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.bodySmall?.copyWith(

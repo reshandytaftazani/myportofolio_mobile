@@ -64,17 +64,16 @@ class PortfolioDetailPage extends StatelessWidget {
       bodyText: project.description,
       metadataRows: [
         if (project.id != null) DetailRow(label: 'ID', value: project.id!),
-        if (project.techStack != null && project.techStack!.trim().isNotEmpty)
-          DetailRow(label: 'Tech Stack', value: project.techStack!),
-        if (project.projectUrl != null && project.projectUrl!.trim().isNotEmpty)
+        if (project.techStack.trim().isNotEmpty)
+          DetailRow(label: 'Tech Stack', value: project.techStack),
+        if (project.projectUrl.trim().isNotEmpty)
           DetailRow(
             label: 'URL Proyek',
-            value: project.projectUrl!,
+            value: project.projectUrl,
             isLink: true,
           ),
-        if (project.projectImageUrl != null &&
-            project.projectImageUrl!.trim().isNotEmpty)
-          DetailRow(label: 'URL Gambar', value: project.projectImageUrl!),
+        if (project.projectImageUrl.trim().isNotEmpty)
+          DetailRow(label: 'URL Gambar', value: project.projectImageUrl),
         DetailRow(
           label: 'Status Unggulan',
           value: project.isFeatured ? 'Featured' : 'Reguler',

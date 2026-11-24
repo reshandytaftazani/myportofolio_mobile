@@ -160,7 +160,7 @@ void main() {
         category: 'Web Development',
         techStack: 'Django',
         projectUrl: 'https://example.com',
-        projectImageUrl: null,
+        projectImageUrl: '',
         isFeatured: false,
       );
 
@@ -170,7 +170,7 @@ void main() {
         'category': 'Web Development',
         'tech_stack': 'Django',
         'project_url': 'https://example.com',
-        'project_image_url': null,
+        'project_image_url': '',
         'is_featured': false,
       });
     });

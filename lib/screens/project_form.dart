@@ -78,8 +78,8 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       category: _category,
-      projectUrl: projectUrl.isEmpty ? null : projectUrl,
-      projectImageUrl: projectImageUrl.isEmpty ? null : projectImageUrl,
+      projectUrl: projectUrl,
+      projectImageUrl: projectImageUrl,
       isFeatured: _isFeatured,
     );
 
