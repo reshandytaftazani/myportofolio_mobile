@@ -101,40 +101,12 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       _isSubmitting = true;
     });
 
+    final Project created;
     try {
-      final created = await context.read<ApiClient>().createProject(
+      created = await context.read<ApiClient>().createProject(
         project,
         token: token,
       );
-      if (!mounted) return;
-
-      final shouldReset = await showFormSummaryDialog(
-        context: context,
-        title: 'Proyek Berhasil Disimpan',
-        entries: [
-          FormSummaryEntry(label: 'Nama Proyek', value: created.title),
-          FormSummaryEntry(
-            label: 'Deskripsi',
-            value: created.description,
-            isMultiline: true,
-          ),
-          FormSummaryEntry(label: 'Kategori', value: created.category),
-          FormSummaryEntry(label: 'Tech Stack', value: created.techStack),
-          FormSummaryEntry(label: 'Tautan Proyek', value: created.projectUrl),
-          FormSummaryEntry(
-            label: 'URL Gambar Proyek',
-            value: created.projectImageUrl,
-          ),
-          FormSummaryEntry(
-            label: 'Proyek Unggulan',
-            value: created.isFeatured ? 'Ya' : 'Tidak',
-          ),
-        ],
-      );
-
-      if (shouldReset == true && mounted) {
-        _resetForm();
-      }
     } on ApiException catch (e) {
       if (!mounted) return;
       if (e.statusCode == 401) {
@@ -155,16 +127,47 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
           ),
         );
       }
+      return;
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      return;
     } finally {
       if (mounted) {
         setState(() {
           _isSubmitting = false;
         });
       }
+    }
+
+    if (!mounted) return;
+    final shouldReset = await showFormSummaryDialog(
+      context: context,
+      title: 'Proyek Berhasil Disimpan',
+      entries: [
+        FormSummaryEntry(label: 'Nama Proyek', value: created.title),
+        FormSummaryEntry(
+          label: 'Deskripsi',
+          value: created.description,
+          isMultiline: true,
+        ),
+        FormSummaryEntry(label: 'Kategori', value: created.category),
+        FormSummaryEntry(label: 'Tech Stack', value: created.techStack),
+        FormSummaryEntry(label: 'Tautan Proyek', value: created.projectUrl),
+        FormSummaryEntry(
+          label: 'URL Gambar Proyek',
+          value: created.projectImageUrl,
+        ),
+        FormSummaryEntry(
+          label: 'Proyek Unggulan',
+          value: created.isFeatured ? 'Ya' : 'Tidak',
+        ),
+      ],
+    );
+
+    if (shouldReset == true && mounted) {
+      _resetForm();
     }
   }
 

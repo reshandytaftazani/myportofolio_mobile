@@ -1,15 +1,74 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/main.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
 import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
+
+ApiClient _createMockApiClient() {
+  return ApiClient(
+    baseUrl: 'https://mock.local',
+    client: MockClient((request) async {
+      if (request.url.path == '/api/v1/projects/' && request.method == 'GET') {
+        return http.Response(jsonEncode([]), 200);
+      }
+      if (request.url.path == '/api/v1/projects/' && request.method == 'POST') {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'id': 'mock-project-1',
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
+      if (request.url.path == '/api/v1/auth/token/' &&
+          request.method == 'POST') {
+        return http.Response(jsonEncode({'token': 'mock-token'}), 200);
+      }
+      if (request.url.path == '/api/v1/auth/logout/' &&
+          request.method == 'POST') {
+        return http.Response('', 204);
+      }
+      return http.Response('Not found', 404);
+    }),
+  );
+}
+
+Widget _wrapWithProviders(
+  Widget child, {
+  ApiClient? apiClient,
+  String? initialToken,
+}) {
+  final client = apiClient ?? _createMockApiClient();
+  return MultiProvider(
+    providers: [
+      Provider<ApiClient>.value(value: client),
+      ChangeNotifierProvider<AuthState>(
+        create: (_) => AuthState(client, initialToken: initialToken),
+      ),
+    ],
+    child: child,
+  );
+}
 
 Future<void> openDrawer(WidgetTester tester) async {
   await tester.tap(find.byTooltip('Open navigation menu'));
@@ -57,7 +116,7 @@ void main() {
   testWidgets('drawer renders without overflow and navigates both ways', (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
     await openDrawer(tester);
     expect(find.text('My Portfolio'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -75,7 +134,9 @@ void main() {
   testWidgets(
     'project card pushes section, form and system Back returns home',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(
+        MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+      );
       await tester.ensureVisible(find.text('Projects'));
       await tester.tap(find.text('Projects'));
       await tester.pumpAndSettle();
@@ -95,7 +156,12 @@ void main() {
   testWidgets(
     'form validates, summarizes all inputs and resets for another submission',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ProjectFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: ProjectFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
       await saveForm(tester);
       expect(find.text('Nama proyek tidak boleh kosong!'), findsOneWidget);
       expect(find.text('Deskripsi proyek tidak boleh kosong!'), findsOneWidget);
@@ -158,6 +224,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Mobile Development').last);
       await tester.pumpAndSettle();
+      await tester.enterText(field('Tech Stack (Opsional)'), 'Flutter, Django');
       await tester.enterText(
         field('Tautan Proyek (Opsional)'),
         'https://example.com/project',
@@ -173,10 +240,11 @@ void main() {
 
       await saveForm(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('Ringkasan Proyek'), findsOneWidget);
+      expect(find.text('Proyek Berhasil Disimpan'), findsOneWidget);
       for (final text in [
         'Nama Proyek: Proyek A',
         'Kategori: Mobile Development',
+        'Tech Stack: Flutter, Django',
         'Tautan Proyek: https://example.com/project',
         'URL Gambar Proyek: https://example.com/cover.png',
         'Proyek Unggulan: Ya',
@@ -255,13 +323,16 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetViewInsets);
       await tester.pumpWidget(
-        MaterialApp(
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(1.5)),
-            child: child!,
+        _wrapWithProviders(
+          MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(1.5)),
+              child: child!,
+            ),
+            home: const ProjectFormPage(),
           ),
-          home: const ProjectFormPage(),
+          initialToken: 'test-token',
         ),
       );
       await openDrawer(tester);
@@ -287,7 +358,7 @@ void main() {
   testWidgets(
     'experience card and drawer open form, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
 
       await tester.ensureVisible(find.text('Experiences'));
       await tester.tap(find.text('Experiences'));
@@ -508,7 +579,7 @@ void main() {
   testWidgets(
     'education and skill cards and drawer open forms, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
 
       for (final entry in <(String, String, Type)>[
         ('Education', 'Tambah Pendidikan', EducationFormPage),
@@ -761,7 +832,7 @@ void main() {
   testWidgets(
     'tech stack card and drawer open form, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
 
       await tester.ensureVisible(find.text('Projects'));
       await tester.tap(find.text('Projects'));
@@ -927,4 +998,104 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  group('AuthState & ensureLoggedIn guard', () {
+    test(
+      'AuthState login and logout update token and notify listeners',
+      () async {
+        var notifyCount = 0;
+        String? logoutAuthHeader;
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: MockClient((request) async {
+            if (request.url.path == '/api/v1/auth/token/') {
+              final body = jsonDecode(request.body) as Map<String, dynamic>;
+              if (body['username'] == 'admin' && body['password'] == 'secret') {
+                return http.Response(jsonEncode({'token': 'tok-123'}), 200);
+              }
+              return http.Response(jsonEncode({'detail': 'Invalid'}), 400);
+            }
+            if (request.url.path == '/api/v1/auth/logout/') {
+              logoutAuthHeader = request.headers['Authorization'];
+              return http.Response('', 204);
+            }
+            return http.Response('Not found', 404);
+          }),
+        );
+
+        final authState = AuthState(apiClient);
+        authState.addListener(() => notifyCount++);
+
+        expect(authState.isLoggedIn, isFalse);
+        expect(authState.token, isNull);
+
+        await authState.login('admin', 'secret');
+        expect(authState.isLoggedIn, isTrue);
+        expect(authState.token, 'tok-123');
+        expect(notifyCount, 1);
+
+        await authState.logout();
+        expect(logoutAuthHeader, 'Token tok-123');
+        expect(authState.isLoggedIn, isFalse);
+        expect(authState.token, isNull);
+        expect(notifyCount, 2);
+      },
+    );
+
+    testWidgets(
+      'ensureLoggedIn redirects unauthenticated user to LoginScreen and proceeds after login',
+      (tester) async {
+        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+
+        await tester.ensureVisible(find.text('Projects'));
+        await tester.tap(find.text('Projects'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Tambah Proyek').first);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginScreen), findsOneWidget);
+        expect(find.byType(ProjectFormPage), findsNothing);
+
+        await tester.enterText(field('Username'), 'admin');
+        await tester.enterText(field('Password'), 'secret');
+        await tester.tap(find.widgetWithText(FilledButton, 'Login'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginScreen), findsNothing);
+        expect(find.byType(ProjectFormPage), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'ensureLoggedIn returns true immediately when already logged in',
+      (tester) async {
+        bool? result;
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () async {
+                      result = await ensureLoggedIn(context);
+                    },
+                    child: const Text('Check Guard'),
+                  ),
+                ),
+              ),
+            ),
+            initialToken: 'existing-token',
+          ),
+        );
+
+        await tester.tap(find.text('Check Guard'));
+        await tester.pumpAndSettle();
+
+        expect(result, isTrue);
+        expect(find.byType(LoginScreen), findsNothing);
+      },
+    );
+  });
 }

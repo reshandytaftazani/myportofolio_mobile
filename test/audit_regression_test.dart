@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
@@ -20,11 +22,24 @@ import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
 import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/utils/url_launcher_helper.dart';
 import 'package:myportofolio_mobile/widgets/experience_card.dart';
 import 'package:myportofolio_mobile/widgets/project_item_card.dart';
 import 'package:myportofolio_mobile/widgets/skill_card.dart';
 import 'package:myportofolio_mobile/widgets/tech_stack_card.dart';
+
+ApiClient _createMockApiClient() {
+  return ApiClient(
+    baseUrl: 'https://mock.local',
+    client: MockClient((request) async {
+      if (request.url.path == '/api/v1/projects/' && request.method == 'GET') {
+        return http.Response(jsonEncode([]), 200);
+      }
+      return http.Response('Not found', 404);
+    }),
+  );
+}
 
 class _FakeHttpOverrides extends HttpOverrides {
   final Map<String, ({int statusCode, List<int> bytes})> responses;
@@ -144,7 +159,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
         await tester.pumpAndSettle();
 
         expect(find.text('Active Student'), findsOneWidget);
@@ -321,7 +336,9 @@ void main() {
     testWidgets(
       'selecting Projects from filled form asks confirmation, preserves draft on Batal, and reuses existing Projects route on Buang',
       (tester) async {
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(
+          MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+        );
 
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
@@ -390,7 +407,7 @@ void main() {
       'TechStackFormPage, EducationFormPage, and SkillFormPage clear dirty state after reset so Back pops without discard dialog',
       (tester) async {
         // 1. TechStackFormPage
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
         await tester.pumpAndSettle();
@@ -807,7 +824,7 @@ void main() {
     testWidgets(
       'Projects section FAB switches to Tambah Tech Stack on Tech Stack tab',
       (tester) async {
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
         await tester.pumpAndSettle();
@@ -910,11 +927,9 @@ void main() {
         (tester) async {
           tester.platformDispatcher.defaultRouteNameTestValue =
               category.routeName;
-          addTearDown(
-            tester.platformDispatcher.clearDefaultRouteNameTestValue,
-          );
+          addTearDown(tester.platformDispatcher.clearDefaultRouteNameTestValue);
 
-          await tester.pumpWidget(const MyApp());
+          await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
           await tester.pumpAndSettle();
 
           // Refresh / tautan langsung membuka halaman kategori yang sesuai
@@ -949,7 +964,7 @@ void main() {
             '/section/tidak-ada';
         addTearDown(tester.platformDispatcher.clearDefaultRouteNameTestValue);
 
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
         await tester.pumpAndSettle();
 
         expect(find.byType(MyHomePage), findsOneWidget);
@@ -961,7 +976,9 @@ void main() {
     testWidgets(
       'first Back closes open drawer on dirty form without discard dialog; second Back prompts and Buang exits form',
       (tester) async {
-        await tester.pumpWidget(const MyApp());
+        await tester.pumpWidget(
+          MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+        );
 
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
