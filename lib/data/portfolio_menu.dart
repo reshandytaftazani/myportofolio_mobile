@@ -16,6 +16,7 @@ import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 import 'package:myportofolio_mobile/widgets/education_card.dart';
 import 'package:myportofolio_mobile/widgets/experience_card.dart';
 import 'package:myportofolio_mobile/widgets/project_item_card.dart';
+import 'package:myportofolio_mobile/widgets/project_list_view.dart';
 import 'package:myportofolio_mobile/widgets/skill_card.dart';
 import 'package:myportofolio_mobile/widgets/tech_stack_card.dart';
 
@@ -66,6 +67,7 @@ Widget buildPortfolioSectionPage(
         icon: config.icon,
         accentColor: config.color,
         primaryTabLabel: 'Projects',
+        primaryBody: dataSource == null ? const ProjectListView() : null,
         itemCount: data.projects.length,
         itemBuilder: (context, index) {
           final project = data.projects[index];
@@ -187,7 +189,6 @@ Widget buildPortfolioSectionPage(
 
 /// Merakit daftar konfigurasi 4 bagian utama portofolio dari [dataSource].
 List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
-  final data = dataSource ?? PortfolioDataSource.dummy();
   return portfolioCategoryConfigs
       .map(
         (config) => ItemHomepage(
@@ -197,7 +198,7 @@ List<ItemHomepage> buildPortfolioMenuItems({PortfolioDataSource? dataSource}) {
           icon: config.icon,
           color: config.color,
           pageBuilder: (_) =>
-              buildPortfolioSectionPage(config.section, dataSource: data),
+              buildPortfolioSectionPage(config.section, dataSource: dataSource),
         ),
       )
       .toList();

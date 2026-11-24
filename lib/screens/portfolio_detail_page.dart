@@ -250,25 +250,25 @@ class PortfolioDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                height: 160,
-                width: double.infinity,
-                color: accentColor.withValues(alpha: 0.1),
-                child: hasImage
-                    ? PortfolioNetworkImage(
-                        imageUrl: imageUrl!,
-                        height: 160,
-                        fit: isSvgImageUrl(imageUrl!)
-                            ? BoxFit.contain
-                            : BoxFit.cover,
-                        fallbackBuilder: (_) => _buildBannerFallback(),
-                      )
-                    : _buildBannerFallback(),
+            if (hasImage) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 160,
+                  width: double.infinity,
+                  color: accentColor.withValues(alpha: 0.1),
+                  child: PortfolioNetworkImage(
+                    imageUrl: imageUrl!,
+                    height: 160,
+                    fit: isSvgImageUrl(imageUrl!)
+                        ? BoxFit.contain
+                        : BoxFit.cover,
+                    fallbackBuilder: (_) => _buildBannerFallback(),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
             if (badges.isNotEmpty) ...[
               Wrap(
                 spacing: 8,

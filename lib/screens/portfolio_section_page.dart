@@ -67,6 +67,9 @@ class PortfolioSectionPage extends StatefulWidget {
   /// Builder item untuk daftar tab sekunder.
   final IndexedWidgetBuilder? secondaryItemBuilder;
 
+  /// Konten kustom opsional untuk tab utama (mis. [ProjectListView]).
+  final Widget? primaryBody;
+
   /// Membuat instansi [PortfolioSectionPage].
   const PortfolioSectionPage({
     super.key,
@@ -83,6 +86,7 @@ class PortfolioSectionPage extends StatefulWidget {
     this.secondaryTabLabel,
     this.secondaryItemCount = 0,
     this.secondaryItemBuilder,
+    this.primaryBody,
   });
 
   @override
@@ -182,6 +186,9 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
 
   Widget _buildBody(BuildContext context) {
     if (!_hasTabs) {
+      if (widget.primaryBody != null) {
+        return widget.primaryBody!;
+      }
       return _buildListOrEmpty(
         context: context,
         count: widget.itemCount,
@@ -197,7 +204,8 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
       children: [
         Column(
           children: [
-            if (widget.secondaryAction != null && widget.itemCount > 0)
+            if (widget.secondaryAction != null &&
+                (widget.primaryBody != null || widget.itemCount > 0))
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -224,15 +232,17 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
                 ),
               ),
             Expanded(
-              child: _buildListOrEmpty(
-                context: context,
-                count: widget.itemCount,
-                builder: widget.itemBuilder,
-                emptyTitle:
-                    'Belum ada data ${widget.primaryTabLabel ?? widget.title}',
-                emptyPrimaryAction: widget.primaryAction,
-                emptySecondaryAction: widget.secondaryAction,
-              ),
+              child:
+                  widget.primaryBody ??
+                  _buildListOrEmpty(
+                    context: context,
+                    count: widget.itemCount,
+                    builder: widget.itemBuilder,
+                    emptyTitle:
+                        'Belum ada data ${widget.primaryTabLabel ?? widget.title}',
+                    emptyPrimaryAction: widget.primaryAction,
+                    emptySecondaryAction: widget.secondaryAction,
+                  ),
             ),
           ],
         ),
