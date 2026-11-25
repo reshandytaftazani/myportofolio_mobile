@@ -372,5 +372,65 @@ void main() {
         expect(find.byType(LoginScreen), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'ProjectListView keeps existing items during refresh and shows SnackBar on refresh error',
+      (tester) async {
+        var attempt = 0;
+        final refreshCompleter = Completer<http.Response>();
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: MockClient((_) async {
+            attempt++;
+            if (attempt == 1) {
+              return http.Response(
+                jsonEncode([
+                  {
+                    'id': '1',
+                    'title': 'Existing Project',
+                    'description': 'Already loaded',
+                    'category': 'Mobile Development',
+                  },
+                ]),
+                200,
+              );
+            }
+            return refreshCompleter.future;
+          }),
+        );
+
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const Scaffold(body: ProjectListView()),
+            apiClient: apiClient,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Existing Project'), findsOneWidget);
+
+        // Trigger pull-to-refresh.
+        await tester.fling(
+          find.text('Existing Project'),
+          const Offset(0, 300),
+          1000,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Existing item stays visible while refresh is in progress.
+        expect(find.text('Existing Project'), findsOneWidget);
+
+        // Complete refresh with an error.
+        refreshCompleter.complete(
+          http.Response(jsonEncode({'detail': 'Refresh failed'}), 503),
+        );
+        await tester.pumpAndSettle();
+
+        // Existing item remains visible and SnackBar reports the error.
+        expect(find.text('Existing Project'), findsOneWidget);
+        expect(find.text('Gagal memuat ulang: Refresh failed'), findsOneWidget);
+      },
+    );
   });
 }

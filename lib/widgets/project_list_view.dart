@@ -21,6 +21,7 @@ class ProjectListViewState extends State<ProjectListView> {
   late ApiClient _apiClient;
   bool _ownsApiClient = false;
   late Future<List<Project>> _projectsFuture;
+  List<Project>? _cachedProjects;
 
   @override
   void initState() {
@@ -53,14 +54,33 @@ class ProjectListViewState extends State<ProjectListView> {
   }
 
   /// Memuat ulang daftar proyek dari API DRF.
-  Future<void> reload() {
+  Future<void> reload() async {
     final future = _apiClient.getProjects();
     // Pastikan error tidak dianggap unhandled sebelum FutureBuilder sempat subscribe.
     future.then<void>((_) {}, onError: (Object _) {});
     setState(() {
       _projectsFuture = future;
     });
-    return future;
+    try {
+      final projects = await future;
+      if (mounted) {
+        _cachedProjects = projects;
+      }
+    } catch (error) {
+      if (!mounted) return;
+      if (_cachedProjects != null) {
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        messenger?.hideCurrentSnackBar();
+        messenger?.showSnackBar(
+          SnackBar(
+            content: Text('Gagal memuat ulang: ${formatApiError(error)}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -70,11 +90,17 @@ class ProjectListViewState extends State<ProjectListView> {
     return FutureBuilder<List<Project>>(
       future: _projectsFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.hasData) {
+          _cachedProjects = snapshot.data;
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData &&
+            _cachedProjects == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError) {
+        if (snapshot.hasError && _cachedProjects == null) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -123,7 +149,7 @@ class ProjectListViewState extends State<ProjectListView> {
           );
         }
 
-        final projects = snapshot.data ?? const <Project>[];
+        final projects = snapshot.data ?? _cachedProjects ?? const <Project>[];
         if (projects.isEmpty) {
           return RefreshIndicator(
             onRefresh: reload,
