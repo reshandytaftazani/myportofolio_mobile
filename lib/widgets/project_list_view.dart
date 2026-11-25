@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:myportofolio_mobile/widgets/project_item_card.dart';
 import 'package:provider/provider.dart';
@@ -22,20 +23,37 @@ class ProjectListViewState extends State<ProjectListView> {
   bool _ownsApiClient = false;
   late Future<List<Project>> _projectsFuture;
   List<Project>? _cachedProjects;
+  ProjectRefreshNotifier? _refreshNotifier;
 
   @override
   void initState() {
     super.initState();
     _apiClient = _resolveApiClient();
+    _refreshNotifier = _resolveRefreshNotifier();
+    _refreshNotifier?.addListener(_handleExternalRefresh);
     _projectsFuture = _apiClient.getProjects();
   }
 
   @override
   void dispose() {
+    _refreshNotifier?.removeListener(_handleExternalRefresh);
     if (_ownsApiClient) {
       _apiClient.close();
     }
     super.dispose();
+  }
+
+  ProjectRefreshNotifier? _resolveRefreshNotifier() {
+    try {
+      return context.read<ProjectRefreshNotifier>();
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
+
+  void _handleExternalRefresh() {
+    if (!mounted) return;
+    reload().catchError((Object _) {});
   }
 
   ApiClient _resolveApiClient() {

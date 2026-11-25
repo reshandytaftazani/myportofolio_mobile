@@ -5,6 +5,7 @@ import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:provider/provider.dart';
@@ -97,6 +98,12 @@ class LeftDrawer extends StatelessWidget {
 
   Future<void> _openAddProject(BuildContext context) async {
     final navigator = Navigator.of(context);
+    ProjectRefreshNotifier? refreshNotifier;
+    try {
+      refreshNotifier = context.read<ProjectRefreshNotifier>();
+    } on ProviderNotFoundException {
+      refreshNotifier = null;
+    }
     navigator.pop();
 
     if (onWillNavigate != null) {
@@ -107,9 +114,12 @@ class LeftDrawer extends StatelessWidget {
     final loggedIn = await ensureLoggedIn(navigator.context);
     if (!loggedIn || !navigator.mounted) return;
 
-    await navigator.push<bool>(
+    final created = await navigator.push<bool>(
       MaterialPageRoute<bool>(builder: (_) => const ProjectFormPage()),
     );
+    if (created == true) {
+      refreshNotifier?.requestRefresh();
+    }
   }
 
   Future<void> _openLogin(BuildContext context) async {

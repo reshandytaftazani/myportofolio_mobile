@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 /// Konfigurasi aksi tambahan pada halaman bagian portofolio.
 class SectionAction {
@@ -170,9 +172,16 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
       MaterialPageRoute<Object?>(builder: action.builder),
     );
     if (!context.mounted) return;
-    if (action == widget.primaryAction &&
-        (result == true || action.requiresAuth)) {
-      await widget.onPrimaryActionSuccess?.call();
+    if (action == widget.primaryAction && result == true) {
+      if (widget.onPrimaryActionSuccess != null) {
+        await widget.onPrimaryActionSuccess!.call();
+      } else if (widget.section == PortfolioSection.projects) {
+        try {
+          context.read<ProjectRefreshNotifier>().requestRefresh();
+        } on ProviderNotFoundException {
+          // Abaikan jika tidak ada ProjectRefreshNotifier di widget tree.
+        }
+      }
     }
   }
 

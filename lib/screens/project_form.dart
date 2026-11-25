@@ -31,6 +31,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   bool _isFeatured = false;
   bool _wasDirty = false;
   bool _isSubmitting = false;
+  bool _hasCreatedProject = false;
 
   bool get _isDirty =>
       _titleController.text.isNotEmpty ||
@@ -118,7 +119,18 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
             content: Text('Sesi login berakhir (401). Silakan login kembali.'),
           ),
         );
-        await ensureLoggedIn(context);
+        final reLoggedIn = await ensureLoggedIn(context);
+        if (reLoggedIn && mounted) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Login berhasil. Tekan Save untuk mengirim ulang proyek.',
+                ),
+              ),
+            );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,6 +160,9 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     }
 
     if (!mounted) return;
+    setState(() {
+      _hasCreatedProject = true;
+    });
     final shouldReset = await showFormSummaryDialog(
       context: context,
       title: 'Proyek Berhasil Disimpan',
@@ -183,6 +198,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
     return FormDraftPopScope(
       isDirty: _isDirty,
+      popResult: _hasCreatedProject ? true : null,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -204,6 +220,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
               children: [
                 TextFormField(
                   controller: _titleController,
+                  enabled: !_isSubmitting,
                   decoration: const InputDecoration(
                     labelText: 'Nama Proyek',
                     hintText: 'Nama Proyek',
@@ -219,6 +236,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _descriptionController,
+                  enabled: !_isSubmitting,
                   maxLines: 5,
                   minLines: 3,
                   decoration: const InputDecoration(
@@ -246,17 +264,20 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                         ),
                       )
                       .toList(),
-                  onChanged: (newValue) {
-                    if (newValue == null) return;
-                    setState(() {
-                      _category = newValue;
-                      _wasDirty = _isDirty;
-                    });
-                  },
+                  onChanged: _isSubmitting
+                      ? null
+                      : (newValue) {
+                          if (newValue == null) return;
+                          setState(() {
+                            _category = newValue;
+                            _wasDirty = _isDirty;
+                          });
+                        },
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _techStackController,
+                  enabled: !_isSubmitting,
                   decoration: const InputDecoration(
                     labelText: 'Tech Stack (Opsional)',
                     hintText: 'Contoh: Flutter, Django, PostgreSQL',
@@ -272,6 +293,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _projectUrlController,
+                  enabled: !_isSubmitting,
                   keyboardType: TextInputType.url,
                   textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
@@ -287,6 +309,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _projectImageUrlController,
+                  enabled: !_isSubmitting,
                   keyboardType: TextInputType.url,
                   textInputAction: TextInputAction.done,
                   decoration: const InputDecoration(
@@ -307,12 +330,14 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                     'Tandai sebagai proyek unggulan di portofolio',
                   ),
                   value: _isFeatured,
-                  onChanged: (value) {
-                    setState(() {
-                      _isFeatured = value;
-                      _wasDirty = _isDirty;
-                    });
-                  },
+                  onChanged: _isSubmitting
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _isFeatured = value;
+                            _wasDirty = _isDirty;
+                          });
+                        },
                 ),
                 const SizedBox(height: 16.0),
                 ElevatedButton(

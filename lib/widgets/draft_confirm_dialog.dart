@@ -33,17 +33,19 @@ Future<bool> showDiscardDraftDialog(BuildContext context) async {
 class FormDraftPopScope extends StatelessWidget {
   final bool isDirty;
   final Widget child;
+  final Object? popResult;
 
   const FormDraftPopScope({
     super.key,
     required this.isDirty,
     required this.child,
+    this.popResult,
   });
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<void>(
-      canPop: !isDirty,
+    return PopScope<Object?>(
+      canPop: !isDirty && popResult == null,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final route = ModalRoute.of(context);
@@ -51,9 +53,13 @@ class FormDraftPopScope extends StatelessWidget {
           Navigator.of(context).pop();
           return;
         }
+        if (!isDirty) {
+          Navigator.of(context).pop(popResult);
+          return;
+        }
         final shouldDiscard = await showDiscardDraftDialog(context);
         if (shouldDiscard && context.mounted) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(popResult);
         }
       },
       child: child,

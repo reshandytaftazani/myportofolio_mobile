@@ -5,6 +5,7 @@ import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 import 'package:provider/provider.dart';
 
@@ -85,6 +86,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthState>(
           create: (context) =>
               AuthState(context.read<ApiClient>(), initialToken: initialToken),
+        ),
+        ChangeNotifierProvider<ProjectRefreshNotifier>(
+          create: (_) => ProjectRefreshNotifier(),
         ),
       ],
       child: MaterialApp(
