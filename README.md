@@ -218,6 +218,7 @@ Ringkasan berikut mencatat progres implementasi pada riwayat Git proyek:
 
 - Daftar pada `PortfolioSectionPage` masih menggunakan data dummy lokal (`DummyPortfolioData`), dan tombol **Logout** pada `AppBar` masih bersifat demonstrasi SnackBar.
 - Data formulir baru divalidasi dan diringkas secara lokal di dialog; belum ada integrasi HTTP, autentikasi sesi, maupun sinkronisasi database ke backend Django.
+- Token autentikasi DRF pada `AuthState` sengaja disimpan hanya di memori (*in-memory*) sesuai spesifikasi Tutorial 10 sehingga sesi login berakhir saat aplikasi ditutup atau dimulai ulang, serta untuk menghindari penyimpanan token mentah pada storage lokal non-terenkripsi.
 - Konten profil masih didefinisikan secara statis di `lib/screens/menu.dart`, sedangkan konfigurasi menu kategori beranda berada di `lib/data/portfolio_menu.dart` dan belum diambil dari backend.
 
 ## Kontribusi dan Pelaporan Masalah
