@@ -3,6 +3,7 @@ import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
@@ -122,7 +123,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Gagal menyimpan proyek (${e.statusCode}): ${e.message}',
+              formatApiError(e, actionLabel: 'Gagal menyimpan proyek'),
             ),
           ),
         );
@@ -130,8 +131,13 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       return;
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            formatApiError(e, actionLabel: 'Gagal menyimpan proyek'),
+          ),
+        ),
+      );
       return;
     } finally {
       if (mounted) {

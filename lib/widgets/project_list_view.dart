@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:myportofolio_mobile/widgets/project_item_card.dart';
 import 'package:provider/provider.dart';
 
@@ -95,7 +96,7 @@ class ProjectListViewState extends State<ProjectListView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${snapshot.error}',
+                      formatApiError(snapshot.error ?? 'Unknown error'),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

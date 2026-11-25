@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:provider/provider.dart';
 
 /// Halaman login untuk menukarkan kredensial Django dengan auth token DRF.
@@ -40,15 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       Navigator.pop(context, true);
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login gagal (${e.statusCode}): ${e.message}')),
-      );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(formatApiError(e, actionLabel: 'Login gagal'))),
+      );
     } finally {
       if (mounted) {
         setState(() {
