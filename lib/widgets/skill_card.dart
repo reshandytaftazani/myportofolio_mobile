@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
 
 /// Kartu tampilan untuk satu entri [Skill] pada daftar portofolio.

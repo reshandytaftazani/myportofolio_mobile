@@ -1,7 +1,7 @@
 import 'dart:convert' show base64Decode, utf8;
 
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 final RegExp _svgRootPattern = RegExp(
   r'<\s*(?:[a-zA-Z0-9_-]+:)?svg\b',

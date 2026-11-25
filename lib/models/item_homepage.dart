@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 /// Identitas stabil untuk setiap bagian utama portofolio.
 enum PortfolioSection { projects, experiences, education, skills }
