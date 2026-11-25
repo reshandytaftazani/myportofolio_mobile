@@ -17,9 +17,9 @@ class MyHomePage extends StatelessWidget {
   /// Membuat instansi [MyHomePage].
   const MyHomePage({super.key});
 
-  final String npm = "2506547651";
-  final String nama = "Reshandy Taftazani Aulya";
-  final String kelas = "PBP D";
+  final String npm = '2506547651';
+  final String nama = 'Reshandy Taftazani Aulya';
+  final String kelas = 'PBP D';
 
   Future<void> _handleLogout(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);

@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
@@ -53,7 +55,7 @@ class ProjectListViewState extends State<ProjectListView> {
 
   void _handleExternalRefresh() {
     if (!mounted) return;
-    reload().catchError((Object _) {});
+    unawaited(reload().catchError((Object _) {}));
   }
 
   ApiClient _resolveApiClient() {
@@ -75,7 +77,7 @@ class ProjectListViewState extends State<ProjectListView> {
   Future<void> reload() async {
     final future = _apiClient.getProjects();
     // Pastikan error tidak dianggap unhandled sebelum FutureBuilder sempat subscribe.
-    future.then<void>((_) {}, onError: (Object _) {});
+    unawaited(future.then<void>((_) {}, onError: (Object _) {}));
     setState(() {
       _projectsFuture = future;
     });
@@ -207,7 +209,7 @@ class ProjectListViewState extends State<ProjectListView> {
                   project: project,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (_) => PortfolioDetailPage.project(project),
                     ),
                   ),

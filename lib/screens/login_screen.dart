@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
@@ -99,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) {
                       if (!_isSubmitting) {
-                        _submit();
+                        unawaited(_submit());
                       }
                     },
                     decoration: const InputDecoration(

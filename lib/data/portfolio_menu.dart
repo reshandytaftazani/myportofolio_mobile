@@ -75,7 +75,7 @@ Widget buildPortfolioSectionPage(
             project: project,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => PortfolioDetailPage.project(project),
               ),
             ),
@@ -89,7 +89,7 @@ Widget buildPortfolioSectionPage(
             techStack: techStack,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => PortfolioDetailPage.techStack(techStack),
               ),
             ),
@@ -121,7 +121,7 @@ Widget buildPortfolioSectionPage(
             experience: experience,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => PortfolioDetailPage.experience(experience),
               ),
             ),
@@ -147,7 +147,7 @@ Widget buildPortfolioSectionPage(
             education: education,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => PortfolioDetailPage.education(education),
               ),
             ),
@@ -173,7 +173,7 @@ Widget buildPortfolioSectionPage(
             skill: skill,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => PortfolioDetailPage.skill(skill),
               ),
             ),

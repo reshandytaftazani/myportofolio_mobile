@@ -30,7 +30,7 @@ class ItemCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               settings: RouteSettings(name: item.routeName),
               builder: item.pageBuilder,
             ),

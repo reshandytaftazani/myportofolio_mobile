@@ -46,7 +46,7 @@ class LeftDrawer extends StatelessWidget {
     }
 
     navigator.pushAndRemoveUntil(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         settings: const RouteSettings(name: '/'),
         builder: (context) => const MyHomePage(),
       ),
@@ -80,7 +80,7 @@ class LeftDrawer extends StatelessWidget {
       return;
     }
 
-    final route = MaterialPageRoute(
+    final route = MaterialPageRoute<void>(
       settings: RouteSettings(name: category.routeName),
       builder: (_) =>
           buildPortfolioSectionPage(category.section, dataSource: dataSource),
