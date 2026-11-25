@@ -55,6 +55,8 @@ class ProjectListViewState extends State<ProjectListView> {
   /// Memuat ulang daftar proyek dari API DRF.
   Future<void> reload() {
     final future = _apiClient.getProjects();
+    // Pastikan error tidak dianggap unhandled sebelum FutureBuilder sempat subscribe.
+    future.then<void>((_) {}, onError: (Object _) {});
     setState(() {
       _projectsFuture = future;
     });
@@ -104,7 +106,13 @@ class ProjectListViewState extends State<ProjectListView> {
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
-                      onPressed: reload,
+                      onPressed: () async {
+                        try {
+                          await reload();
+                        } catch (_) {
+                          // Error sudah ditampilkan oleh FutureBuilder melalui snapshot.error.
+                        }
+                      },
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Retry'),
                     ),

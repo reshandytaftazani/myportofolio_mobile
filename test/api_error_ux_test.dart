@@ -244,5 +244,133 @@ void main() {
         expect(find.textContaining('SocketException'), findsNothing);
       },
     );
+
+    testWidgets(
+      'ProjectListView shows concise message on TimeoutException/HTML 500 and recovers on Retry',
+      (tester) async {
+        var attempt = 0;
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          timeout: const Duration(milliseconds: 20),
+          client: MockClient((_) async {
+            attempt++;
+            if (attempt == 1) {
+              return Completer<http.Response>().future;
+            }
+            if (attempt == 2) {
+              return http.Response(
+                '<html><body><h1>500 Server Error</h1></body></html>',
+                500,
+                reasonPhrase: 'Internal Server Error',
+              );
+            }
+            return http.Response(
+              jsonEncode([
+                {
+                  'id': '1',
+                  'title': 'Recovered Project',
+                  'description': 'Loaded after retry',
+                  'category': 'Mobile Development',
+                },
+              ]),
+              200,
+            );
+          }),
+        );
+
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const Scaffold(body: ProjectListView()),
+            apiClient: apiClient,
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 40));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Koneksi ke server habis waktu. Periksa jaringan lalu coba lagi.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Permintaan gagal (HTTP 500: Internal Server Error).'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('<html>'), findsNothing);
+
+        await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Recovered Project'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'ProjectFormPage shows friendly message on TimeoutException and redirects to LoginScreen on 401',
+      (tester) async {
+        var return401 = false;
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          timeout: const Duration(milliseconds: 20),
+          client: MockClient((request) async {
+            if (request.url.path == '/api/v1/auth/logout/') {
+              return http.Response('', 204);
+            }
+            if (return401) {
+              return http.Response(
+                jsonEncode({'detail': 'Invalid token.'}),
+                401,
+              );
+            }
+            return Completer<http.Response>().future;
+          }),
+        );
+
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const ProjectFormPage(),
+            apiClient: apiClient,
+            initialToken: 'expired-token',
+          ),
+        );
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama Proyek'),
+          'Timeout Project',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Deskripsi Proyek'),
+          'Testing timeout and 401 handling',
+        );
+
+        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        await tester.ensureVisible(saveButton);
+        await tester.tap(saveButton);
+        await tester.pump(const Duration(milliseconds: 40));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Koneksi ke server habis waktu. Periksa jaringan lalu coba lagi.',
+          ),
+          findsOneWidget,
+        );
+
+        ScaffoldMessenger.of(tester.element(find.byType(ProjectFormPage)))
+            .hideCurrentSnackBar();
+        await tester.pumpAndSettle();
+
+        return401 = true;
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginScreen), findsOneWidget);
+      },
+    );
   });
 }
