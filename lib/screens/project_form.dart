@@ -194,20 +194,11 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return FormDraftPopScope(
       isDirty: _isDirty,
       popResult: _hasCreatedProject ? true : null,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Add Project Form',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: colorScheme.primary,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
+        appBar: AppBar(title: const Text('Add Project Form')),
         drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
         body: Form(
           key: _formKey,
@@ -340,32 +331,15 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                         },
                 ),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
+                FilledButton(
                   onPressed: _isSubmitting ? null : _submitForm,
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20.0,
                           width: 20.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            color: Colors.white,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
                         )
-                      : const Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      : const Text('Save'),
                 ),
                 const SizedBox(height: 16.0),
               ],

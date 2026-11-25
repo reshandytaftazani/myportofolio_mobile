@@ -5,6 +5,7 @@ import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
 import 'package:myportofolio_mobile/utils/url_launcher_helper.dart';
+import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Halaman detail lengkap untuk menampilkan seluruh atribut item portofolio.
@@ -234,17 +235,7 @@ class PortfolioDetailPage extends StatelessWidget {
     final hasCode = codeSnippet != null && codeSnippet!.trim().isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          pageTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: theme.colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: AppBar(title: Text(pageTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -345,24 +336,12 @@ class PortfolioDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
+              CodeSnippetBox(
+                code: codeSnippet!,
+                selectable: true,
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E2E),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SelectableText(
-                    codeSnippet!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: 'monospace',
-                      color: const Color(0xFFE2E8F0),
-                      height: 1.5,
-                    ),
-                  ),
-                ),
+                borderRadius: 12,
+                lineHeight: 1.5,
               ),
             ],
             const SizedBox(height: 20),

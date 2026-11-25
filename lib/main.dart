@@ -7,6 +7,7 @@ import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
+import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -73,6 +74,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.indigo,
+      secondary: Colors.amber[700],
+    );
+
     return MultiProvider(
       providers: [
         Provider<ApiClient>(
@@ -98,15 +104,38 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.indigo,
-            secondary: Colors.amber[700],
+          colorScheme: colorScheme,
+          appBarTheme: AppBarTheme(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: Colors.white,
+            iconTheme: const IconThemeData(color: Colors.white),
+            titleTextStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          filledButtonTheme: FilledButtonThemeData(
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 14.0,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
+          extensions: const [CodeSnippetTheme.dark()],
           useMaterial3: true,
         ),
         builder: (context, child) {

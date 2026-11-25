@@ -98,19 +98,10 @@ class _SkillFormPageState extends State<SkillFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return FormDraftPopScope(
       isDirty: _isDirty,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Tambah Keahlian',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: colorScheme.primary,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
+        appBar: AppBar(title: const Text('Tambah Keahlian')),
         drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
         body: Form(
           key: _formKey,
@@ -178,23 +169,9 @@ class _SkillFormPageState extends State<SkillFormPage> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
+                FilledButton(
                   onPressed: _submitForm,
-                  child: const Text(
-                    'Simpan',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text('Simpan'),
                 ),
                 const SizedBox(height: 16.0),
               ],

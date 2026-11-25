@@ -436,7 +436,7 @@ void main() {
           const Offset(0, -400),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(ElevatedButton, 'Simpan'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Selesai'));
         await tester.pumpAndSettle();
@@ -479,7 +479,7 @@ void main() {
           const Offset(0, -400),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(ElevatedButton, 'Simpan'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Selesai'));
         await tester.pumpAndSettle();
@@ -518,7 +518,7 @@ void main() {
           const Offset(0, -400),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(ElevatedButton, 'Simpan'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Selesai'));
         await tester.pumpAndSettle();

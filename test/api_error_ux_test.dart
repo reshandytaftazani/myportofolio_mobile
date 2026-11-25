@@ -187,7 +187,7 @@ void main() {
           'Project description',
         );
 
-        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Save');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pumpAndSettle();
@@ -348,7 +348,7 @@ void main() {
           'Testing timeout and 401 handling',
         );
 
-        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Save');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pump(const Duration(milliseconds: 40));

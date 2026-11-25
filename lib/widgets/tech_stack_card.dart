@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
+import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
 
 /// Kartu tampilan untuk satu entri [TechStack] beserta preview code block.
@@ -75,24 +76,7 @@ class TechStackCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E2E),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  techStack.codeSnippet,
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    color: const Color(0xFFE2E8F0),
-                    height: 1.4,
-                  ),
-                ),
-              ),
+              CodeSnippetBox(code: techStack.codeSnippet, maxLines: 5),
             ],
           ),
         ),

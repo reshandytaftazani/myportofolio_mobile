@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
+import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
 
 /// Kartu tampilan untuk satu entri [Skill] pada daftar portofolio.
 class SkillCard extends StatelessWidget {
@@ -92,24 +93,7 @@ class SkillCard extends StatelessWidget {
               ),
               if (hasSnippet) ...[
                 const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    skill.codeSnippet!,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: 'monospace',
-                      color: const Color(0xFFE2E8F0),
-                      height: 1.4,
-                    ),
-                  ),
-                ),
+                CodeSnippetBox(code: skill.codeSnippet!, maxLines: 4),
               ],
             ],
           ),

@@ -57,12 +57,7 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       // AppBar menampilkan bar bagian atas halaman aplikasi.
       appBar: AppBar(
-        title: const Text(
-          'MyPortfolio',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('MyPortfolio'),
         actions: [
           if (isLoggedIn)
             IconButton(

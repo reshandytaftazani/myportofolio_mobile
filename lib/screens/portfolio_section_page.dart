@@ -291,20 +291,11 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final activeAction = _activeAction;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: theme.colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(widget.title),
         bottom: _hasTabs
             ? TabBar(
                 controller: _tabController,

@@ -76,7 +76,7 @@ Future<void> openDrawer(WidgetTester tester) async {
 }
 
 Future<void> saveForm(WidgetTester tester) async {
-  final button = find.widgetWithText(ElevatedButton, 'Save');
+  final button = find.widgetWithText(FilledButton, 'Save');
   await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
   await tester.pumpAndSettle();
   await tester.ensureVisible(button);
@@ -86,7 +86,7 @@ Future<void> saveForm(WidgetTester tester) async {
 }
 
 Future<void> submitExperienceForm(WidgetTester tester) async {
-  final button = find.widgetWithText(ElevatedButton, 'Simpan');
+  final button = find.widgetWithText(FilledButton, 'Simpan');
   await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
   await tester.pumpAndSettle();
   await tester.ensureVisible(button);

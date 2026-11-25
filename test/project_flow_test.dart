@@ -287,7 +287,7 @@ void main() {
           'Added through LeftDrawer',
         );
 
-        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Save');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pumpAndSettle();
@@ -338,7 +338,7 @@ void main() {
           'Checking disabled controls while submitting',
         );
 
-        final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Save');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pump();
@@ -359,13 +359,13 @@ void main() {
         );
         expect(switchTile.onChanged, isNull);
 
-        final submitButton = tester.widget<ElevatedButton>(
-          find.byType(ElevatedButton),
+        final submitButton = tester.widget<FilledButton>(
+          find.byType(FilledButton),
         );
         expect(submitButton.onPressed, isNull);
         expect(
           find.descendant(
-            of: find.byType(ElevatedButton),
+            of: find.byType(FilledButton),
             matching: find.byType(CircularProgressIndicator),
           ),
           findsOneWidget,
