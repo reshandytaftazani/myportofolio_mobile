@@ -31,7 +31,7 @@ class _TrackingClient extends http.BaseClient {
 }
 
 void main() {
-  group('ApiClient Task 1.1', () {
+  group('ApiClient', () {
     test('defaultTimeout is 15 seconds and can be overridden', () {
       expect(ApiClient.defaultTimeout, const Duration(seconds: 15));
 
@@ -271,7 +271,7 @@ void main() {
     });
   });
 
-  group('ApiClient lifecycle Task 1.2', () {
+  group('ApiClient lifecycle', () {
     testWidgets(
       'MyApp does not close externally injected ApiClient on dispose',
       (tester) async {
