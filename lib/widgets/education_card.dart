@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/education.dart';
 
 /// Kartu tampilan untuk satu entri [Education] pada daftar portofolio.

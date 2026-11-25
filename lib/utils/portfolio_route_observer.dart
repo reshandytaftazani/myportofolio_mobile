@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Observer navigasi global yang melacak tumpukan rute aktif per [NavigatorState]
 /// secara sinkron melalui lifecycle [NavigatorObserver], tanpa menyimpan state

@@ -55,7 +55,7 @@ Proyek ini merupakan pendamping mobile untuk [MyPortfolio berbasis Django](https
 ## Teknologi
 
 - Flutter SDK dengan Dart `^3.13.7` pada [pubspec.yaml](pubspec.yaml).
-- `flutter/material.dart` dan tema Material 3 untuk komponen antarmuka.
+- `material_ui: ^1.11.1` dan tema Material 3 untuk komponen antarmuka (paket Material resmi untuk Flutter `>= 3.47`).
 - `http: ^1.6.0` untuk komunikasi HTTP REST dengan backend Django (`ApiClient`).
 - `provider: ^6.1.5+1` untuk injeksi dependensi dan manajemen state (`ApiClient`, `AuthState`, `ProjectRefreshNotifier`).
 - `json_annotation: ^4.12.0`, `json_serializable: ^6.15.2`, dan `build_runner: ^2.17.1` untuk generasi kode serialisasi JSON model.
@@ -252,7 +252,7 @@ Ringkasan berikut mencatat progres implementasi pada riwayat Git proyek:
 | 25 November 2026 — Hardening Networking & Penanganan Error API | Menambahkan timeout HTTP 15 detik, `ApiClient.close()` melalui `Provider.dispose` dan fallback `ProjectListView`, parsing error JSON DRF & fallback HTML 500 aman, pemformat pesan ramah `formatApiError`, serta unit/widget test terkait. | `0f9dc6c`, `0fa49a3`, `af2b918`, `7e0b59b` | Selesai |
 | 25 November 2026 — Perbaikan UX Refresh, Sinkronisasi Daftar Proyek, & Penguncian Form | Mempertahankan daftar saat *pull-to-refresh* di `ProjectListView`, mencegah GET reload sia-sia saat batal dari `ProjectFormPage`, menyinkronkan refresh lintas FAB/`LeftDrawer` lewat `ProjectRefreshNotifier`, mengunci input selama submit, serta menambah `test/project_flow_test.dart`. | `8ab4a17`, `08b4a17`, `3f75723` | Selesai |
 | 25 November 2026 — Konfigurasi Keamanan Jaringan Android & Dokumentasi Sesi Auth | Membatasi *cleartext HTTP* Android hanya untuk host lokal debug (`network_security_config.xml`) dan mendokumentasikan alasan desain penyimpanan token *in-memory* pada `AuthState`. | `fbf145e`, `27d4daa` | Selesai |
-| 25 November 2026 — Migrasi Material SDK, Serialisasi `@JsonSerializable`, & Sentralisasi Theme | Mengganti dependensi `material_ui` ke `flutter/material.dart`, menyeragamkan ke-5 model dengan `@JsonSerializable` + `copyWith`/`==`/`hashCode`, memusatkan `AppBarTheme` & `FilledButtonThemeData` di `ThemeData`, dan mengekstrak `CodeSnippetBox`. | `22b8b21`, `441cefa`, `0bf5f84` | Selesai |
+| 25 November 2026 — Serialisasi `@JsonSerializable`, Sentralisasi Theme, & Pemulihan `material_ui` | Menyeragamkan ke-5 model dengan `@JsonSerializable` + `copyWith`/`==`/`hashCode`, memusatkan `AppBarTheme` & `FilledButtonThemeData` di `ThemeData`, mengekstrak `CodeSnippetBox`, serta memakai `package:material_ui/material_ui.dart` sesuai depresiasi `flutter/material.dart` pada Flutter `>= 3.47` di CI. | `22b8b21`, `441cefa`, `0bf5f84` | Selesai |
 | 25 November 2026 — Deduplikasi Helper/Form, Penyeragaman Bahasa UI, & Strict Lints | Mengekstrak `formatIsoDate`, `portfolio_svg_utils.dart`, dan `FormDraftStateMixin`/`PortfolioFormScaffold`; menyeragamkan label UI Bahasa Indonesia; mengaktifkan strict analyzer (`strict-casts`, `strict-inference`, `strict-raw-types`) dan lint tambahan (`84/84` tes lulus). | `0d8c3f4`, `dcf1ba8`, `98dc777` | Selesai |
 
 ## Keterbatasan Saat Ini

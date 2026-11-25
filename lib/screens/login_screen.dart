@@ -1,6 +1,6 @@
 import 'dart:async' show unawaited;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:provider/provider.dart';

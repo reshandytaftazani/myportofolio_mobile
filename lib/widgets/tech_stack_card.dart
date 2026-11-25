@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
 import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_network_image.dart';
