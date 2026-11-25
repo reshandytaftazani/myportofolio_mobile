@@ -18,6 +18,7 @@ class ProjectListView extends StatefulWidget {
 /// State publik untuk [ProjectListView] agar dapat dipicu reload dari luar.
 class ProjectListViewState extends State<ProjectListView> {
   late ApiClient _apiClient;
+  bool _ownsApiClient = false;
   late Future<List<Project>> _projectsFuture;
 
   @override
@@ -27,13 +28,25 @@ class ProjectListViewState extends State<ProjectListView> {
     _projectsFuture = _apiClient.getProjects();
   }
 
+  @override
+  void dispose() {
+    if (_ownsApiClient) {
+      _apiClient.close();
+    }
+    super.dispose();
+  }
+
   ApiClient _resolveApiClient() {
     if (widget.apiClient != null) {
+      _ownsApiClient = false;
       return widget.apiClient!;
     }
     try {
-      return context.read<ApiClient>();
+      final provided = context.read<ApiClient>();
+      _ownsApiClient = false;
+      return provided;
     } on ProviderNotFoundException {
+      _ownsApiClient = true;
       return ApiClient();
     }
   }

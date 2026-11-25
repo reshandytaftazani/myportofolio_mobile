@@ -4,15 +4,23 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/main.dart';
 import 'package:myportofolio_mobile/models/project.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/project_list_view.dart';
+import 'package:provider/provider.dart';
 
 class _TrackingClient extends http.BaseClient {
   bool closed = false;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    return http.StreamedResponse(const Stream.empty(), 200);
+    return http.StreamedResponse(
+      Stream<List<int>>.value(utf8.encode('[]')),
+      200,
+    );
   }
 
   @override
@@ -261,5 +269,93 @@ void main() {
         ),
       );
     });
+  });
+
+  group('ApiClient lifecycle Task 1.2', () {
+    testWidgets(
+      'MyApp does not close externally injected ApiClient on dispose',
+      (tester) async {
+        final trackingClient = _TrackingClient();
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: trackingClient,
+        );
+
+        await tester.pumpWidget(MyApp(apiClient: apiClient));
+        // Trigger AuthState creation so Provider<ApiClient> is instantiated too.
+        final appContext = tester.element(find.byType(MaterialApp));
+        appContext.read<AuthState>();
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+
+        expect(trackingClient.closed, isFalse);
+        apiClient.close();
+        expect(trackingClient.closed, isTrue);
+      },
+    );
+
+    testWidgets(
+      'MyApp creates and disposes internal ApiClient cleanly when apiClient is null',
+      (tester) async {
+        await tester.pumpWidget(const MyApp());
+        final appContext = tester.element(find.byType(MaterialApp));
+        appContext.read<AuthState>();
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'ProjectListView does not close Provider or injected ApiClient on dispose',
+      (tester) async {
+        final injectedHttp = _TrackingClient();
+        final injectedApi = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: injectedHttp,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: ProjectListView(apiClient: injectedApi)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(injectedHttp.closed, isFalse);
+        injectedApi.close();
+
+        final providedHttp = _TrackingClient();
+        final providedApi = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: providedHttp,
+        );
+
+        await tester.pumpWidget(
+          Provider<ApiClient>.value(
+            value: providedApi,
+            child: const MaterialApp(home: Scaffold(body: ProjectListView())),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(providedHttp.closed, isFalse);
+        providedApi.close();
+      },
+    );
+
+    testWidgets(
+      'ProjectListView closes fallback ApiClient cleanly when no Provider is present',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: ProjectListView())),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

@@ -17,6 +17,11 @@ void main() {
 /// Mengatur konfigurasi dasar aplikasi seperti judul, tema warna Material 3,
 /// resolver rute kategori untuk deep link/refresh web, dan menentukan
 /// [MyHomePage] sebagai halaman utama aplikasi.
+///
+/// Jika [apiClient] disuntikkan dari luar (mis. untuk pengujian), pemanggil
+/// tetap memegang kepemilikan lifecycle dan bertanggung jawab memanggil
+/// `apiClient.close()`. Jika bernilai `null`, `MyApp` membuat dan menutup
+/// instance [ApiClient] secara otomatis saat [Provider] di-dispose.
 class MyApp extends StatelessWidget {
   const MyApp({super.key, this.apiClient, this.initialToken});
 
@@ -69,7 +74,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<ApiClient>(create: (_) => apiClient ?? ApiClient()),
+        Provider<ApiClient>(
+          create: (_) => apiClient ?? ApiClient(),
+          dispose: (_, client) {
+            if (apiClient == null) {
+              client.close();
+            }
+          },
+        ),
         ChangeNotifierProvider<AuthState>(
           create: (context) =>
               AuthState(context.read<ApiClient>(), initialToken: initialToken),
