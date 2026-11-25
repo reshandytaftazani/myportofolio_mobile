@@ -1,13 +1,14 @@
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_svg_loader_stub.dart'
     if (dart.library.io) 'package:myportofolio_mobile/widgets/portfolio_svg_loader_io.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_svg_utils.dart';
 
 /// Mengecek apakah [url] merujuk pada berkas atau data URI berformat SVG.
 bool isSvgImageUrl(String url) {
   final trimmed = url.trim().toLowerCase();
   if (trimmed.isEmpty) return false;
-  if (trimmed.startsWith('data:image/svg+xml')) return true;
+  if (isSvgDataUri(trimmed)) return true;
 
   final uri = Uri.tryParse(trimmed);
   if (uri == null) return trimmed.endsWith('.svg');

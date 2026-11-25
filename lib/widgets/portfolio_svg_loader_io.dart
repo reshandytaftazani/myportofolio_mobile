@@ -1,15 +1,10 @@
-import 'dart:convert' show base64Decode, utf8;
 import 'dart:io' show HttpClient, HttpClientRequest, HttpStatus;
 
 import 'package:flutter/foundation.dart'
     show Uint8List, consolidateHttpClientResponseBytes;
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
-
-final RegExp _svgRootPattern = RegExp(
-  r'<\s*(?:[a-zA-Z0-9_-]+:)?svg\b',
-  caseSensitive: false,
-);
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_svg_utils.dart';
 
 /// Membuat [BytesLoader] untuk platform IO (Android, iOS, Desktop, dan test)
 /// yang kompatibel dengan `HttpOverrides.global`, menutup [HttpClient] setelah
@@ -31,23 +26,10 @@ class _IoPortfolioSvgLoader extends SvgLoader<Uint8List> {
     }
   }
 
-  Uint8List _decodeDataUri(String dataUri) {
-    final commaIndex = dataUri.indexOf(',');
-    if (commaIndex == -1) {
-      throw const FormatException('Invalid SVG data URI');
-    }
-    final metadata = dataUri.substring(0, commaIndex).toLowerCase();
-    final payload = dataUri.substring(commaIndex + 1);
-    if (metadata.contains(';base64')) {
-      return base64Decode(payload);
-    }
-    return Uint8List.fromList(utf8.encode(Uri.decodeFull(payload)));
-  }
-
   @override
   Future<Uint8List?> prepareMessage(BuildContext? context) async {
-    if (url.toLowerCase().startsWith('data:image/svg+xml')) {
-      return _decodeDataUri(url);
+    if (isSvgDataUri(url)) {
+      return decodeSvgDataUri(url);
     }
 
     final uri = Uri.parse(url);
@@ -77,16 +59,7 @@ class _IoPortfolioSvgLoader extends SvgLoader<Uint8List> {
   }
 
   @override
-  String provideSvg(Uint8List? message) {
-    if (message == null || message.isEmpty) {
-      throw const FormatException('Empty SVG data');
-    }
-    final decoded = utf8.decode(message, allowMalformed: true).trim();
-    if (!_svgRootPattern.hasMatch(decoded)) {
-      throw const FormatException('Payload does not contain <svg> root');
-    }
-    return decoded;
-  }
+  String provideSvg(Uint8List? message) => validateAndDecodeSvgBytes(message);
 
   @override
   SvgCacheKey cacheKey(BuildContext? context) {

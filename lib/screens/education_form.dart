@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/education.dart';
-import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
-import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
 
 /// Halaman formulir untuk menambahkan entri Pendidikan baru.
 class EducationFormPage extends StatefulWidget {
@@ -13,35 +12,19 @@ class EducationFormPage extends StatefulWidget {
   State<EducationFormPage> createState() => _EducationFormPageState();
 }
 
-class _EducationFormPageState extends State<EducationFormPage> {
-  final _formKey = GlobalKey<FormState>();
-
+class _EducationFormPageState extends State<EducationFormPage>
+    with FormDraftStateMixin<EducationFormPage> {
   final _schoolNameController = TextEditingController();
   final _periodController = TextEditingController();
   final _detailController = TextEditingController();
   final _startYearController = TextEditingController();
 
-  bool _wasDirty = false;
-
-  bool get _isDirty =>
+  @override
+  bool get isFormDirty =>
       _schoolNameController.text.isNotEmpty ||
       _periodController.text.isNotEmpty ||
       _detailController.text.isNotEmpty ||
       _startYearController.text.isNotEmpty;
-
-  void _syncDirtyState() {
-    final dirty = _isDirty;
-    if (dirty != _wasDirty) {
-      setState(() {
-        _wasDirty = dirty;
-      });
-    }
-  }
-
-  Future<bool> _confirmDiscardDraft() async {
-    if (!_isDirty) return true;
-    return showDiscardDraftDialog(context);
-  }
 
   @override
   void dispose() {
@@ -53,12 +36,12 @@ class _EducationFormPageState extends State<EducationFormPage> {
   }
 
   void _resetForm() {
-    _formKey.currentState?.reset();
+    formKey.currentState?.reset();
     _schoolNameController.clear();
     _periodController.clear();
     _detailController.clear();
     _startYearController.clear();
-    _syncDirtyState();
+    syncDirtyState();
   }
 
   String? _validateStartYear(String? value) {
@@ -77,7 +60,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
 
     final education = Education(
       schoolName: _schoolNameController.text.trim(),
@@ -114,85 +97,64 @@ class _EducationFormPageState extends State<EducationFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FormDraftPopScope(
-      isDirty: _isDirty,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Tambah Pendidikan')),
-        drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
-        body: Form(
-          key: _formKey,
-          onChanged: _syncDirtyState,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _schoolNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama Sekolah / Institusi',
-                    hintText: 'Contoh: Universitas Indonesia',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => validateRequiredText(
-                    value,
-                    fieldLabel: 'Nama sekolah/institusi',
-                    maxLength: 255,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _periodController,
-                  decoration: const InputDecoration(
-                    labelText: 'Periode',
-                    hintText: 'Contoh: 2024 - Sekarang',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => validateRequiredText(
-                    value,
-                    fieldLabel: 'Periode',
-                    maxLength: 50,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _detailController,
-                  maxLines: 3,
-                  minLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Detail Pendidikan',
-                    hintText: 'Contoh: S1 Ilmu Komputer',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => validateRequiredText(
-                    value,
-                    fieldLabel: 'Detail pendidikan',
-                    maxLength: 255,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _startYearController,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'Tahun Mulai',
-                    hintText: 'Contoh: 2024',
-                  ),
-                  validator: _validateStartYear,
-                ),
-                const SizedBox(height: 24.0),
-                FilledButton(
-                  onPressed: _submitForm,
-                  child: const Text('Simpan'),
-                ),
-                const SizedBox(height: 16.0),
-              ],
-            ),
+    return buildFormScaffold(
+      title: 'Tambah Pendidikan',
+      children: [
+        TextFormField(
+          controller: _schoolNameController,
+          decoration: const InputDecoration(
+            labelText: 'Nama Sekolah / Institusi',
+            hintText: 'Contoh: Universitas Indonesia',
+          ),
+          textInputAction: TextInputAction.next,
+          validator: (value) => validateRequiredText(
+            value,
+            fieldLabel: 'Nama sekolah/institusi',
+            maxLength: 255,
           ),
         ),
-      ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _periodController,
+          decoration: const InputDecoration(
+            labelText: 'Periode',
+            hintText: 'Contoh: 2024 - Sekarang',
+          ),
+          textInputAction: TextInputAction.next,
+          validator: (value) =>
+              validateRequiredText(value, fieldLabel: 'Periode', maxLength: 50),
+        ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _detailController,
+          maxLines: 3,
+          minLines: 2,
+          decoration: const InputDecoration(
+            labelText: 'Detail Pendidikan',
+            hintText: 'Contoh: S1 Ilmu Komputer',
+          ),
+          textInputAction: TextInputAction.next,
+          validator: (value) => validateRequiredText(
+            value,
+            fieldLabel: 'Detail pendidikan',
+            maxLength: 255,
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _startYearController,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'Tahun Mulai',
+            hintText: 'Contoh: 2024',
+          ),
+          validator: _validateStartYear,
+        ),
+        const SizedBox(height: 24.0),
+        FilledButton(onPressed: _submitForm, child: const Text('Simpan')),
+        const SizedBox(height: 16.0),
+      ],
     );
   }
 }

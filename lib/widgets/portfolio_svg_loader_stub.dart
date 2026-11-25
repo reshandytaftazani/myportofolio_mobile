@@ -1,16 +1,10 @@
-import 'dart:convert' show base64Decode, utf8;
-
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
-
-final RegExp _svgRootPattern = RegExp(
-  r'<\s*(?:[a-zA-Z0-9_-]+:)?svg\b',
-  caseSensitive: false,
-);
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_svg_utils.dart';
 
 /// Membuat [BytesLoader] untuk platform Web / non-IO tanpa mengimpor `dart:io`.
 BytesLoader createPortfolioSvgLoader(String url) {
-  if (url.toLowerCase().startsWith('data:image/svg+xml')) {
+  if (isSvgDataUri(url)) {
     return _DataUriSvgLoader(url);
   }
   return SvgNetworkLoader(url);
@@ -23,19 +17,7 @@ class _DataUriSvgLoader extends SvgLoader<String> {
 
   @override
   Future<String?> prepareMessage(BuildContext? context) async {
-    final commaIndex = dataUri.indexOf(',');
-    if (commaIndex == -1) {
-      throw const FormatException('Invalid SVG data URI');
-    }
-    final metadata = dataUri.substring(0, commaIndex).toLowerCase();
-    final payload = dataUri.substring(commaIndex + 1);
-    final decoded = metadata.contains(';base64')
-        ? utf8.decode(base64Decode(payload), allowMalformed: true).trim()
-        : Uri.decodeFull(payload).trim();
-    if (!_svgRootPattern.hasMatch(decoded)) {
-      throw const FormatException('Payload does not contain <svg> root');
-    }
-    return decoded;
+    return validateAndDecodeSvgBytes(decodeSvgDataUri(dataUri));
   }
 
   @override

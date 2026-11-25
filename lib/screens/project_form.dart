@@ -5,9 +5,8 @@ import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
-import 'package:myportofolio_mobile/widgets/draft_confirm_dialog.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
-import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
 import 'package:provider/provider.dart';
 
 /// Halaman formulir untuk menambahkan entri Proyek baru.
@@ -18,9 +17,8 @@ class ProjectFormPage extends StatefulWidget {
   State<ProjectFormPage> createState() => _ProjectFormPageState();
 }
 
-class _ProjectFormPageState extends State<ProjectFormPage> {
-  final _formKey = GlobalKey<FormState>();
-
+class _ProjectFormPageState extends State<ProjectFormPage>
+    with FormDraftStateMixin<ProjectFormPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _techStackController = TextEditingController();
@@ -29,11 +27,11 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   String _category = Project.defaultCategory;
   bool _isFeatured = false;
-  bool _wasDirty = false;
   bool _isSubmitting = false;
   bool _hasCreatedProject = false;
 
-  bool get _isDirty =>
+  @override
+  bool get isFormDirty =>
       _titleController.text.isNotEmpty ||
       _descriptionController.text.isNotEmpty ||
       _techStackController.text.isNotEmpty ||
@@ -41,20 +39,6 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       _projectImageUrlController.text.isNotEmpty ||
       _category != Project.defaultCategory ||
       _isFeatured;
-
-  void _syncDirtyState() {
-    final dirty = _isDirty;
-    if (dirty != _wasDirty) {
-      setState(() {
-        _wasDirty = dirty;
-      });
-    }
-  }
-
-  Future<bool> _confirmDiscardDraft() async {
-    if (!_isDirty) return true;
-    return showDiscardDraftDialog(context);
-  }
 
   @override
   void dispose() {
@@ -67,21 +51,20 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   }
 
   void _resetForm() {
-    _formKey.currentState?.reset();
+    formKey.currentState?.reset();
     _titleController.clear();
     _descriptionController.clear();
     _techStackController.clear();
     _projectUrlController.clear();
     _projectImageUrlController.clear();
-    setState(() {
+    setFormState(() {
       _category = Project.defaultCategory;
       _isFeatured = false;
-      _wasDirty = false;
     });
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
 
     final loggedIn = await ensureLoggedIn(context);
     if (!loggedIn || !mounted) return;
@@ -194,159 +177,135 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FormDraftPopScope(
-      isDirty: _isDirty,
+    return buildFormScaffold(
+      title: 'Add Project Form',
       popResult: _hasCreatedProject ? true : null,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Add Project Form')),
-        drawer: LeftDrawer(onWillNavigate: _confirmDiscardDraft),
-        body: Form(
-          key: _formKey,
-          onChanged: _syncDirtyState,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  enabled: !_isSubmitting,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama Proyek',
-                    hintText: 'Nama Proyek',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => validateRequiredText(
-                    value,
-                    fieldLabel: 'Nama proyek',
-                    maxLength: 255,
-                    emptySuffix: '!',
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _descriptionController,
-                  enabled: !_isSubmitting,
-                  maxLines: 5,
-                  minLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Deskripsi Proyek',
-                    hintText: 'Deskripsi Proyek',
-                  ),
-                  validator: (value) => validateRequiredText(
-                    value,
-                    fieldLabel: 'Deskripsi proyek',
-                    emptySuffix: '!',
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                DropdownButtonFormField<String>(
-                  isExpanded: true,
-                  initialValue: _category,
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori Proyek',
-                  ),
-                  items: Project.categoryChoices
-                      .map(
-                        (category) => DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _isSubmitting
-                      ? null
-                      : (newValue) {
-                          if (newValue == null) return;
-                          setState(() {
-                            _category = newValue;
-                            _wasDirty = _isDirty;
-                          });
-                        },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _techStackController,
-                  enabled: !_isSubmitting,
-                  decoration: const InputDecoration(
-                    labelText: 'Tech Stack (Opsional)',
-                    hintText: 'Contoh: Flutter, Django, PostgreSQL',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    if (value != null && value.trim().length > 255) {
-                      return 'Tech stack maksimal 255 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _projectUrlController,
-                  enabled: !_isSubmitting,
-                  keyboardType: TextInputType.url,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Tautan Proyek (Opsional)',
-                    hintText: 'https://example.com/project',
-                  ),
-                  validator: (value) => validateHttpUrl(
-                    value,
-                    fieldLabel: 'URL proyek',
-                    maxLength: 200,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _projectImageUrlController,
-                  enabled: !_isSubmitting,
-                  keyboardType: TextInputType.url,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'URL Gambar Proyek (Opsional)',
-                    hintText: 'https://example.com/cover.png',
-                  ),
-                  validator: (value) => validateHttpUrl(
-                    value,
-                    fieldLabel: 'URL gambar proyek',
-                    maxLength: 500,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Proyek Unggulan'),
-                  subtitle: const Text(
-                    'Tandai sebagai proyek unggulan di portofolio',
-                  ),
-                  value: _isFeatured,
-                  onChanged: _isSubmitting
-                      ? null
-                      : (value) {
-                          setState(() {
-                            _isFeatured = value;
-                            _wasDirty = _isDirty;
-                          });
-                        },
-                ),
-                const SizedBox(height: 16.0),
-                FilledButton(
-                  onPressed: _isSubmitting ? null : _submitForm,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20.0,
-                          width: 20.0,
-                          child: CircularProgressIndicator(strokeWidth: 2.0),
-                        )
-                      : const Text('Save'),
-                ),
-                const SizedBox(height: 16.0),
-              ],
-            ),
+      children: [
+        TextFormField(
+          controller: _titleController,
+          enabled: !_isSubmitting,
+          decoration: const InputDecoration(
+            labelText: 'Nama Proyek',
+            hintText: 'Nama Proyek',
+          ),
+          textInputAction: TextInputAction.next,
+          validator: (value) => validateRequiredText(
+            value,
+            fieldLabel: 'Nama proyek',
+            maxLength: 255,
+            emptySuffix: '!',
           ),
         ),
-      ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _descriptionController,
+          enabled: !_isSubmitting,
+          maxLines: 5,
+          minLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'Deskripsi Proyek',
+            hintText: 'Deskripsi Proyek',
+          ),
+          validator: (value) => validateRequiredText(
+            value,
+            fieldLabel: 'Deskripsi proyek',
+            emptySuffix: '!',
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        DropdownButtonFormField<String>(
+          isExpanded: true,
+          initialValue: _category,
+          decoration: const InputDecoration(labelText: 'Kategori Proyek'),
+          items: Project.categoryChoices
+              .map(
+                (category) => DropdownMenuItem<String>(
+                  value: category,
+                  child: Text(category),
+                ),
+              )
+              .toList(),
+          onChanged: _isSubmitting
+              ? null
+              : (newValue) {
+                  if (newValue == null) return;
+                  setFormState(() {
+                    _category = newValue;
+                  });
+                },
+        ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _techStackController,
+          enabled: !_isSubmitting,
+          decoration: const InputDecoration(
+            labelText: 'Tech Stack (Opsional)',
+            hintText: 'Contoh: Flutter, Django, PostgreSQL',
+          ),
+          textInputAction: TextInputAction.next,
+          validator: (value) {
+            if (value != null && value.trim().length > 255) {
+              return 'Tech stack maksimal 255 karakter';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _projectUrlController,
+          enabled: !_isSubmitting,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.next,
+          decoration: const InputDecoration(
+            labelText: 'Tautan Proyek (Opsional)',
+            hintText: 'https://example.com/project',
+          ),
+          validator: (value) =>
+              validateHttpUrl(value, fieldLabel: 'URL proyek', maxLength: 200),
+        ),
+        const SizedBox(height: 16.0),
+        TextFormField(
+          controller: _projectImageUrlController,
+          enabled: !_isSubmitting,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'URL Gambar Proyek (Opsional)',
+            hintText: 'https://example.com/cover.png',
+          ),
+          validator: (value) => validateHttpUrl(
+            value,
+            fieldLabel: 'URL gambar proyek',
+            maxLength: 500,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Proyek Unggulan'),
+          subtitle: const Text('Tandai sebagai proyek unggulan di portofolio'),
+          value: _isFeatured,
+          onChanged: _isSubmitting
+              ? null
+              : (value) {
+                  setFormState(() {
+                    _isFeatured = value;
+                  });
+                },
+        ),
+        const SizedBox(height: 16.0),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                )
+              : const Text('Save'),
+        ),
+        const SizedBox(height: 16.0),
+      ],
     );
   }
 }

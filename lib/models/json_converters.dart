@@ -1,6 +1,8 @@
 /// Helper parsing dan formatting JSON bersama untuk model-model di `lib/models/`.
 library;
 
+import 'package:myportofolio_mobile/utils/date_formatter.dart';
+
 /// Mengurai nilai JSON dinamis menjadi [int] nullable (mendukung `num` dan `String`).
 int? parseNullableInt(Object? value) {
   if (value == null) return null;
@@ -22,10 +24,5 @@ DateTime? parseNullableDateTime(Object? value) {
 }
 
 /// Memformat [DateTime] nullable menjadi string tanggal `YYYY-MM-DD`.
-String? formatNullableIsoDate(DateTime? date) {
-  if (date == null) return null;
-  final year = date.year.toString().padLeft(4, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  return '$year-$month-$day';
-}
+String? formatNullableIsoDate(DateTime? date) =>
+    date == null ? null : formatIsoDate(date);
