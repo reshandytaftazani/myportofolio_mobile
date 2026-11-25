@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:myportofolio_mobile/models/json_converters.dart';
+
+part 'experience.g.dart';
+
 /// Status akhir dari sebuah entri [Experience].
 enum ExperienceEndStatus {
   /// Pengalaman masih berlangsung (`isOngoing == true`).
@@ -11,6 +16,7 @@ enum ExperienceEndStatus {
 }
 
 /// Model data untuk entri Pengalaman (Experience) pada portofolio.
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Experience {
   /// Pilihan kategori pengalaman sesuai model Django.
   static const Map<String, String> categoryChoices = {
@@ -27,18 +33,29 @@ class Experience {
   /// Nilai kategori bawaan sesuai model Django.
   static const String defaultCategory = 'full-time';
 
+  @JsonKey(fromJson: parseNullableId, includeIfNull: false)
   final String? id;
+  @JsonKey(defaultValue: '')
   final String title;
   final String? company;
+  @JsonKey(defaultValue: '')
   final String description;
+  @JsonKey(defaultValue: defaultCategory)
   final String category;
+  @JsonKey(includeToJson: false)
   final String? categoryDisplay;
   final String? thumbnail;
+  @JsonKey(fromJson: parseNullableDateTime, toJson: formatNullableIsoDate)
   final DateTime? startedAt;
+  @JsonKey(fromJson: parseNullableDateTime, toJson: formatNullableIsoDate)
   final DateTime? endedAt;
+  @JsonKey(includeToJson: false, defaultValue: false)
   final bool isOngoing;
+  @JsonKey(includeToJson: false, defaultValue: 0)
   final int starCount;
+  @JsonKey(includeToJson: false, defaultValue: false)
   final bool isStarred;
+  @JsonKey(includeToJson: false, defaultValue: '')
   final String starredByNames;
 
   const Experience({
@@ -69,48 +86,79 @@ class Experience {
   }
 
   /// Membuat instance [Experience] dari JSON response API Django.
-  factory Experience.fromJson(Map<String, dynamic> json) {
+  factory Experience.fromJson(Map<String, dynamic> json) =>
+      _$ExperienceFromJson(json);
+
+  /// Mengonversi instance [Experience] ke Map JSON untuk dikirim ke API Django.
+  Map<String, dynamic> toJson() => _$ExperienceToJson(this);
+
+  /// Membuat salinan [Experience] dengan field tertentu yang diperbarui.
+  Experience copyWith({
+    String? id,
+    String? title,
+    String? company,
+    String? description,
+    String? category,
+    String? categoryDisplay,
+    String? thumbnail,
+    DateTime? startedAt,
+    DateTime? endedAt,
+    bool? isOngoing,
+    int? starCount,
+    bool? isStarred,
+    String? starredByNames,
+  }) {
     return Experience(
-      id: json['id']?.toString(),
-      title: (json['title'] as String?) ?? '',
-      company: json['company'] as String?,
-      description: (json['description'] as String?) ?? '',
-      category: (json['category'] as String?) ?? defaultCategory,
-      categoryDisplay: json['category_display'] as String?,
-      thumbnail: json['thumbnail'] as String?,
-      startedAt: json['started_at'] != null
-          ? DateTime.tryParse(json['started_at'].toString())
-          : null,
-      endedAt: json['ended_at'] != null
-          ? DateTime.tryParse(json['ended_at'].toString())
-          : null,
-      isOngoing: (json['is_ongoing'] as bool?) ?? false,
-      starCount: json['star_count'] is int
-          ? json['star_count'] as int
-          : int.tryParse('${json['star_count']}') ?? 0,
-      isStarred: (json['is_starred'] as bool?) ?? false,
-      starredByNames: (json['starred_by_names'] as String?) ?? '',
+      id: id ?? this.id,
+      title: title ?? this.title,
+      company: company ?? this.company,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      categoryDisplay: categoryDisplay ?? this.categoryDisplay,
+      thumbnail: thumbnail ?? this.thumbnail,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      isOngoing: isOngoing ?? this.isOngoing,
+      starCount: starCount ?? this.starCount,
+      isStarred: isStarred ?? this.isStarred,
+      starredByNames: starredByNames ?? this.starredByNames,
     );
   }
 
-  /// Mengonversi instance [Experience] ke Map JSON untuk dikirim ke API Django.
-  Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
-      'title': title,
-      'company': company,
-      'description': description,
-      'category': category,
-      'thumbnail': thumbnail,
-      'started_at': startedAt != null ? _formatDate(startedAt!) : null,
-      'ended_at': endedAt != null ? _formatDate(endedAt!) : null,
-    };
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Experience &&
+            runtimeType == other.runtimeType &&
+            id == other.id &&
+            title == other.title &&
+            company == other.company &&
+            description == other.description &&
+            category == other.category &&
+            categoryDisplay == other.categoryDisplay &&
+            thumbnail == other.thumbnail &&
+            startedAt == other.startedAt &&
+            endedAt == other.endedAt &&
+            isOngoing == other.isOngoing &&
+            starCount == other.starCount &&
+            isStarred == other.isStarred &&
+            starredByNames == other.starredByNames;
   }
 
-  static String _formatDate(DateTime date) {
-    final year = date.year.toString().padLeft(4, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
-  }
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    company,
+    description,
+    category,
+    categoryDisplay,
+    thumbnail,
+    startedAt,
+    endedAt,
+    isOngoing,
+    starCount,
+    isStarred,
+    starredByNames,
+  );
 }

@@ -19,6 +19,8 @@ class Project {
 
   @JsonKey(includeToJson: false)
   final String? id;
+  // Dipertahankan wajib non-null tanpa defaultValue agar payload proyek
+  // yang rusak (mis. `{'title': null}`) gagal parsing dan ditolak ApiClient.
   final String title;
   final String description;
   @JsonKey(defaultValue: defaultCategory)
@@ -58,4 +60,66 @@ class Project {
 
   /// Mengonversi instance [Project] ke Map JSON untuk dikirim ke API Django.
   Map<String, dynamic> toJson() => _$ProjectToJson(this);
+
+  /// Membuat salinan [Project] dengan field tertentu yang diperbarui.
+  Project copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? category,
+    String? techStack,
+    String? projectUrl,
+    String? projectImageUrl,
+    bool? isFeatured,
+    int? starCount,
+    bool? isStarred,
+    String? starredByNames,
+  }) {
+    return Project(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      techStack: techStack ?? this.techStack,
+      projectUrl: projectUrl ?? this.projectUrl,
+      projectImageUrl: projectImageUrl ?? this.projectImageUrl,
+      isFeatured: isFeatured ?? this.isFeatured,
+      starCount: starCount ?? this.starCount,
+      isStarred: isStarred ?? this.isStarred,
+      starredByNames: starredByNames ?? this.starredByNames,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Project &&
+            runtimeType == other.runtimeType &&
+            id == other.id &&
+            title == other.title &&
+            description == other.description &&
+            category == other.category &&
+            techStack == other.techStack &&
+            projectUrl == other.projectUrl &&
+            projectImageUrl == other.projectImageUrl &&
+            isFeatured == other.isFeatured &&
+            starCount == other.starCount &&
+            isStarred == other.isStarred &&
+            starredByNames == other.starredByNames;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    description,
+    category,
+    techStack,
+    projectUrl,
+    projectImageUrl,
+    isFeatured,
+    starCount,
+    isStarred,
+    starredByNames,
+  );
 }

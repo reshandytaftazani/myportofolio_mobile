@@ -251,4 +251,132 @@ void main() {
       });
     });
   });
+
+  group('Model value semantics (copyWith, ==, hashCode)', () {
+    test('Project supports equality, hashCode, and copyWith', () {
+      const a = Project(
+        id: 'p-1',
+        title: 'App',
+        description: 'Desc',
+        category: 'Mobile Development',
+        isFeatured: true,
+      );
+      const b = Project(
+        id: 'p-1',
+        title: 'App',
+        description: 'Desc',
+        category: 'Mobile Development',
+        isFeatured: true,
+      );
+      final updated = a.copyWith(title: 'App v2', starCount: 5);
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(updated, isNot(equals(a)));
+      expect(updated.title, 'App v2');
+      expect(updated.starCount, 5);
+      expect(updated.description, 'Desc');
+    });
+
+    test('Education supports equality, hashCode, and copyWith', () {
+      const a = Education(
+        id: 1,
+        schoolName: 'UI',
+        period: '2024 - 2028',
+        detail: 'Ilmu Komputer',
+        startYear: 2024,
+      );
+      const b = Education(
+        id: 1,
+        schoolName: 'UI',
+        period: '2024 - 2028',
+        detail: 'Ilmu Komputer',
+        startYear: 2024,
+      );
+      final updated = a.copyWith(startYear: 2025, isStarred: true);
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(updated, isNot(equals(a)));
+      expect(updated.startYear, 2025);
+      expect(updated.isStarred, isTrue);
+      expect(updated.schoolName, 'UI');
+    });
+
+    test('Experience supports equality, hashCode, and copyWith', () {
+      final a = Experience(
+        id: 'e-1',
+        title: 'Intern',
+        company: 'Acme',
+        description: 'Work',
+        startedAt: DateTime(2025, 1, 1),
+      );
+      final b = Experience(
+        id: 'e-1',
+        title: 'Intern',
+        company: 'Acme',
+        description: 'Work',
+        startedAt: DateTime(2025, 1, 1),
+      );
+      final updated = a.copyWith(isOngoing: true, category: 'internship');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(updated, isNot(equals(a)));
+      expect(updated.isOngoing, isTrue);
+      expect(updated.category, 'internship');
+      expect(updated.company, 'Acme');
+    });
+
+    test('Skill supports equality, hashCode, and copyWith', () {
+      const a = Skill(
+        id: 's-1',
+        title: 'Dart',
+        description: 'Language',
+        level: 'Advanced',
+        codeSnippet: 'void main() {}',
+      );
+      const b = Skill(
+        id: 's-1',
+        title: 'Dart',
+        description: 'Language',
+        level: 'Advanced',
+        codeSnippet: 'void main() {}',
+      );
+      final updated = a.copyWith(level: 'Expert');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(updated, isNot(equals(a)));
+      expect(updated.level, 'Expert');
+      expect(updated.title, 'Dart');
+    });
+
+    test('TechStack supports equality, hashCode, and copyWith', () {
+      const a = TechStack(
+        id: 1,
+        name: 'Flutter',
+        iconUrl: 'https://example.com/flutter.svg',
+        filename: 'main.dart',
+        codeSnippet: 'runApp(const MyApp());',
+        order: 1,
+      );
+      const b = TechStack(
+        id: 1,
+        name: 'Flutter',
+        iconUrl: 'https://example.com/flutter.svg',
+        filename: 'main.dart',
+        codeSnippet: 'runApp(const MyApp());',
+        order: 1,
+      );
+      final updated = a.copyWith(order: 2, starredByNames: 'alice');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(updated, isNot(equals(a)));
+      expect(updated.order, 2);
+      expect(updated.starredByNames, 'alice');
+      expect(updated.name, 'Flutter');
+    });
+  });
 }
