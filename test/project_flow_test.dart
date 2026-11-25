@@ -274,7 +274,12 @@ void main() {
 
         await tester.tap(find.byTooltip('Open navigation menu'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Add Project'));
+        await tester.tap(
+          find.descendant(
+            of: find.byType(Drawer),
+            matching: find.text('Tambah Proyek'),
+          ),
+        );
         await tester.pumpAndSettle();
         expect(find.byType(ProjectFormPage), findsOneWidget);
 
@@ -287,7 +292,7 @@ void main() {
           'Added through LeftDrawer',
         );
 
-        final saveButton = find.widgetWithText(FilledButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Simpan');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pumpAndSettle();
@@ -338,7 +343,7 @@ void main() {
           'Checking disabled controls while submitting',
         );
 
-        final saveButton = find.widgetWithText(FilledButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Simpan');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pump();

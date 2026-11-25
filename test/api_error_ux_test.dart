@@ -187,7 +187,7 @@ void main() {
           'Project description',
         );
 
-        final saveButton = find.widgetWithText(FilledButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Simpan');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pumpAndSettle();
@@ -294,7 +294,7 @@ void main() {
           findsOneWidget,
         );
 
-        await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Coba Lagi'));
         await tester.pumpAndSettle();
 
         expect(
@@ -303,7 +303,7 @@ void main() {
         );
         expect(find.textContaining('<html>'), findsNothing);
 
-        await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Coba Lagi'));
         await tester.pumpAndSettle();
 
         expect(find.text('Recovered Project'), findsOneWidget);
@@ -348,7 +348,7 @@ void main() {
           'Testing timeout and 401 handling',
         );
 
-        final saveButton = find.widgetWithText(FilledButton, 'Save');
+        final saveButton = find.widgetWithText(FilledButton, 'Simpan');
         await tester.ensureVisible(saveButton);
         await tester.tap(saveButton);
         await tester.pump(const Duration(milliseconds: 40));

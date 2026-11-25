@@ -109,7 +109,7 @@ class _ProjectFormPageState extends State<ProjectFormPage>
             ..showSnackBar(
               const SnackBar(
                 content: Text(
-                  'Login berhasil. Tekan Save untuk mengirim ulang proyek.',
+                  'Login berhasil. Tekan Simpan untuk mengirim ulang proyek.',
                 ),
               ),
             );
@@ -178,7 +178,7 @@ class _ProjectFormPageState extends State<ProjectFormPage>
   @override
   Widget build(BuildContext context) {
     return buildFormScaffold(
-      title: 'Add Project Form',
+      title: 'Tambah Proyek',
       popResult: _hasCreatedProject ? true : null,
       children: [
         TextFormField(
@@ -302,7 +302,7 @@ class _ProjectFormPageState extends State<ProjectFormPage>
                   width: 20.0,
                   child: CircularProgressIndicator(strokeWidth: 2.0),
                 )
-              : const Text('Save'),
+              : const Text('Simpan'),
         ),
         const SizedBox(height: 16.0),
       ],

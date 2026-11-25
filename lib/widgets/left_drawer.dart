@@ -193,7 +193,7 @@ class LeftDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.add_box_outlined),
-            title: const Text('Add Project'),
+            title: const Text('Tambah Proyek'),
             onTap: () => _openAddProject(context),
           ),
           if (isLoggedIn)

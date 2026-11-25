@@ -158,7 +158,7 @@ class ProjectListViewState extends State<ProjectListView> {
                         }
                       },
                       icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Retry'),
+                      label: const Text('Coba Lagi'),
                     ),
                   ],
                 ),
@@ -180,7 +180,7 @@ class ProjectListViewState extends State<ProjectListView> {
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        'No projects found.',
+                        'Belum ada proyek.',
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
