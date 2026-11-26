@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/tech_stack.dart';
+import 'package:myportofolio_mobile/utils/authenticated_action_helper.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
 
@@ -19,6 +20,9 @@ class _TechStackFormPageState extends State<TechStackFormPage>
   final _filenameController = TextEditingController();
   final _codeSnippetController = TextEditingController();
   final _orderController = TextEditingController(text: '0');
+
+  bool _isSubmitting = false;
+  bool _hasCreatedTechStack = false;
 
   @override
   bool get isFormDirty =>
@@ -70,21 +74,42 @@ class _TechStackFormPageState extends State<TechStackFormPage>
       order: int.parse(_orderController.text.trim()),
     );
 
+    final result = await runAuthenticatedAction<TechStack>(
+      context: context,
+      action: (apiClient, token) =>
+          apiClient.createTechStack(techStack, token: token),
+      errorActionLabel: 'Gagal menyimpan tech stack',
+      reLoginSuccessMessage:
+          'Login berhasil. Tekan Simpan untuk mengirim ulang tech stack.',
+      onSubmittingChanged: (isSubmitting) {
+        setState(() {
+          _isSubmitting = isSubmitting;
+        });
+      },
+    );
+
+    if (!result.succeeded || !mounted) return;
+    final created = result.data!;
+
+    setState(() {
+      _hasCreatedTechStack = true;
+    });
+
     final shouldReset = await showFormSummaryDialog(
       context: context,
-      title: 'Ringkasan Tech Stack',
+      title: 'Tech Stack Berhasil Disimpan',
       entries: [
-        FormSummaryEntry(label: 'Nama Tech Stack', value: techStack.name),
-        FormSummaryEntry(label: 'URL Ikon', value: techStack.iconUrl),
-        FormSummaryEntry(label: 'Nama File', value: techStack.filename),
+        FormSummaryEntry(label: 'Nama Tech Stack', value: created.name),
+        FormSummaryEntry(label: 'URL Ikon', value: created.iconUrl),
+        FormSummaryEntry(label: 'Nama File', value: created.filename),
         FormSummaryEntry(
           label: 'Cuplikan Kode',
-          value: techStack.codeSnippet,
+          value: created.codeSnippet,
           isCode: true,
         ),
         FormSummaryEntry(
           label: 'Urutan Tampil',
-          value: techStack.order.toString(),
+          value: created.order.toString(),
         ),
       ],
     );
@@ -98,9 +123,11 @@ class _TechStackFormPageState extends State<TechStackFormPage>
   Widget build(BuildContext context) {
     return buildFormScaffold(
       title: 'Tambah Tech Stack',
+      popResult: _hasCreatedTechStack ? true : null,
       children: [
         TextFormField(
           controller: _nameController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Nama Tech Stack',
             hintText: 'Contoh: Dart',
@@ -115,6 +142,7 @@ class _TechStackFormPageState extends State<TechStackFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _iconUrlController,
+          enabled: !_isSubmitting,
           keyboardType: TextInputType.url,
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
@@ -131,6 +159,7 @@ class _TechStackFormPageState extends State<TechStackFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _filenameController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Nama File',
             hintText: 'Contoh: main.dart',
@@ -145,6 +174,7 @@ class _TechStackFormPageState extends State<TechStackFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _codeSnippetController,
+          enabled: !_isSubmitting,
           maxLines: 6,
           minLines: 4,
           keyboardType: TextInputType.multiline,
@@ -159,6 +189,7 @@ class _TechStackFormPageState extends State<TechStackFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _orderController,
+          enabled: !_isSubmitting,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           textInputAction: TextInputAction.done,
           decoration: const InputDecoration(
@@ -168,7 +199,16 @@ class _TechStackFormPageState extends State<TechStackFormPage>
           validator: _validateOrder,
         ),
         const SizedBox(height: 24.0),
-        FilledButton(onPressed: _submitForm, child: const Text('Simpan')),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                )
+              : const Text('Simpan'),
+        ),
         const SizedBox(height: 16.0),
       ],
     );

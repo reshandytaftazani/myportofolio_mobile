@@ -75,6 +75,33 @@ ApiClient _createMockApiClient() {
           201,
         );
       }
+      if (request.url.path == '/api/v1/skills/' && request.method == 'POST') {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'id': 'mock-skill-1',
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
+      if (request.url.path == '/api/v1/techstacks/' &&
+          request.method == 'POST') {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'id': 1,
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
       if (request.url.path == '/api/v1/auth/token/' &&
           request.method == 'POST') {
         return http.Response(jsonEncode({'token': 'mock-token'}), 200);
@@ -792,7 +819,12 @@ void main() {
   testWidgets(
     'skill form validates whitespace, max lengths, and preserves code snippet indentation on Edit Isian',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SkillFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: SkillFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       await tester.enterText(field('Nama Keahlian'), '   ');
       await tester.enterText(field('Level'), '   ');
@@ -829,7 +861,7 @@ void main() {
       await submitExperienceForm(tester);
 
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('Ringkasan Keahlian'), findsOneWidget);
+      expect(find.text('Keahlian Berhasil Disimpan'), findsOneWidget);
       expect(
         find.textContaining('Nama Keahlian: Flutter & Dart'),
         findsOneWidget,
@@ -929,7 +961,12 @@ void main() {
   testWidgets(
     'tech stack form validates invalid URL, decimal order, empty snippet, and preserves multiline summary',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: TechStackFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: TechStackFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       expect(
         tester.widget<TextFormField>(field('Urutan Tampil')).controller?.text,
@@ -968,7 +1005,7 @@ void main() {
       await submitExperienceForm(tester);
 
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('Ringkasan Tech Stack'), findsOneWidget);
+      expect(find.text('Tech Stack Berhasil Disimpan'), findsOneWidget);
       expect(find.textContaining('Nama Tech Stack: Dart'), findsOneWidget);
       expect(
         find.textContaining('URL Ikon: https://cdn.example.com/dart.svg'),
@@ -1017,7 +1054,12 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetViewInsets);
 
-      await tester.pumpWidget(const MaterialApp(home: TechStackFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: TechStackFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       final longSnippet = List.generate(
         40,

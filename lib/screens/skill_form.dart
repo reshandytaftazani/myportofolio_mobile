@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/skill.dart';
+import 'package:myportofolio_mobile/utils/authenticated_action_helper.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
 
@@ -18,6 +19,9 @@ class _SkillFormPageState extends State<SkillFormPage>
   final _levelController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _codeSnippetController = TextEditingController();
+
+  bool _isSubmitting = false;
+  bool _hasCreatedSkill = false;
 
   @override
   bool get isFormDirty =>
@@ -55,20 +59,40 @@ class _SkillFormPageState extends State<SkillFormPage>
       codeSnippet: rawCode.trim().isEmpty ? null : rawCode,
     );
 
+    final result = await runAuthenticatedAction<Skill>(
+      context: context,
+      action: (apiClient, token) => apiClient.createSkill(skill, token: token),
+      errorActionLabel: 'Gagal menyimpan keahlian',
+      reLoginSuccessMessage:
+          'Login berhasil. Tekan Simpan untuk mengirim ulang keahlian.',
+      onSubmittingChanged: (isSubmitting) {
+        setState(() {
+          _isSubmitting = isSubmitting;
+        });
+      },
+    );
+
+    if (!result.succeeded || !mounted) return;
+    final created = result.data!;
+
+    setState(() {
+      _hasCreatedSkill = true;
+    });
+
     final shouldReset = await showFormSummaryDialog(
       context: context,
-      title: 'Ringkasan Keahlian',
+      title: 'Keahlian Berhasil Disimpan',
       entries: [
-        FormSummaryEntry(label: 'Nama Keahlian', value: skill.title),
-        FormSummaryEntry(label: 'Level', value: skill.level),
+        FormSummaryEntry(label: 'Nama Keahlian', value: created.title),
+        FormSummaryEntry(label: 'Level', value: created.level),
         FormSummaryEntry(
           label: 'Deskripsi',
-          value: skill.description,
+          value: created.description,
           isMultiline: true,
         ),
         FormSummaryEntry(
           label: 'Cuplikan Kode',
-          value: skill.codeSnippet,
+          value: created.codeSnippet,
           isCode: true,
         ),
       ],
@@ -83,9 +107,11 @@ class _SkillFormPageState extends State<SkillFormPage>
   Widget build(BuildContext context) {
     return buildFormScaffold(
       title: 'Tambah Keahlian',
+      popResult: _hasCreatedSkill ? true : null,
       children: [
         TextFormField(
           controller: _titleController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Nama Keahlian',
             hintText: 'Contoh: Flutter & Dart',
@@ -100,6 +126,7 @@ class _SkillFormPageState extends State<SkillFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _levelController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Level',
             hintText: 'Contoh: Intermediate',
@@ -111,6 +138,7 @@ class _SkillFormPageState extends State<SkillFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _descriptionController,
+          enabled: !_isSubmitting,
           maxLines: 4,
           minLines: 3,
           decoration: const InputDecoration(
@@ -123,6 +151,7 @@ class _SkillFormPageState extends State<SkillFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _codeSnippetController,
+          enabled: !_isSubmitting,
           maxLines: 6,
           minLines: 4,
           keyboardType: TextInputType.multiline,
@@ -133,7 +162,16 @@ class _SkillFormPageState extends State<SkillFormPage>
           ),
         ),
         const SizedBox(height: 24.0),
-        FilledButton(onPressed: _submitForm, child: const Text('Simpan')),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                )
+              : const Text('Simpan'),
+        ),
         const SizedBox(height: 16.0),
       ],
     );
