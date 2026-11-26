@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/utils/authenticated_action_helper.dart';
 import 'package:myportofolio_mobile/utils/date_formatter.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
@@ -25,6 +26,8 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
   String _category = Experience.defaultCategory;
   DateTime? _startedAt;
   DateTime? _endedAt;
+  bool _isSubmitting = false;
+  bool _hasCreatedExperience = false;
 
   @override
   bool get isFormDirty =>
@@ -114,32 +117,53 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
       endedAt: _endedAt,
     );
 
+    final result = await runAuthenticatedAction<Experience>(
+      context: context,
+      action: (apiClient, token) =>
+          apiClient.createExperience(experience, token: token),
+      errorActionLabel: 'Gagal menyimpan pengalaman',
+      reLoginSuccessMessage:
+          'Login berhasil. Tekan Simpan untuk mengirim ulang pengalaman.',
+      onSubmittingChanged: (isSubmitting) {
+        setState(() {
+          _isSubmitting = isSubmitting;
+        });
+      },
+    );
+
+    if (!result.succeeded || !mounted) return;
+    final created = result.data!;
+
+    setState(() {
+      _hasCreatedExperience = true;
+    });
+
     final shouldReset = await showFormSummaryDialog(
       context: context,
-      title: 'Ringkasan Pengalaman',
+      title: 'Pengalaman Berhasil Disimpan',
       entries: [
-        FormSummaryEntry(label: 'Nama Pengalaman', value: experience.title),
+        FormSummaryEntry(label: 'Nama Pengalaman', value: created.title),
         FormSummaryEntry(
           label: 'Perusahaan / Organisasi',
-          value: experience.company,
+          value: created.company,
         ),
-        FormSummaryEntry(label: 'Kategori', value: experience.categoryLabel),
+        FormSummaryEntry(label: 'Kategori', value: created.categoryLabel),
         FormSummaryEntry(
           label: 'Deskripsi',
-          value: experience.description,
+          value: created.description,
           isMultiline: true,
         ),
-        FormSummaryEntry(label: 'URL Thumbnail', value: experience.thumbnail),
+        FormSummaryEntry(label: 'URL Thumbnail', value: created.thumbnail),
         FormSummaryEntry(
           label: 'Tanggal Mulai',
-          value: experience.startedAt != null
-              ? formatIsoDate(experience.startedAt!)
+          value: created.startedAt != null
+              ? formatIsoDate(created.startedAt!)
               : null,
         ),
         FormSummaryEntry(
           label: 'Tanggal Selesai',
-          value: experience.endedAt != null
-              ? formatIsoDate(experience.endedAt!)
+          value: created.endedAt != null
+              ? formatIsoDate(created.endedAt!)
               : null,
         ),
       ],
@@ -159,8 +183,9 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
   }) {
     return TextFormField(
       controller: controller,
+      enabled: !_isSubmitting,
       readOnly: true,
-      onTap: () => _pickDate(isStart: isStart),
+      onTap: _isSubmitting ? null : () => _pickDate(isStart: isStart),
       decoration: InputDecoration(
         labelText: labelText,
         hintText: 'YYYY-MM-DD',
@@ -169,7 +194,9 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
             : IconButton(
                 tooltip: 'Hapus tanggal',
                 icon: const Icon(Icons.clear),
-                onPressed: () => _clearDate(isStart: isStart),
+                onPressed: _isSubmitting
+                    ? null
+                    : () => _clearDate(isStart: isStart),
               ),
       ),
       validator: validator,
@@ -180,9 +207,11 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
   Widget build(BuildContext context) {
     return buildFormScaffold(
       title: 'Tambah Pengalaman',
+      popResult: _hasCreatedExperience ? true : null,
       children: [
         TextFormField(
           controller: _titleController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Nama Pengalaman',
             hintText: 'Contoh: Software Engineer Intern',
@@ -197,6 +226,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _companyController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Perusahaan / Organisasi (Opsional)',
             hintText: 'Contoh: Google',
@@ -223,16 +253,19 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
                 ),
               )
               .toList(),
-          onChanged: (newValue) {
-            if (newValue == null) return;
-            setFormState(() {
-              _category = newValue;
-            });
-          },
+          onChanged: _isSubmitting
+              ? null
+              : (newValue) {
+                  if (newValue == null) return;
+                  setFormState(() {
+                    _category = newValue;
+                  });
+                },
         ),
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _descriptionController,
+          enabled: !_isSubmitting,
           maxLines: 5,
           minLines: 3,
           decoration: const InputDecoration(
@@ -245,6 +278,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _thumbnailController,
+          enabled: !_isSubmitting,
           keyboardType: TextInputType.url,
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
@@ -277,7 +311,16 @@ class _ExperienceFormPageState extends State<ExperienceFormPage>
           },
         ),
         const SizedBox(height: 24.0),
-        FilledButton(onPressed: _submitForm, child: const Text('Simpan')),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                )
+              : const Text('Simpan'),
+        ),
         const SizedBox(height: 16.0),
       ],
     );

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/education.dart';
+import 'package:myportofolio_mobile/utils/authenticated_action_helper.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
 
@@ -18,6 +19,9 @@ class _EducationFormPageState extends State<EducationFormPage>
   final _periodController = TextEditingController();
   final _detailController = TextEditingController();
   final _startYearController = TextEditingController();
+
+  bool _isSubmitting = false;
+  bool _hasCreatedEducation = false;
 
   @override
   bool get isFormDirty =>
@@ -69,23 +73,44 @@ class _EducationFormPageState extends State<EducationFormPage>
       startYear: int.parse(_startYearController.text.trim()),
     );
 
+    final result = await runAuthenticatedAction<Education>(
+      context: context,
+      action: (apiClient, token) =>
+          apiClient.createEducation(education, token: token),
+      errorActionLabel: 'Gagal menyimpan pendidikan',
+      reLoginSuccessMessage:
+          'Login berhasil. Tekan Simpan untuk mengirim ulang pendidikan.',
+      onSubmittingChanged: (isSubmitting) {
+        setState(() {
+          _isSubmitting = isSubmitting;
+        });
+      },
+    );
+
+    if (!result.succeeded || !mounted) return;
+    final created = result.data!;
+
+    setState(() {
+      _hasCreatedEducation = true;
+    });
+
     final shouldReset = await showFormSummaryDialog(
       context: context,
-      title: 'Ringkasan Pendidikan',
+      title: 'Pendidikan Berhasil Disimpan',
       entries: [
         FormSummaryEntry(
           label: 'Nama Sekolah / Institusi',
-          value: education.schoolName,
+          value: created.schoolName,
         ),
-        FormSummaryEntry(label: 'Periode', value: education.period),
+        FormSummaryEntry(label: 'Periode', value: created.period),
         FormSummaryEntry(
           label: 'Detail',
-          value: education.detail,
+          value: created.detail,
           isMultiline: true,
         ),
         FormSummaryEntry(
           label: 'Tahun Mulai',
-          value: education.startYear.toString(),
+          value: created.startYear.toString(),
         ),
       ],
     );
@@ -99,9 +124,11 @@ class _EducationFormPageState extends State<EducationFormPage>
   Widget build(BuildContext context) {
     return buildFormScaffold(
       title: 'Tambah Pendidikan',
+      popResult: _hasCreatedEducation ? true : null,
       children: [
         TextFormField(
           controller: _schoolNameController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Nama Sekolah / Institusi',
             hintText: 'Contoh: Universitas Indonesia',
@@ -116,6 +143,7 @@ class _EducationFormPageState extends State<EducationFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _periodController,
+          enabled: !_isSubmitting,
           decoration: const InputDecoration(
             labelText: 'Periode',
             hintText: 'Contoh: 2024 - Sekarang',
@@ -127,6 +155,7 @@ class _EducationFormPageState extends State<EducationFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _detailController,
+          enabled: !_isSubmitting,
           maxLines: 3,
           minLines: 2,
           decoration: const InputDecoration(
@@ -143,6 +172,7 @@ class _EducationFormPageState extends State<EducationFormPage>
         const SizedBox(height: 16.0),
         TextFormField(
           controller: _startYearController,
+          enabled: !_isSubmitting,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.done,
           decoration: const InputDecoration(
@@ -152,7 +182,16 @@ class _EducationFormPageState extends State<EducationFormPage>
           validator: _validateStartYear,
         ),
         const SizedBox(height: 24.0),
-        FilledButton(onPressed: _submitForm, child: const Text('Simpan')),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                )
+              : const Text('Simpan'),
+        ),
         const SizedBox(height: 16.0),
       ],
     );

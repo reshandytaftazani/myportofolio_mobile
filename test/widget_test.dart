@@ -47,6 +47,34 @@ ApiClient _createMockApiClient() {
           201,
         );
       }
+      if (request.url.path == '/api/v1/experiences/' &&
+          request.method == 'POST') {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'id': 'mock-experience-1',
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
+      if (request.url.path == '/api/v1/education/' &&
+          request.method == 'POST') {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'id': 1,
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
       if (request.url.path == '/api/v1/auth/token/' &&
           request.method == 'POST') {
         return http.Response(jsonEncode({'token': 'mock-token'}), 200);
@@ -461,7 +489,12 @@ void main() {
   testWidgets(
     'experience summary displays all inputs, Edit Isian preserves values, and Selesai resets',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ExperienceFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: ExperienceFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       await tester.enterText(
         field('Nama Pengalaman'),
@@ -491,7 +524,7 @@ void main() {
 
       await submitExperienceForm(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('Ringkasan Pengalaman'), findsOneWidget);
+      expect(find.text('Pengalaman Berhasil Disimpan'), findsOneWidget);
       for (final expected in [
         'Nama Pengalaman: Software Engineer Intern',
         'Perusahaan / Organisasi: PT Maju',
@@ -563,13 +596,16 @@ void main() {
     addTearDown(tester.view.resetViewInsets);
 
     await tester.pumpWidget(
-      MaterialApp(
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: const TextScaler.linear(1.5)),
-          child: child!,
+      _wrapWithProviders(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          ),
+          home: const ExperienceFormPage(),
         ),
-        home: const ExperienceFormPage(),
+        initialToken: 'test-token',
       ),
     );
 
@@ -644,7 +680,12 @@ void main() {
   testWidgets(
     'education form validates whitespace, max lengths, 4-digit year, and Edit Isian',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: EducationFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: EducationFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       await tester.enterText(field('Nama Sekolah / Institusi'), '   ');
       await tester.enterText(field('Periode'), '   ');
@@ -702,7 +743,7 @@ void main() {
       await submitExperienceForm(tester);
 
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.text('Ringkasan Pendidikan'), findsOneWidget);
+      expect(find.text('Pendidikan Berhasil Disimpan'), findsOneWidget);
       expect(
         find.textContaining('Nama Sekolah / Institusi: Universitas Indonesia'),
         findsOneWidget,

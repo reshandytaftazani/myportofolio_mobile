@@ -43,6 +43,29 @@ ApiClient _createMockApiClient() {
           }.contains(request.url.path)) {
         return http.Response(jsonEncode([]), 200);
       }
+      if (request.method == 'POST' &&
+          const {
+            '/api/v1/projects/',
+            '/api/v1/experiences/',
+            '/api/v1/education/',
+            '/api/v1/skills/',
+            '/api/v1/techstacks/',
+          }.contains(request.url.path)) {
+        final payload = jsonDecode(request.body) as Map<String, dynamic>;
+        final isIntId =
+            request.url.path == '/api/v1/education/' ||
+            request.url.path == '/api/v1/techstacks/';
+        return http.Response(
+          jsonEncode({
+            'id': isIntId ? 1 : 'mock-id-1',
+            ...payload,
+            'star_count': 0,
+            'is_starred': false,
+            'starred_by_names': '',
+          }),
+          201,
+        );
+      }
       return http.Response('Not found', 404);
     }),
   );
