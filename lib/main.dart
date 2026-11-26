@@ -5,6 +5,7 @@ import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/services/portfolio_refresh_notifier.dart';
 import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 import 'package:myportofolio_mobile/widgets/code_snippet_box.dart';
@@ -95,6 +96,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ProjectRefreshNotifier>(
           create: (_) => ProjectRefreshNotifier(),
+        ),
+        ChangeNotifierProvider<PortfolioRefreshNotifier>(
+          create: (_) => PortfolioRefreshNotifier(),
         ),
       ],
       child: MaterialApp(
