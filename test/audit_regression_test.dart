@@ -33,7 +33,14 @@ ApiClient _createMockApiClient() {
   return ApiClient(
     baseUrl: 'https://mock.local',
     client: MockClient((request) async {
-      if (request.url.path == '/api/v1/projects/' && request.method == 'GET') {
+      if (request.method == 'GET' &&
+          const {
+            '/api/v1/projects/',
+            '/api/v1/experiences/',
+            '/api/v1/education/',
+            '/api/v1/skills/',
+            '/api/v1/techstacks/',
+          }.contains(request.url.path)) {
         return http.Response(jsonEncode([]), 200);
       }
       return http.Response('Not found', 404);
@@ -407,7 +414,9 @@ void main() {
       'TechStackFormPage, EducationFormPage, and SkillFormPage clear dirty state after reset so Back pops without discard dialog',
       (tester) async {
         // 1. TechStackFormPage
-        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+        await tester.pumpWidget(
+          MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+        );
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
         await tester.pumpAndSettle();
@@ -824,7 +833,9 @@ void main() {
     testWidgets(
       'Projects section FAB switches to Tambah Tech Stack on Tech Stack tab',
       (tester) async {
-        await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+        await tester.pumpWidget(
+          MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+        );
         await tester.ensureVisible(find.text('Projects'));
         await tester.tap(find.text('Projects'));
         await tester.pumpAndSettle();

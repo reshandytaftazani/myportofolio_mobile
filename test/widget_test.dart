@@ -24,7 +24,14 @@ ApiClient _createMockApiClient() {
   return ApiClient(
     baseUrl: 'https://mock.local',
     client: MockClient((request) async {
-      if (request.url.path == '/api/v1/projects/' && request.method == 'GET') {
+      if (request.method == 'GET' &&
+          const {
+            '/api/v1/projects/',
+            '/api/v1/experiences/',
+            '/api/v1/education/',
+            '/api/v1/skills/',
+            '/api/v1/techstacks/',
+          }.contains(request.url.path)) {
         return http.Response(jsonEncode([]), 200);
       }
       if (request.url.path == '/api/v1/projects/' && request.method == 'POST') {
@@ -358,7 +365,9 @@ void main() {
   testWidgets(
     'experience card and drawer open form, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+      await tester.pumpWidget(
+        MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+      );
 
       await tester.ensureVisible(find.text('Experiences'));
       await tester.tap(find.text('Experiences'));
@@ -579,7 +588,9 @@ void main() {
   testWidgets(
     'education and skill cards and drawer open forms, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+      await tester.pumpWidget(
+        MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+      );
 
       for (final entry in <(String, String, Type)>[
         ('Education', 'Tambah Pendidikan', EducationFormPage),
@@ -832,7 +843,9 @@ void main() {
   testWidgets(
     'tech stack card and drawer open form, Back and Home return cleanly',
     (tester) async {
-      await tester.pumpWidget(MyApp(apiClient: _createMockApiClient()));
+      await tester.pumpWidget(
+        MyApp(apiClient: _createMockApiClient(), initialToken: 'test-token'),
+      );
 
       await tester.ensureVisible(find.text('Projects'));
       await tester.tap(find.text('Projects'));

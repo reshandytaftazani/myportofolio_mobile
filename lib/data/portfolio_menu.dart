@@ -13,8 +13,10 @@ import 'package:myportofolio_mobile/screens/portfolio_section_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/skill_form.dart';
 import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
+import 'package:myportofolio_mobile/services/portfolio_refresh_notifier.dart';
 import 'package:myportofolio_mobile/widgets/education_card.dart';
 import 'package:myportofolio_mobile/widgets/experience_card.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_async_list_view.dart';
 import 'package:myportofolio_mobile/widgets/project_item_card.dart';
 import 'package:myportofolio_mobile/widgets/project_list_view.dart';
 import 'package:myportofolio_mobile/widgets/skill_card.dart';
@@ -36,7 +38,7 @@ class PortfolioDataSource {
     this.skills = const [],
   });
 
-  /// Menggunakan data dummy lokal sementara sebelum integrasi backend Django.
+  /// Menggunakan data dummy lokal (mis. untuk pratinjau atau pengujian lokal).
   factory PortfolioDataSource.dummy() {
     return PortfolioDataSource(
       projects: DummyPortfolioData.projects,
@@ -50,11 +52,16 @@ class PortfolioDataSource {
 
 /// Membangun halaman bagian portofolio untuk [section] dari [dataSource]
 /// secara terpisah dari konfigurasi menu dan komponen navigasi.
+///
+/// Jika [dataSource] bernilai `null`, seluruh bagian menampilkan data live
+/// dari backend DRF melalui [PortfolioAsyncListView]. Jika [dataSource]
+/// disuntikkan (mis. pada widget test), daftar dirender secara deterministik
+/// dari data lokal tanpa panggilan jaringan.
 Widget buildPortfolioSectionPage(
   PortfolioSection section, {
   PortfolioDataSource? dataSource,
 }) {
-  final data = dataSource ?? PortfolioDataSource.dummy();
+  final data = dataSource ?? const PortfolioDataSource();
   final config = categoryConfigForSection(section);
 
   switch (section) {
@@ -82,6 +89,23 @@ Widget buildPortfolioSectionPage(
           );
         },
         secondaryTabLabel: 'Tech Stack',
+        secondaryBody: dataSource == null
+            ? PortfolioAsyncListView<TechStack>(
+                fetcher: (client) => client.getTechStacks(),
+                errorTitle: 'Gagal memuat daftar tech stack',
+                emptyMessage: 'Belum ada tech stack.',
+                refreshTarget: PortfolioRefreshTarget.techStacks,
+                itemBuilder: (context, techStack) => TechStackCard(
+                  techStack: techStack,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => PortfolioDetailPage.techStack(techStack),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         secondaryItemCount: data.techStacks.length,
         secondaryItemBuilder: (context, index) {
           final techStack = data.techStacks[index];
@@ -104,6 +128,7 @@ Widget buildPortfolioSectionPage(
         secondaryAction: SectionAction(
           label: 'Tambah Tech Stack',
           icon: Icons.layers_outlined,
+          requiresAuth: true,
           builder: (_) => const TechStackFormPage(),
         ),
       );
@@ -114,6 +139,24 @@ Widget buildPortfolioSectionPage(
         emptyMessage: 'Catat pengalaman kerja, magang, atau organisasi Anda.',
         icon: config.icon,
         accentColor: config.color,
+        primaryBody: dataSource == null
+            ? PortfolioAsyncListView<Experience>(
+                fetcher: (client) => client.getExperiences(),
+                errorTitle: 'Gagal memuat daftar pengalaman',
+                emptyMessage: 'Belum ada pengalaman.',
+                refreshTarget: PortfolioRefreshTarget.experiences,
+                itemBuilder: (context, experience) => ExperienceCard(
+                  experience: experience,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          PortfolioDetailPage.experience(experience),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         itemCount: data.experiences.length,
         itemBuilder: (context, index) {
           final experience = data.experiences[index];
@@ -130,6 +173,7 @@ Widget buildPortfolioSectionPage(
         primaryAction: SectionAction(
           label: 'Tambah Pengalaman',
           icon: Icons.add,
+          requiresAuth: true,
           builder: (_) => const ExperienceFormPage(),
         ),
       );
@@ -140,6 +184,23 @@ Widget buildPortfolioSectionPage(
         emptyMessage: 'Tambahkan riwayat sekolah atau perguruan tinggi Anda.',
         icon: config.icon,
         accentColor: config.color,
+        primaryBody: dataSource == null
+            ? PortfolioAsyncListView<Education>(
+                fetcher: (client) => client.getEducations(),
+                errorTitle: 'Gagal memuat daftar pendidikan',
+                emptyMessage: 'Belum ada riwayat pendidikan.',
+                refreshTarget: PortfolioRefreshTarget.education,
+                itemBuilder: (context, education) => EducationCard(
+                  education: education,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => PortfolioDetailPage.education(education),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         itemCount: data.educations.length,
         itemBuilder: (context, index) {
           final education = data.educations[index];
@@ -156,6 +217,7 @@ Widget buildPortfolioSectionPage(
         primaryAction: SectionAction(
           label: 'Tambah Pendidikan',
           icon: Icons.add,
+          requiresAuth: true,
           builder: (_) => const EducationFormPage(),
         ),
       );
@@ -166,6 +228,23 @@ Widget buildPortfolioSectionPage(
         emptyMessage: 'Tambahkan keahlian teknis beserta tingkat kemahirannya.',
         icon: config.icon,
         accentColor: config.color,
+        primaryBody: dataSource == null
+            ? PortfolioAsyncListView<Skill>(
+                fetcher: (client) => client.getSkills(),
+                errorTitle: 'Gagal memuat daftar keahlian',
+                emptyMessage: 'Belum ada keahlian.',
+                refreshTarget: PortfolioRefreshTarget.skills,
+                itemBuilder: (context, skill) => SkillCard(
+                  skill: skill,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => PortfolioDetailPage.skill(skill),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         itemCount: data.skills.length,
         itemBuilder: (context, index) {
           final skill = data.skills[index];
@@ -182,6 +261,7 @@ Widget buildPortfolioSectionPage(
         primaryAction: SectionAction(
           label: 'Tambah Keahlian',
           icon: Icons.add,
+          requiresAuth: true,
           builder: (_) => const SkillFormPage(),
         ),
       );

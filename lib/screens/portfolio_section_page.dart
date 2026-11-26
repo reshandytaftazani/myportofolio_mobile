@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/services/portfolio_refresh_notifier.dart';
 import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
@@ -77,8 +78,14 @@ class PortfolioSectionPage extends StatefulWidget {
   /// Konten kustom opsional untuk tab utama (mis. [ProjectListView]).
   final Widget? primaryBody;
 
+  /// Konten kustom opsional untuk tab sekunder (mis. daftar live Tech Stack).
+  final Widget? secondaryBody;
+
   /// Callback opsional setelah [primaryAction] selesai dijalankan.
   final Future<void>? Function()? onPrimaryActionSuccess;
+
+  /// Callback opsional setelah [secondaryAction] selesai dijalankan.
+  final Future<void>? Function()? onSecondaryActionSuccess;
 
   /// Membuat instansi [PortfolioSectionPage].
   const PortfolioSectionPage({
@@ -97,7 +104,9 @@ class PortfolioSectionPage extends StatefulWidget {
     this.secondaryItemCount = 0,
     this.secondaryItemBuilder,
     this.primaryBody,
+    this.secondaryBody,
     this.onPrimaryActionSuccess,
+    this.onSecondaryActionSuccess,
   });
 
   @override
@@ -171,15 +180,38 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
       context,
       MaterialPageRoute<Object?>(builder: action.builder),
     );
-    if (!context.mounted) return;
-    if (action == widget.primaryAction && result == true) {
+    if (!context.mounted || result != true) return;
+    if (action == widget.primaryAction) {
       if (widget.onPrimaryActionSuccess != null) {
         await widget.onPrimaryActionSuccess!.call();
+      } else {
+        var notified = false;
+        try {
+          context.read<PortfolioRefreshNotifier>().requestSectionRefresh(
+            widget.section,
+          );
+          notified = true;
+        } on ProviderNotFoundException {
+          // Lanjut cek notifier legacy jika PortfolioRefreshNotifier tidak tersedia.
+        }
+        if (!notified && widget.section == PortfolioSection.projects) {
+          try {
+            context.read<ProjectRefreshNotifier>().requestRefresh();
+          } on ProviderNotFoundException {
+            // Abaikan jika tidak ada ProjectRefreshNotifier di widget tree.
+          }
+        }
+      }
+    } else if (action == widget.secondaryAction) {
+      if (widget.onSecondaryActionSuccess != null) {
+        await widget.onSecondaryActionSuccess!.call();
       } else if (widget.section == PortfolioSection.projects) {
         try {
-          context.read<ProjectRefreshNotifier>().requestRefresh();
+          context.read<PortfolioRefreshNotifier>().requestRefresh(
+            PortfolioRefreshTarget.techStacks,
+          );
         } on ProviderNotFoundException {
-          // Abaikan jika tidak ada ProjectRefreshNotifier di widget tree.
+          // Abaikan jika tidak ada PortfolioRefreshNotifier di widget tree.
         }
       }
     }
@@ -277,14 +309,16 @@ class _PortfolioSectionPageState extends State<PortfolioSectionPage>
             ),
           ],
         ),
-        _buildListOrEmpty(
-          context: context,
-          count: widget.secondaryItemCount,
-          builder: widget.secondaryItemBuilder,
-          emptyTitle: 'Belum ada data ${widget.secondaryTabLabel}',
-          emptyPrimaryAction: widget.secondaryAction ?? widget.primaryAction,
-          emptySecondaryAction: null,
-        ),
+        widget.secondaryBody ??
+            _buildListOrEmpty(
+              context: context,
+              count: widget.secondaryItemCount,
+              builder: widget.secondaryItemBuilder,
+              emptyTitle: 'Belum ada data ${widget.secondaryTabLabel}',
+              emptyPrimaryAction:
+                  widget.secondaryAction ?? widget.primaryAction,
+              emptySecondaryAction: null,
+            ),
       ],
     );
   }
