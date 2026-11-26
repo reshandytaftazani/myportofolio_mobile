@@ -1,13 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/forms/form_validators.dart';
 import 'package:myportofolio_mobile/models/project.dart';
-import 'package:myportofolio_mobile/services/api_client.dart';
-import 'package:myportofolio_mobile/services/auth_state.dart';
-import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
-import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:myportofolio_mobile/utils/authenticated_action_helper.dart';
 import 'package:myportofolio_mobile/widgets/form_summary_dialog.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_form_scaffold.dart';
-import 'package:provider/provider.dart';
 
 /// Halaman formulir untuk menambahkan entri Proyek baru.
 class ProjectFormPage extends StatefulWidget {
@@ -66,12 +62,6 @@ class _ProjectFormPageState extends State<ProjectFormPage>
   Future<void> _submitForm() async {
     if (!formKey.currentState!.validate()) return;
 
-    final loggedIn = await ensureLoggedIn(context);
-    if (!loggedIn || !mounted) return;
-
-    final token = context.read<AuthState>().token;
-    if (token == null) return;
-
     final project = Project(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
@@ -82,67 +72,23 @@ class _ProjectFormPageState extends State<ProjectFormPage>
       isFeatured: _isFeatured,
     );
 
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    final Project created;
-    try {
-      created = await context.read<ApiClient>().createProject(
-        project,
-        token: token,
-      );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      if (e.statusCode == 401) {
-        await context.read<AuthState>().logout();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sesi login berakhir (401). Silakan login kembali.'),
-          ),
-        );
-        final reLoggedIn = await ensureLoggedIn(context);
-        if (reLoggedIn && mounted) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Login berhasil. Tekan Simpan untuk mengirim ulang proyek.',
-                ),
-              ),
-            );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              formatApiError(e, actionLabel: 'Gagal menyimpan proyek'),
-            ),
-          ),
-        );
-      }
-      return;
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            formatApiError(e, actionLabel: 'Gagal menyimpan proyek'),
-          ),
-        ),
-      );
-      return;
-    } finally {
-      if (mounted) {
+    final result = await runAuthenticatedAction<Project>(
+      context: context,
+      action: (apiClient, token) =>
+          apiClient.createProject(project, token: token),
+      errorActionLabel: 'Gagal menyimpan proyek',
+      reLoginSuccessMessage:
+          'Login berhasil. Tekan Simpan untuk mengirim ulang proyek.',
+      onSubmittingChanged: (isSubmitting) {
         setState(() {
-          _isSubmitting = false;
+          _isSubmitting = isSubmitting;
         });
-      }
-    }
+      },
+    );
 
-    if (!mounted) return;
+    if (!result.succeeded || !mounted) return;
+    final created = result.data!;
+
     setState(() {
       _hasCreatedProject = true;
     });
