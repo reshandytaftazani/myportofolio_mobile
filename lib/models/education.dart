@@ -6,7 +6,7 @@ part 'education.g.dart';
 /// Model data untuk entri Pendidikan (Education) pada portofolio.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Education {
-  @JsonKey(fromJson: parseNullableInt, includeIfNull: false)
+  @JsonKey(fromJson: parseNullableInt, includeToJson: false)
   final int? id;
   @JsonKey(defaultValue: '')
   final String schoolName;

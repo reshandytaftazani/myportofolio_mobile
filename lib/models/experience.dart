@@ -33,7 +33,7 @@ class Experience {
   /// Nilai kategori bawaan sesuai model Django.
   static const String defaultCategory = 'full-time';
 
-  @JsonKey(fromJson: parseNullableId, includeIfNull: false)
+  @JsonKey(fromJson: parseNullableId, includeToJson: false)
   final String? id;
   @JsonKey(defaultValue: '')
   final String title;

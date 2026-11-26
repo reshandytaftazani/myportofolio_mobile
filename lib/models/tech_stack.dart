@@ -6,7 +6,7 @@ part 'tech_stack.g.dart';
 /// Model data untuk entri Tech Stack pada portofolio.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class TechStack {
-  @JsonKey(fromJson: parseNullableInt, includeIfNull: false)
+  @JsonKey(fromJson: parseNullableInt, includeToJson: false)
   final int? id;
   @JsonKey(defaultValue: '')
   final String name;

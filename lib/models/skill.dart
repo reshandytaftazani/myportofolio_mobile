@@ -6,7 +6,7 @@ part 'skill.g.dart';
 /// Model data untuk entri Keahlian (Skill) pada portofolio.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Skill {
-  @JsonKey(fromJson: parseNullableId, includeIfNull: false)
+  @JsonKey(fromJson: parseNullableId, includeToJson: false)
   final String? id;
   @JsonKey(defaultValue: '')
   final String title;

@@ -40,7 +40,7 @@ void main() {
       expect(minimal.starredByNames, '');
     });
 
-    test('toJson serializes snake_case fields and omits null id', () {
+    test('toJson serializes snake_case fields and excludes id', () {
       const withoutId = Education(
         schoolName: 'Universitas Indonesia',
         period: '2024 - Sekarang',
@@ -61,7 +61,14 @@ void main() {
         detail: 'S1 Ilmu Komputer',
         startYear: 2024,
       );
-      expect(withId.toJson()['id'], 12);
+      final withIdJson = withId.toJson();
+      expect(withIdJson.containsKey('id'), isFalse);
+      expect(withIdJson, {
+        'school_name': 'Universitas Indonesia',
+        'period': '2024 - Sekarang',
+        'detail': 'S1 Ilmu Komputer',
+        'start_year': 2024,
+      });
     });
   });
 
@@ -99,29 +106,33 @@ void main() {
       expect(exp.starredByNames, 'charlie');
     });
 
-    test('toJson formats started_at and ended_at as YYYY-MM-DD', () {
-      final exp = Experience(
-        id: 'uuid-exp-2',
-        title: 'Research Assistant',
-        company: 'Lab AI',
-        description: 'Riset NLP.',
-        category: 'research',
-        thumbnail: null,
-        startedAt: DateTime(2025, 1, 5),
-        endedAt: DateTime(2025, 11, 21),
-      );
+    test(
+      'toJson formats started_at and ended_at as YYYY-MM-DD and excludes id',
+      () {
+        final exp = Experience(
+          id: 'uuid-exp-2',
+          title: 'Research Assistant',
+          company: 'Lab AI',
+          description: 'Riset NLP.',
+          category: 'research',
+          thumbnail: null,
+          startedAt: DateTime(2025, 1, 5),
+          endedAt: DateTime(2025, 11, 21),
+        );
 
-      expect(exp.toJson(), {
-        'id': 'uuid-exp-2',
-        'title': 'Research Assistant',
-        'company': 'Lab AI',
-        'description': 'Riset NLP.',
-        'category': 'research',
-        'thumbnail': null,
-        'started_at': '2025-01-05',
-        'ended_at': '2025-11-21',
-      });
-    });
+        final json = exp.toJson();
+        expect(json.containsKey('id'), isFalse);
+        expect(json, {
+          'title': 'Research Assistant',
+          'company': 'Lab AI',
+          'description': 'Riset NLP.',
+          'category': 'research',
+          'thumbnail': null,
+          'started_at': '2025-01-05',
+          'ended_at': '2025-11-21',
+        });
+      },
+    );
   });
 
   group('Project serialization', () {
@@ -204,8 +215,9 @@ void main() {
       expect(skill.isStarred, isTrue);
       expect(skill.starredByNames, 'eve');
 
-      expect(skill.toJson(), {
-        'id': 'uuid-skill-1',
+      final json = skill.toJson();
+      expect(json.containsKey('id'), isFalse);
+      expect(json, {
         'title': 'Flutter',
         'description': 'Pengembangan aplikasi mobile lintas platform.',
         'level': 'Intermediate',
@@ -241,8 +253,9 @@ void main() {
       expect(stack.isStarred, isFalse);
       expect(stack.starredByNames, 'frank');
 
-      expect(stack.toJson(), {
-        'id': 3,
+      final json = stack.toJson();
+      expect(json.containsKey('id'), isFalse);
+      expect(json, {
         'name': 'Django',
         'icon_url': 'https://cdn.example.com/django.svg',
         'filename': 'views.py',
