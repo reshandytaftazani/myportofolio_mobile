@@ -1,10 +1,15 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_menu.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/login_screen.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/skill_form.dart';
+import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/services/portfolio_refresh_notifier.dart';
 import 'package:myportofolio_mobile/services/project_refresh_notifier.dart';
 import 'package:myportofolio_mobile/utils/portfolio_route_observer.dart';
 import 'package:myportofolio_mobile/widgets/auth_guard.dart';
@@ -96,13 +101,26 @@ class LeftDrawer extends StatelessWidget {
     }
   }
 
-  Future<void> _openAddProject(BuildContext context) async {
+  Future<void> _openAddForm(
+    BuildContext context, {
+    required WidgetBuilder builder,
+    required PortfolioRefreshTarget refreshTarget,
+  }) async {
     final navigator = Navigator.of(context);
-    ProjectRefreshNotifier? refreshNotifier;
+    PortfolioRefreshNotifier? portfolioRefreshNotifier;
     try {
-      refreshNotifier = context.read<ProjectRefreshNotifier>();
+      portfolioRefreshNotifier = context.read<PortfolioRefreshNotifier>();
     } on ProviderNotFoundException {
-      refreshNotifier = null;
+      portfolioRefreshNotifier = null;
+    }
+    ProjectRefreshNotifier? legacyProjectNotifier;
+    if (portfolioRefreshNotifier == null &&
+        refreshTarget == PortfolioRefreshTarget.projects) {
+      try {
+        legacyProjectNotifier = context.read<ProjectRefreshNotifier>();
+      } on ProviderNotFoundException {
+        legacyProjectNotifier = null;
+      }
     }
     navigator.pop();
 
@@ -115,10 +133,14 @@ class LeftDrawer extends StatelessWidget {
     if (!loggedIn || !navigator.mounted) return;
 
     final created = await navigator.push<bool>(
-      MaterialPageRoute<bool>(builder: (_) => const ProjectFormPage()),
+      MaterialPageRoute<bool>(builder: builder),
     );
     if (created == true) {
-      refreshNotifier?.requestRefresh();
+      if (portfolioRefreshNotifier != null) {
+        portfolioRefreshNotifier.requestRefresh(refreshTarget);
+      } else {
+        legacyProjectNotifier?.requestRefresh();
+      }
     }
   }
 
@@ -191,10 +213,59 @@ class LeftDrawer extends StatelessWidget {
             ),
           ),
           const Divider(),
-          ListTile(
+          ExpansionTile(
             leading: const Icon(Icons.add_box_outlined),
-            title: const Text('Tambah Proyek'),
-            onTap: () => _openAddProject(context),
+            title: const Text('Tambah Data'),
+            childrenPadding: const EdgeInsets.only(left: 16.0),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: const Text('Tambah Proyek'),
+                onTap: () => _openAddForm(
+                  context,
+                  builder: (_) => const ProjectFormPage(),
+                  refreshTarget: PortfolioRefreshTarget.projects,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.layers_outlined),
+                title: const Text('Tambah Tech Stack'),
+                onTap: () => _openAddForm(
+                  context,
+                  builder: (_) => const TechStackFormPage(),
+                  refreshTarget: PortfolioRefreshTarget.techStacks,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.work_outline),
+                title: const Text('Tambah Pengalaman'),
+                onTap: () => _openAddForm(
+                  context,
+                  builder: (_) => const ExperienceFormPage(),
+                  refreshTarget: PortfolioRefreshTarget.experiences,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.school_outlined),
+                title: const Text('Tambah Pendidikan'),
+                onTap: () => _openAddForm(
+                  context,
+                  builder: (_) => const EducationFormPage(),
+                  refreshTarget: PortfolioRefreshTarget.education,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.code_outlined),
+                title: const Text('Tambah Keahlian'),
+                onTap: () => _openAddForm(
+                  context,
+                  builder: (_) => const SkillFormPage(),
+                  refreshTarget: PortfolioRefreshTarget.skills,
+                ),
+              ),
+            ],
           ),
           if (isLoggedIn)
             ListTile(

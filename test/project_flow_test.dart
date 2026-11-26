@@ -277,6 +277,13 @@ void main() {
         await tester.tap(
           find.descendant(
             of: find.byType(Drawer),
+            matching: find.text('Tambah Data'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(Drawer),
             matching: find.text('Tambah Proyek'),
           ),
         );
