@@ -67,6 +67,10 @@ class ApiClient {
         resourceLabel: 'proyek',
       );
 
+  /// Menghapus proyek melalui `DELETE /api/v1/projects/<id>/` dengan autentikasi token.
+  Future<void> deleteProject(String id, {required String token}) =>
+      _deleteItem('/api/v1/projects/${Uri.encodeComponent(id)}/', token: token);
+
   /// Mengambil daftar pengalaman publik dari `GET /api/v1/experiences/`.
   Future<List<Experience>> getExperiences() =>
       _getList('/api/v1/experiences/', Experience.fromJson, 'pengalaman');
@@ -82,6 +86,13 @@ class ApiClient {
     token: token,
     resourceLabel: 'pengalaman',
   );
+
+  /// Menghapus pengalaman melalui `DELETE /api/v1/experiences/<id>/` dengan autentikasi token.
+  Future<void> deleteExperience(String id, {required String token}) =>
+      _deleteItem(
+        '/api/v1/experiences/${Uri.encodeComponent(id)}/',
+        token: token,
+      );
 
   /// Mengambil daftar pendidikan publik dari `GET /api/v1/education/`.
   Future<List<Education>> getEducations() =>
@@ -99,6 +110,10 @@ class ApiClient {
     resourceLabel: 'pendidikan',
   );
 
+  /// Menghapus pendidikan melalui `DELETE /api/v1/education/<id>/` dengan autentikasi token.
+  Future<void> deleteEducation(int id, {required String token}) =>
+      _deleteItem('/api/v1/education/$id/', token: token);
+
   /// Mengambil daftar keahlian publik dari `GET /api/v1/skills/`.
   Future<List<Skill>> getSkills() =>
       _getList('/api/v1/skills/', Skill.fromJson, 'keahlian');
@@ -111,6 +126,10 @@ class ApiClient {
     token: token,
     resourceLabel: 'keahlian',
   );
+
+  /// Menghapus keahlian melalui `DELETE /api/v1/skills/<id>/` dengan autentikasi token.
+  Future<void> deleteSkill(String id, {required String token}) =>
+      _deleteItem('/api/v1/skills/${Uri.encodeComponent(id)}/', token: token);
 
   /// Mengambil daftar tech stack publik dari `GET /api/v1/techstacks/`.
   Future<List<TechStack>> getTechStacks() =>
@@ -127,6 +146,10 @@ class ApiClient {
     token: token,
     resourceLabel: 'tech stack',
   );
+
+  /// Menghapus tech stack melalui `DELETE /api/v1/techstacks/<id>/` dengan autentikasi token.
+  Future<void> deleteTechStack(int id, {required String token}) =>
+      _deleteItem('/api/v1/techstacks/$id/', token: token);
 
   Future<List<T>> _getList<T>(
     String path,
@@ -193,6 +216,13 @@ class ApiClient {
         'Data $resourceLabel dari server tidak sesuai kontrak.',
       );
     }
+  }
+
+  Future<void> _deleteItem(String path, {required String token}) async {
+    final response = await _client
+        .delete(_uri(path), headers: _headers(token: token))
+        .timeout(timeout);
+    _ensureSuccess(response);
   }
 
   /// Menukarkan username dan password menjadi DRF auth token.
