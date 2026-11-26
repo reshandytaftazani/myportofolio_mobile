@@ -3,7 +3,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:myportofolio_mobile/config.dart';
+import 'package:myportofolio_mobile/models/education.dart';
+import 'package:myportofolio_mobile/models/experience.dart';
 import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/models/skill.dart';
+import 'package:myportofolio_mobile/models/tech_stack.dart';
 
 /// Exception yang dilempar ketika respons HTTP API bukan 2xx atau payload tidak valid.
 class ApiException implements Exception {
@@ -50,9 +54,87 @@ class ApiClient {
   }
 
   /// Mengambil daftar proyek publik dari `GET /api/v1/projects/`.
-  Future<List<Project>> getProjects() async {
+  Future<List<Project>> getProjects() =>
+      _getList('/api/v1/projects/', Project.fromJson, 'proyek');
+
+  /// Membuat proyek baru melalui `POST /api/v1/projects/` dengan autentikasi token.
+  Future<Project> createProject(Project project, {required String token}) =>
+      _postItem(
+        '/api/v1/projects/',
+        project.toJson(),
+        Project.fromJson,
+        token: token,
+        resourceLabel: 'proyek',
+      );
+
+  /// Mengambil daftar pengalaman publik dari `GET /api/v1/experiences/`.
+  Future<List<Experience>> getExperiences() =>
+      _getList('/api/v1/experiences/', Experience.fromJson, 'pengalaman');
+
+  /// Membuat pengalaman baru melalui `POST /api/v1/experiences/` dengan autentikasi token.
+  Future<Experience> createExperience(
+    Experience experience, {
+    required String token,
+  }) => _postItem(
+    '/api/v1/experiences/',
+    experience.toJson(),
+    Experience.fromJson,
+    token: token,
+    resourceLabel: 'pengalaman',
+  );
+
+  /// Mengambil daftar pendidikan publik dari `GET /api/v1/education/`.
+  Future<List<Education>> getEducations() =>
+      _getList('/api/v1/education/', Education.fromJson, 'pendidikan');
+
+  /// Membuat pendidikan baru melalui `POST /api/v1/education/` dengan autentikasi token.
+  Future<Education> createEducation(
+    Education education, {
+    required String token,
+  }) => _postItem(
+    '/api/v1/education/',
+    education.toJson(),
+    Education.fromJson,
+    token: token,
+    resourceLabel: 'pendidikan',
+  );
+
+  /// Mengambil daftar keahlian publik dari `GET /api/v1/skills/`.
+  Future<List<Skill>> getSkills() =>
+      _getList('/api/v1/skills/', Skill.fromJson, 'keahlian');
+
+  /// Membuat keahlian baru melalui `POST /api/v1/skills/` dengan autentikasi token.
+  Future<Skill> createSkill(Skill skill, {required String token}) => _postItem(
+    '/api/v1/skills/',
+    skill.toJson(),
+    Skill.fromJson,
+    token: token,
+    resourceLabel: 'keahlian',
+  );
+
+  /// Mengambil daftar tech stack publik dari `GET /api/v1/techstacks/`.
+  Future<List<TechStack>> getTechStacks() =>
+      _getList('/api/v1/techstacks/', TechStack.fromJson, 'tech stack');
+
+  /// Membuat tech stack baru melalui `POST /api/v1/techstacks/` dengan autentikasi token.
+  Future<TechStack> createTechStack(
+    TechStack techStack, {
+    required String token,
+  }) => _postItem(
+    '/api/v1/techstacks/',
+    techStack.toJson(),
+    TechStack.fromJson,
+    token: token,
+    resourceLabel: 'tech stack',
+  );
+
+  Future<List<T>> _getList<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+    String resourceLabel,
+  ) async {
     final response = await _client
-        .get(_uri('/api/v1/projects/'), headers: _headers())
+        .get(_uri(path), headers: _headers())
         .timeout(timeout);
     _ensureSuccess(response);
 
@@ -60,35 +142,37 @@ class ApiClient {
     if (decoded is! List) {
       throw ApiException(
         response.statusCode,
-        'Format respons daftar proyek tidak valid.',
+        'Format respons daftar $resourceLabel tidak valid.',
       );
     }
 
     try {
       return decoded.map((item) {
         if (item is! Map<String, dynamic>) {
-          throw const FormatException('Item proyek bukan JSON object.');
+          throw FormatException('Item $resourceLabel bukan JSON object.');
         }
-        return Project.fromJson(item);
+        return fromJson(item);
       }).toList();
     } on Object {
       throw ApiException(
         response.statusCode,
-        'Data proyek dari server tidak sesuai kontrak.',
+        'Data $resourceLabel dari server tidak sesuai kontrak.',
       );
     }
   }
 
-  /// Membuat proyek baru melalui `POST /api/v1/projects/` dengan autentikasi token.
-  Future<Project> createProject(
-    Project project, {
+  Future<T> _postItem<T>(
+    String path,
+    Map<String, dynamic> body,
+    T Function(Map<String, dynamic>) fromJson, {
     required String token,
+    required String resourceLabel,
   }) async {
     final response = await _client
         .post(
-          _uri('/api/v1/projects/'),
+          _uri(path),
           headers: _headers(token: token, hasJsonBody: true),
-          body: jsonEncode(project.toJson()),
+          body: jsonEncode(body),
         )
         .timeout(timeout);
     _ensureSuccess(response);
@@ -97,16 +181,16 @@ class ApiClient {
     if (decoded is! Map<String, dynamic>) {
       throw ApiException(
         response.statusCode,
-        'Format respons proyek tidak valid.',
+        'Format respons $resourceLabel tidak valid.',
       );
     }
 
     try {
-      return Project.fromJson(decoded);
+      return fromJson(decoded);
     } on Object {
       throw ApiException(
         response.statusCode,
-        'Data proyek dari server tidak sesuai kontrak.',
+        'Data $resourceLabel dari server tidak sesuai kontrak.',
       );
     }
   }
