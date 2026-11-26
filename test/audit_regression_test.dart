@@ -216,7 +216,7 @@ void main() {
                   .copyWith(textScaler: const TextScaler.linear(1.3)),
               child: child!,
             ),
-            home: const MyApp(),
+            home: MyApp(apiClient: _createMockApiClient()),
           ),
         );
         await tester.pumpAndSettle();

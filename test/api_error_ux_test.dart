@@ -6,8 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/login_screen.dart';
+import 'package:myportofolio_mobile/screens/portfolio_detail_page.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/skill_form.dart';
+import 'package:myportofolio_mobile/screens/tech_stack_form.dart';
 import 'package:myportofolio_mobile/services/api_client.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
 import 'package:myportofolio_mobile/utils/api_error_formatter.dart';
@@ -367,6 +373,282 @@ void main() {
 
         return401 = true;
         await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginScreen), findsOneWidget);
+      },
+    );
+  });
+
+  group('Non-project forms & detail delete error UX', () {
+    testWidgets(
+      'ExperienceFormPage shows friendly SocketException/400 messages and redirects to LoginScreen on 401',
+      (tester) async {
+        var mode = 'socket';
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: MockClient((request) async {
+            if (request.url.path == '/api/v1/auth/logout/') {
+              return http.Response('', 204);
+            }
+            if (mode == '400') {
+              return http.Response(
+                jsonEncode({
+                  'title': ['Experience title is invalid.'],
+                }),
+                400,
+              );
+            }
+            if (mode == '401') {
+              return http.Response(
+                jsonEncode({'detail': 'Invalid token.'}),
+                401,
+              );
+            }
+            throw const SocketException('Connection refused');
+          }),
+        );
+
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const ExperienceFormPage(),
+            apiClient: apiClient,
+            initialToken: 'tok-exp',
+          ),
+        );
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama Pengalaman'),
+          'Backend Intern',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Deskripsi Pengalaman'),
+          'Membangun REST API.',
+        );
+
+        final saveButton = find.widgetWithText(FilledButton, 'Simpan');
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(saveButton);
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+          ),
+          findsOneWidget,
+        );
+
+        ScaffoldMessenger.of(tester.element(find.byType(ExperienceFormPage)))
+            .hideCurrentSnackBar();
+        await tester.pumpAndSettle();
+
+        mode = '400';
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Gagal menyimpan pengalaman (400): title: Experience title is invalid.',
+          ),
+          findsOneWidget,
+        );
+
+        ScaffoldMessenger.of(tester.element(find.byType(ExperienceFormPage)))
+            .hideCurrentSnackBar();
+        await tester.pumpAndSettle();
+
+        mode = '401';
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'EducationFormPage, SkillFormPage, and TechStackFormPage redirect to LoginScreen on 401',
+      (tester) async {
+        ApiClient create401Client() {
+          return ApiClient(
+            baseUrl: 'https://mock.local',
+            client: MockClient((request) async {
+              if (request.url.path == '/api/v1/auth/logout/') {
+                return http.Response('', 204);
+              }
+              return http.Response(
+                jsonEncode({'detail': 'Invalid token.'}),
+                401,
+              );
+            }),
+          );
+        }
+
+        // EducationFormPage
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const EducationFormPage(),
+            apiClient: create401Client(),
+            initialToken: 'expired-tok',
+          ),
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama Sekolah / Institusi'),
+          'Universitas Indonesia',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Periode'),
+          '2024 - Sekarang',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Detail Pendidikan'),
+          'S1 Ilmu Komputer',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Tahun Mulai'),
+          '2024',
+        );
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LoginScreen), findsOneWidget);
+
+        // SkillFormPage
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const SkillFormPage(),
+            apiClient: create401Client(),
+            initialToken: 'expired-tok',
+          ),
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama Keahlian'),
+          'Flutter',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Level'),
+          'Intermediate',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Deskripsi Keahlian'),
+          'Cross-platform mobile apps.',
+        );
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LoginScreen), findsOneWidget);
+
+        // TechStackFormPage
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            const TechStackFormPage(),
+            apiClient: create401Client(),
+            initialToken: 'expired-tok',
+          ),
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama Tech Stack'),
+          'Dart',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'URL Ikon'),
+          'https://cdn.example.com/dart.svg',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama File'),
+          'main.dart',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Cuplikan Kode'),
+          'void main() {}',
+        );
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LoginScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'PortfolioDetailPage delete shows friendly 500 error and redirects to LoginScreen on 401',
+      (tester) async {
+        var return401 = false;
+        final apiClient = ApiClient(
+          baseUrl: 'https://mock.local',
+          client: MockClient((request) async {
+            if (request.url.path == '/api/v1/auth/logout/') {
+              return http.Response('', 204);
+            }
+            if (request.method == 'DELETE') {
+              if (return401) {
+                return http.Response(
+                  jsonEncode({'detail': 'Invalid token.'}),
+                  401,
+                );
+              }
+              return http.Response(
+                '<html><body>500 Error</body></html>',
+                500,
+                reasonPhrase: 'Internal Server Error',
+              );
+            }
+            return http.Response('Not found', 404);
+          }),
+        );
+
+        const exp = Experience(
+          id: 'exp-err-1',
+          title: 'Intern Error Test',
+          description: 'Menguji error hapus.',
+        );
+
+        await tester.pumpWidget(
+          _wrapWithProviders(
+            PortfolioDetailPage.experience(exp),
+            apiClient: apiClient,
+            initialToken: 'tok-del',
+          ),
+        );
+
+        await tester.tap(find.byTooltip('Hapus'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Hapus'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(PortfolioDetailPage), findsOneWidget);
+        expect(
+          find.text(
+            'Gagal menghapus pengalaman (500): Permintaan gagal (HTTP 500: Internal Server Error).',
+          ),
+          findsOneWidget,
+        );
+
+        ScaffoldMessenger.of(tester.element(find.byType(PortfolioDetailPage)))
+            .hideCurrentSnackBar();
+        await tester.pumpAndSettle();
+
+        return401 = true;
+        await tester.tap(find.byTooltip('Hapus'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Hapus'));
         await tester.pumpAndSettle();
 
         expect(find.byType(LoginScreen), findsOneWidget);

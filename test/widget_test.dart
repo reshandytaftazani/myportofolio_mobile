@@ -465,7 +465,12 @@ void main() {
   testWidgets(
     'experience form validates required text, URL, and reversed dates',
     (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ExperienceFormPage()));
+      await tester.pumpWidget(
+        _wrapWithProviders(
+          const MaterialApp(home: ExperienceFormPage()),
+          initialToken: 'test-token',
+        ),
+      );
 
       await submitExperienceForm(tester);
       expect(find.text('Nama pengalaman tidak boleh kosong.'), findsOneWidget);
@@ -1191,6 +1196,51 @@ void main() {
 
         expect(result, isTrue);
         expect(find.byType(LoginScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'ensureLoggedIn guards Tambah actions across non-project sections and Tech Stack',
+      (tester) async {
+        final cases = <(String, String, Type)>[
+          ('Experiences', 'Tambah Pengalaman', ExperienceFormPage),
+          ('Education', 'Tambah Pendidikan', EducationFormPage),
+          ('Skills', 'Tambah Keahlian', SkillFormPage),
+          ('Projects', 'Tambah Tech Stack', TechStackFormPage),
+        ];
+
+        for (final entry in cases) {
+          final sectionLabel = entry.$1;
+          final actionLabel = entry.$2;
+          final formType = entry.$3;
+
+          await tester.pumpWidget(
+            MyApp(
+              key: ValueKey('guard-$sectionLabel-$actionLabel'),
+              apiClient: _createMockApiClient(),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await tester.ensureVisible(find.text(sectionLabel));
+          await tester.tap(find.text(sectionLabel));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(actionLabel).first);
+          await tester.pumpAndSettle();
+
+          expect(find.byType(LoginScreen), findsOneWidget);
+          expect(find.byType(formType), findsNothing);
+
+          await tester.enterText(field('Username'), 'admin');
+          await tester.enterText(field('Password'), 'secret');
+          await tester.tap(find.widgetWithText(FilledButton, 'Login'));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(LoginScreen), findsNothing);
+          expect(find.byType(formType), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        }
       },
     );
   });
